@@ -1,0 +1,14 @@
+
+@global +='''
+  org.febit.rectify.engine.EnginePluginCollector
+'''
+
+[logger :slf4jLogger]
+
+[spiPluginCollector]
+enable=false
+
+[resolverManager]
+resolvers +='''
+  org.febit.rectify.engine.InputResolver
+'''
