@@ -36,7 +36,7 @@ public class InternalMethods implements EnginePlugin {
         globalManager.setConstMethod(ScriptBuilder.VAR_CHECK_FILTER,
                 (UnConstableMethodDeclare) InternalMethods::checkFilter);
         globalManager.setConstMethod(ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT,
-                (UnConstableMethodDeclare) InternalMethods::newFilterBreakpoint);
+                InternalMethods::newFilterBreakpoint);
     }
 
     private static FilterBreakpoint newFilterBreakpoint(InternalContext context, Object[] args) {

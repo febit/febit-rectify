@@ -17,9 +17,12 @@ package org.febit.rectify;
 
 import jodd.json.JsonSerializer;
 import org.febit.lang.TerConsumer;
+import org.febit.lang.Tuple2;
+import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,6 +202,81 @@ public class RectifierTest {
         assertNull(consumer.out);
         assertNull(consumer.resultRaw);
         assertEquals("enable is falsely", consumer.reason);
+    }
+
+    @Test
+    public void processInDebugMode() {
+        List<Tuple2<FilterBreakpoint, Object>> breakpoints = new ArrayList<>();
+        Rectifier<String, GenericStruct> rectifier = Rectifier.create(conf, (label, context, statement, val) -> {
+            if (label instanceof FilterBreakpoint) {
+                FilterBreakpoint breakpoint = (FilterBreakpoint) label;
+                breakpoints.add(Tuple2.of(breakpoint, val));
+                if ("enable".equals(breakpoint.getField())) {
+                    assertEquals(1, context.get(ScriptBuilder.VAR_CURR_COLUMN));
+                }
+            }
+        });
+        AssertSingleTerConsumer<GenericStruct> consumer;
+        Tuple2<FilterBreakpoint, Object> breakpoint;
+
+        breakpoints.clear();
+        consumer = new AssertSingleTerConsumer<>();
+        rectifier.process(buildInput(
+                "123",
+                true,
+                12,
+                true,
+                "tell something"
+        ), consumer);
+        assertTrue(consumer.flag);
+        assertNull(consumer.reason);
+        assertNotNull(consumer.resultRaw);
+        assertEquals(123L, consumer.out.get(0));
+        assertEquals(true, consumer.out.get(1));
+        assertEquals(12, consumer.out.get(2));
+        assertEquals(true, consumer.out.get(3));
+        assertEquals(true, consumer.out.get(4));
+        assertEquals("prefix:tell something", consumer.out.get(5));
+
+        assertEquals(4, breakpoints.size());
+        breakpoint = breakpoints.get(0);
+        assertEquals(0, breakpoint._1.getIndex());
+        assertNull(breakpoint._1.getField());
+        assertEquals("$.status > 0", breakpoint._1.getExpr());
+        assertEquals(true, breakpoint._2);
+        breakpoint = breakpoints.get(1);
+        assertEquals(1, breakpoint._1.getIndex());
+        assertNull(breakpoint._1.getField());
+        assertEquals("$.status < 100 || \"status should <100\"", breakpoint._1.getExpr());
+        assertEquals(true, breakpoint._2);
+        breakpoint = breakpoints.get(2);
+        assertEquals(2, breakpoint._1.getIndex());
+        assertNull(breakpoint._1.getField());
+        assertEquals("isEven || \"status is not even\"", breakpoint._1.getExpr());
+        assertEquals(true, breakpoint._2);
+        breakpoint = breakpoints.get(3);
+        assertEquals(1, breakpoint._1.getIndex());
+        assertEquals("enable", breakpoint._1.getField());
+        assertEquals("$$ || \"enable is falsely\"", breakpoint._1.getExpr());
+        assertEquals(true, breakpoint._2);
+
+        breakpoints.clear();
+        consumer = new AssertSingleTerConsumer<>();
+        rectifier.process(buildInput(
+                123,
+                false,
+                99,
+                0,
+                null
+        ), consumer);
+        assertTrue(consumer.flag);
+        assertNull(consumer.out);
+        assertNull(consumer.resultRaw);
+        assertEquals("status is not even", consumer.reason);
+
+        assertEquals(3, breakpoints.size());
+        breakpoint = breakpoints.get(2);
+        assertEquals("status is not even", breakpoint._2);
     }
 
     private static class AssertSingleTerConsumer<OUT> implements TerConsumer<OUT, ResultRaw, String> {

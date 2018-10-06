@@ -45,6 +45,11 @@ public class Rectifier<IN, OUT> {
         static final Engine ENGINE = Engine.create("febit-rectifier-engine.wim");
     }
 
+    /**
+     * Get script hints.
+     *
+     * @return hints string list
+     */
     public static List<String> getHints() {
         List<String> hints = new ArrayList<>();
 
@@ -60,24 +65,62 @@ public class Rectifier<IN, OUT> {
         return hints;
     }
 
+    /**
+     * Create a {@code Rectifier} by conf.
+     *
+     * @param conf conf
+     * @param <I>  input type
+     * @return Rectifier
+     */
     public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf) {
         return create(conf, GenericStruct.model(), null);
     }
 
-    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf, BreakPointListener breakPointListener) {
-        return create(conf, GenericStruct.model(), null);
+    /**
+     * Create a {@code DebugRectifier} by conf.
+     *
+     * WARN: Poor performance, not for production environment.
+     *
+     * @param conf               conf
+     * @param breakpointListener Wit breakpoint listener
+     * @param <I>                input type
+     * @return Rectifier
+     */
+    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf, BreakPointListener breakpointListener) {
+        return create(conf, GenericStruct.model(), breakpointListener);
     }
 
+    /**
+     * Create a {@code Rectifier} by conf.
+     *
+     * @param conf        conf
+     * @param resultModel ResultModel
+     * @param <I>         input Type
+     * @param <O>         out type
+     * @return Rectifier
+     */
     public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel) {
         return create(conf, resultModel, null);
     }
 
-    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel, BreakPointListener breakPointListener) {
+    /**
+     * Create a {@code DebugRectifier} by conf.
+     *
+     * WARN: Poor performance, not for production environment.
+     *
+     * @param conf               conf
+     * @param resultModel        ResultModel
+     * @param breakpointListener Wit breakpoint listener
+     * @param <I>                input Type
+     * @param <O>                out type
+     * @return
+     */
+    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel, BreakPointListener breakpointListener) {
         Rectifier<I, O> processor;
-        if (breakPointListener == null) {
+        if (breakpointListener == null) {
             processor = new Rectifier<>(conf, false, resultModel);
         } else {
-            processor = new DebugRectifier<>(conf, resultModel, breakPointListener);
+            processor = new DebugRectifier<>(conf, resultModel, breakpointListener);
         }
         processor.init();
         return processor;
@@ -98,8 +141,14 @@ public class Rectifier<IN, OUT> {
         this.resultModel = resultModel;
     }
 
-    public void process(IN input, TerConsumer<OUT, ResultRaw, String> action) {
-        this.sourceFormat.process(input, record -> process(record, action));
+    /**
+     * Process input one by one.
+     *
+     * @param input    input
+     * @param consumer consumer
+     */
+    public void process(IN input, TerConsumer<OUT, ResultRaw, String> consumer) {
+        this.sourceFormat.process(input, record -> process(record, consumer));
     }
 
     private void init() {
@@ -183,7 +232,7 @@ public class Rectifier<IN, OUT> {
 
         private final BreakPointListener breakPointListener;
 
-        protected DebugRectifier(RectifierConf conf, ResultModel<OUT> resultModel, BreakPointListener breakPointListener) {
+        private DebugRectifier(RectifierConf conf, ResultModel<OUT> resultModel, BreakPointListener breakPointListener) {
             super(conf, true, resultModel);
             Objects.requireNonNull(breakPointListener);
             this.breakPointListener = breakPointListener;
