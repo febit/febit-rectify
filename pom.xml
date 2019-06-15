@@ -26,7 +26,7 @@
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <jodd.version>5.0.5</jodd.version>
+        <jodd.version>5.0.13</jodd.version>
         <wit.version>2.7.0-beta</wit.version>
         <febit.version>2.8.0-SNAPSHOT</febit.version>
         <slf4j.version>1.7.25</slf4j.version>
