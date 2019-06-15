@@ -27,7 +27,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jodd.version>5.0.5</jodd.version>
-        <wit.version>2.7.0-SNAPSHOT</wit.version>
+        <wit.version>2.7.0-beta</wit.version>
         <febit.version>2.8.0-SNAPSHOT</febit.version>
         <slf4j.version>1.7.25</slf4j.version>
         <flink.version>1.6.0</flink.version>
