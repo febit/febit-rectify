@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,12 +33,8 @@ public class JacksonUtils {
         try {
             return MAPPER.readValue(json, type);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
-    }
-
-    public static <T> T parse(String json, Type type) {
-        return parse(json, TYPE_FACTORY.constructType(type));
     }
 
     public static <T> T parse(String json, Class<T> type) {

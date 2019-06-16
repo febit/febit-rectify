@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,12 +15,18 @@
  */
 package org.febit.rectify;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Singular;
+import lombok.val;
 import org.febit.rectify.engine.ScriptBuilder;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,28 +35,23 @@ import java.util.stream.Collectors;
  *
  * @author zqq90
  */
+@AllArgsConstructor
+@lombok.Builder(builderClassName = "Builder")
 public class RectifierConf implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static RectifierConf.Builder builder() {
-        return new Builder();
-    }
-
     private final String name;
     private final String sourceFormat;
-    private final String sourceFormatProps;
-    private final List<GlobalSegment> globalSegments;
-    private final List<Column> columns;
 
-    private RectifierConf(String name, String sourceFormat, String sourceFormatProps,
-                          List<GlobalSegment> globalSegments, List<Column> columns) {
-        this.name = name;
-        this.sourceFormat = sourceFormat;
-        this.sourceFormatProps = sourceFormatProps;
-        this.globalSegments = Collections.unmodifiableList(new ArrayList<>(globalSegments));
-        this.columns = Collections.unmodifiableList(new ArrayList<>(columns));
-    }
+    @Singular
+    private final Map<String, String> sourceFormatProps;
+
+    @Singular
+    private final List<GlobalSegment> globalSegments;
+
+    @Singular
+    private final List<Column> columns;
 
     public String script(boolean debug) {
         return ScriptBuilder.buildScript(this, debug);
@@ -66,7 +67,7 @@ public class RectifierConf implements Serializable {
     }
 
     public Schema schema(Predicate<Column> filter) {
-        List<Schema.Field> fields = this.columns.stream()
+        val fields = this.columns.stream()
                 .filter(filter)
                 .map(this::columnToSchemaField)
                 .collect(Collectors.toList());
@@ -81,7 +82,7 @@ public class RectifierConf implements Serializable {
         return sourceFormat;
     }
 
-    public String sourceFormatProps() {
+    public Map<String, String> sourceFormatProps() {
         return sourceFormatProps;
     }
 
@@ -105,22 +106,22 @@ public class RectifierConf implements Serializable {
         void appendTo(ScriptBuilder.Context context);
     }
 
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @JsonDeserialize(builder = Column.Builder.class)
+    @lombok.Builder(builderClassName = "Builder")
     public static class Column implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
         private final String type;
         private final String name;
-        private final String convertExpr;
+        private final String expr;
         private final String checkExpr;
         private final String comment;
 
-        private Column(String type, String name, String convertExpr, String checkExpr, String comment) {
-            this.type = type;
-            this.name = name;
-            this.convertExpr = convertExpr;
-            this.checkExpr = checkExpr;
-            this.comment = comment;
+        @JsonPOJOBuilder(withPrefix = "")
+        public static class Builder {
         }
 
         public String type() {
@@ -131,8 +132,8 @@ public class RectifierConf implements Serializable {
             return name;
         }
 
-        public String convertExpr() {
-            return convertExpr;
+        public String expr() {
+            return expr;
         }
 
         public String checkExpr() {
@@ -144,58 +145,46 @@ public class RectifierConf implements Serializable {
         }
     }
 
-    public static class Builder {
+    public static class Builder implements BuilderExtra {
+    }
 
-        private String name;
-        private String sourceFormat;
-        private String sourceFormatProps;
-        private final List<GlobalSegment> globalSegments = new ArrayList<>();
-        private final List<Column> columns = new ArrayList<>();
+    private interface BuilderExtra {
 
-        public RectifierConf build() {
-            return new RectifierConf(name, sourceFormat, sourceFormatProps,
-                    globalSegments, columns);
+        Builder column(Column column);
+
+        Builder globalSegment(GlobalSegment segment);
+
+        default Builder column(String type, String name, String expr) {
+            return column(type, name, expr, null, null);
         }
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+        default Builder column(String type, String name, String expr, String checkExpr) {
+            return column(type, name, expr, checkExpr, null);
         }
 
-        public Builder sourceFormat(String sourceFormat) {
-            this.sourceFormat = sourceFormat;
-            return this;
+        default Builder column(String type, String name,
+                               String expr, String checkExpr,
+                               String comment) {
+            Column column = new Column(type, name, expr, checkExpr, comment);
+            return column(column);
         }
 
-        public Builder sourceFormatProps(String sourceFormatProps) {
-            this.sourceFormatProps = sourceFormatProps;
-            return this;
+        default Builder globalCode(String code) {
+            return globalSegment(context -> context.append(code));
         }
 
-        public Builder addColumn(String type, String name, String convertExpr) {
-            return addColumn(type, name, convertExpr, null, null);
+        default Builder globalCodes(Collection<String> codes) {
+            codes.forEach(this::globalCode);
+            return (Builder) this;
         }
 
-        public Builder addColumn(String type, String name, String convertExpr, String checkExpr) {
-            return addColumn(type, name, convertExpr, checkExpr, null);
+        default Builder globalFilter(String expr) {
+            return globalSegment(context -> ScriptBuilder.appendGlobalFilter(context, expr));
         }
 
-        public Builder addColumn(String type, String name,
-                                 String convertExpr, String checkExpr,
-                                 String comment) {
-            Column column = new Column(type, name, convertExpr, checkExpr, comment);
-            columns.add(column);
-            return this;
-        }
-
-        public Builder addGlobalCode(String code) {
-            globalSegments.add(context -> context.append(code));
-            return this;
-        }
-
-        public Builder addGlobalFilter(String expr) {
-            globalSegments.add(context -> ScriptBuilder.appendGlobalFilter(context, expr));
-            return this;
+        default Builder globalFilters(Collection<String> exprs) {
+            exprs.forEach(this::globalFilter);
+            return (Builder) this;
         }
     }
 }

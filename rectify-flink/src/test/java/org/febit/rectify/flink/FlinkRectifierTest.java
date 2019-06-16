@@ -37,14 +37,14 @@ import static org.junit.Assert.assertEquals;
 public class FlinkRectifierTest {
 
     final RectifierConf conf = RectifierConf.builder()
-            .addGlobalFilter("$.status > 0")
-            .addGlobalFilter("$.status < 100 || \"status should <100\"")
             .name("Demo")
             .sourceFormat("json")
-            .addColumn("long", "id", "$.id")
-            .addColumn("boolean", "enable", "", "$$ || \"enable is falsely\"")
-            .addColumn("int", "status", "$.status")
-            .addColumn("string", "content", "\"prefix:\"+$.content")
+            .globalFilter("$.status > 0")
+            .globalFilter("$.status < 100 || \"status should <100\"")
+            .column("long", "id", "$.id")
+            .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
+            .column("int", "status", "$.status")
+            .column("string", "content", "\"prefix:\"+$.content")
             .build();
 
     final List<String> source = Arrays.asList(

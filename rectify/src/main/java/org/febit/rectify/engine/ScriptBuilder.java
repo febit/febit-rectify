@@ -107,9 +107,9 @@ public class ScriptBuilder {
                                     final int index) {
         final String escapedName = escapeForString(column.name());
 
-        String convertExpr = column.convertExpr();
-        if (StringUtil.isBlank(convertExpr)) {
-            convertExpr = VAR_INPUT + '[' + escapedName + ']';
+        String expr = column.expr();
+        if (StringUtil.isBlank(expr)) {
+            expr = VAR_INPUT + '[' + escapedName + ']';
         }
 
         context.append("// -\n");
@@ -117,7 +117,7 @@ public class ScriptBuilder {
         context.append(VAR_CURR + " = " + VAR_RESULT + '[')
                 .append(escapedName)
                 .append("] = ")
-                .append(convertExpr)
+                .append(expr)
                 .append(";\n");
 
         if (StringUtil.isNotEmpty(column.checkExpr())) {

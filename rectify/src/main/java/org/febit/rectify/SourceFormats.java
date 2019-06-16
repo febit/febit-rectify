@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,10 @@ package org.febit.rectify;
 import jodd.bean.BeanUtil;
 import org.febit.util.CollectionUtil;
 import org.febit.util.Priority;
-import org.febit.util.Props;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
@@ -57,7 +57,7 @@ public class SourceFormats {
         return create(schema.sourceFormat(), schema.sourceFormatProps());
     }
 
-    public static <T> SourceFormat<T> create(String name, String props) {
+    public static <T> SourceFormat<T> create(String name, Map<String, String> props) {
         @SuppressWarnings("unchecked")
         SourceFormat<T> format = (SourceFormat<T>) lookup(name);
         if (format == null) {
@@ -81,13 +81,8 @@ public class SourceFormats {
         return null;
     }
 
-    private static void injectConfigs(SourceFormat sourceFormat, String props) {
-        injectConfigs(sourceFormat, Props.shadowLoader()
-                .loadString(props).get());
-    }
-
-    private static void injectConfigs(SourceFormat sourceFormat, Props props) {
-        if (sourceFormat == null) {
+    private static void injectConfigs(SourceFormat sourceFormat, Map<String, String> props) {
+        if (sourceFormat == null || props == null) {
             return;
         }
         BeanUtil beanUtil = BeanUtil.declaredForced;

@@ -36,25 +36,34 @@ import static org.junit.Assert.assertTrue;
 public class RectifierTest {
 
     final RectifierConf conf = RectifierConf.builder()
-            .addGlobalCode(""
+            // Named your schema
+            .name("Demo")
+            // Source format
+            .sourceFormat("json")
+            // Global code
+            .globalCode(""
                     + "var isTruly = obj -> {\n"
                     + "   return obj == true \n"
                     + "              || obj == \"on\" || obj == \"true\"\n"
                     + "              || obj == 1;\n"
                     + "};")
-            .addGlobalFilter("$.status > 0")
-            .addGlobalFilter("$.status < 100 || \"status should <100\"")
-            .addGlobalCode("var isEven = $.status % 2 == 0 ")
-            .addGlobalCode("var statusCopy = $.status")
-            .addGlobalFilter("isEven || \"status is not even\"")
-            .name("Demo")
-            .sourceFormat("json")
-            .addColumn("long", "id", "$.id")
-            .addColumn("boolean", "enable", "", "$$ || \"enable is falsely\"")
-            .addColumn("int", "status", "$.status")
-            .addColumn("boolean", "isEven", "isEven")
-            .addColumn("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
-            .addColumn("string", "content", "\"prefix:\"+$.content")
+            // Global filters:
+            //    Notice: only a Boolean.FALSE or a non-null String (reason) can ban current row, others pass.
+            .globalFilter("$.status > 0")
+            //    Recommend: give a reason if falsely, `||` is logic OR (just what it means to in JS, feel free!).
+            .globalFilter("$.status < 100 || \"status should <100\"")
+            // Global code and filters, Will be executed in defined order.
+            .globalCode("var isEven = $.status % 2 == 0 ")
+            .globalCode("var statusCopy = $.status")
+            .globalFilter("isEven || \"status is not even\"")
+            // Columns
+            .column("long", "id", "$.id")
+            // column with check expression
+            .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
+            .column("int", "status", "$.status")
+            .column("boolean", "isEven", "isEven")
+            .column("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
+            .column("string", "content", "\"prefix:\"+$.content")
             .build();
 
     private static String buildInput(
