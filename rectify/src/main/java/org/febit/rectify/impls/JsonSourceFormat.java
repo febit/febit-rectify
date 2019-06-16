@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,9 +15,9 @@
  */
 package org.febit.rectify.impls;
 
-import jodd.json.JsonParser;
 import org.febit.rectify.Input;
 import org.febit.rectify.SourceFormat;
+import org.febit.rectify.util.JacksonUtils;
 import org.febit.util.StringUtil;
 
 import java.util.Map;
@@ -35,7 +35,7 @@ public class JsonSourceFormat implements SourceFormat<String> {
         }
         Map<String, Object> values;
         try {
-            values = parseAsMap(input);
+            values = JacksonUtils.parseAsNamedMap(input);
         } catch (Exception e) {
             //XXX: log this bad case
             return;
@@ -45,11 +45,4 @@ public class JsonSourceFormat implements SourceFormat<String> {
         }
         collector.accept(MapInput.of(values));
     }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> parseAsMap(String json) {
-        return new JsonParser()
-                .parseAsMap(json, String.class, Object.class);
-    }
-
 }

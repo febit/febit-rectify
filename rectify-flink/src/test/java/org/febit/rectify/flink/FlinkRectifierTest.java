@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.flink;
 
-import jodd.json.JsonSerializer;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
@@ -23,16 +22,19 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.rectify.RectifierConf;
+import org.febit.rectify.util.JacksonUtils;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class FlinkRectifierTest {
-
-    private static final JsonSerializer JSON_SERIALIZER = new JsonSerializer()
-            .deep(true);
 
     final RectifierConf conf = RectifierConf.builder()
             .addGlobalFilter("$.status > 0")
@@ -66,7 +68,7 @@ public class FlinkRectifierTest {
         bean.put("enable", enable);
         bean.put("status", status);
         bean.put("content", content);
-        return JSON_SERIALIZER.serialize(bean);
+        return JacksonUtils.toJsonString(bean);
     }
 
     @Test

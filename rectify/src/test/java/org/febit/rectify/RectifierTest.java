@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +15,11 @@
  */
 package org.febit.rectify;
 
-import jodd.json.JsonSerializer;
 import org.febit.lang.TerConsumer;
 import org.febit.lang.Tuple2;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
+import org.febit.rectify.util.JacksonUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -27,12 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class RectifierTest {
-
-    private static final JsonSerializer JSON_SERIALIZER = new JsonSerializer()
-            .deep(true);
 
     final RectifierConf conf = RectifierConf.builder()
             .addGlobalCode(""
@@ -68,7 +69,7 @@ public class RectifierTest {
         bean.put("status", status);
         bean.put("isTrulyArg", isTrulyArg);
         bean.put("content", content);
-        return JSON_SERIALIZER.serialize(bean);
+        return JacksonUtils.toJsonString(bean);
     }
 
     @Test
