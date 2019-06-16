@@ -41,6 +41,7 @@
     <modules>
         <module>rectify</module>
         <module>rectify-flink</module>
+        <module>rectify-sqlline</module>
     </modules>
     <scm>
         <url>https://github.com/febit/febit-rectify</url>
