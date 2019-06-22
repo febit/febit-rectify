@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,11 @@ public class GenericStruct implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final GenericResultModel MODEL = new GenericResultModel();
+    private final Object[] values;
+
+    private GenericStruct(int fieldCount) {
+        this.values = new Object[fieldCount];
+    }
 
     public static ResultModel<GenericStruct> model() {
         return MODEL;
@@ -36,12 +41,6 @@ public class GenericStruct implements Serializable {
             throw new IllegalArgumentException("Not a struct: " + schema);
         }
         return new GenericStruct(schema.fieldSize());
-    }
-
-    private final Object[] values;
-
-    private GenericStruct(int fieldCount) {
-        this.values = new Object[fieldCount];
     }
 
     /**

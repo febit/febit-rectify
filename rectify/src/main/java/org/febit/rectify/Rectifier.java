@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,8 +41,19 @@ import java.util.Objects;
  */
 public class Rectifier<IN, OUT> {
 
-    private static class EngineHolder {
-        static final Engine ENGINE = Engine.create("febit-rectifier-engine.wim");
+    protected final boolean debug;
+    protected final RectifierConf conf;
+    protected final ResultModel<?> resultModel;
+    protected Schema schema;
+    protected Template script;
+    protected SourceFormat<IN> sourceFormat;
+
+    protected Rectifier(RectifierConf conf, boolean debug, ResultModel<OUT> resultModel) {
+        Objects.requireNonNull(conf);
+        Objects.requireNonNull(resultModel);
+        this.conf = conf;
+        this.debug = debug;
+        this.resultModel = resultModel;
     }
 
     /**
@@ -126,19 +137,17 @@ public class Rectifier<IN, OUT> {
         return processor;
     }
 
-    protected final boolean debug;
-    protected final RectifierConf conf;
-    protected final ResultModel<?> resultModel;
-    protected Schema schema;
-    protected Template script;
-    protected SourceFormat<IN> sourceFormat;
-
-    protected Rectifier(RectifierConf conf, boolean debug, ResultModel<OUT> resultModel) {
-        Objects.requireNonNull(conf);
-        Objects.requireNonNull(resultModel);
-        this.conf = conf;
-        this.debug = debug;
-        this.resultModel = resultModel;
+    private static ExitException searchExitException(Throwable exception) {
+        int i = 0;
+        do {
+            if (exception == null
+                    || (exception instanceof ExitException)) {
+                return (ExitException) exception;
+            }
+            exception = exception.getCause();
+            i++;
+        } while (i < 10);
+        return null;
     }
 
     /**
@@ -215,17 +224,8 @@ public class Rectifier<IN, OUT> {
         return schema;
     }
 
-    private static ExitException searchExitException(Throwable exception) {
-        int i = 0;
-        do {
-            if (exception == null
-                    || (exception instanceof ExitException)) {
-                return (ExitException) exception;
-            }
-            exception = exception.getCause();
-            i++;
-        } while (i < 10);
-        return null;
+    private static class EngineHolder {
+        static final Engine ENGINE = Engine.create("febit-rectifier-engine.wim");
     }
 
     private static class DebugRectifier<IN, OUT> extends Rectifier<IN, OUT> {

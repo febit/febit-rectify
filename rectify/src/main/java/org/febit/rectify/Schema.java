@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,11 @@ import org.febit.util.StringUtil;
 import org.febit.util.StringWalker;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -34,21 +38,10 @@ public abstract class Schema implements Serializable {
     private static final char[] LINE_BREAKERS = "\r\n".toCharArray();
     private static final char[] LINE_BREAKERS_REPLACE = "  ".toCharArray();
     private static final Pattern NAME_PATTERN = Pattern.compile("^[_a-zA-Z][_a-zA-Z0-9]{1,64}$");
+    final Type type;
 
-    public enum Type {
-        OPTIONAL, STRUCT, ARRAY, MAP,
-        STRING, BYTES, BOOLEAN,
-        INT, BIGINT, FLOAT, DOUBLE;
-
-        private final String name;
-
-        Type() {
-            this.name = this.name().toLowerCase();
-        }
-
-        public String getName() {
-            return name;
-        }
+    Schema(Type type) {
+        this.type = type;
     }
 
     public static Schema parseFieldLines(String name, String lines) {
@@ -122,12 +115,6 @@ public abstract class Schema implements Serializable {
             return null;
         }
         return StringUtil.replaceChars(remark, LINE_BREAKERS, LINE_BREAKERS_REPLACE);
-    }
-
-    final Type type;
-
-    Schema(Type type) {
-        this.type = type;
     }
 
     public Type getType() {
@@ -242,6 +229,22 @@ public abstract class Schema implements Serializable {
      */
     public Schema valueType() {
         throw new UnsupportedOperationException("Not an array, map or optional: " + this);
+    }
+
+    public enum Type {
+        OPTIONAL, STRUCT, ARRAY, MAP,
+        STRING, BYTES, BOOLEAN,
+        INT, BIGINT, FLOAT, DOUBLE;
+
+        private final String name;
+
+        Type() {
+            this.name = this.name().toLowerCase();
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     private static class PrimitiveSchema extends Schema {

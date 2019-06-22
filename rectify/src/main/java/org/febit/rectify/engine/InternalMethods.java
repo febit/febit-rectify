@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,18 +26,6 @@ import org.febit.wit.lang.UnConstableMethodDeclare;
  * @author zqq90
  */
 public class InternalMethods implements EnginePlugin {
-
-    @Override
-    public void apply(Engine engine) {
-        GlobalManager globalManager = engine.getGlobalManager();
-
-        globalManager.setConstMethod(ScriptBuilder.VAR_EXIT,
-                (UnConstableMethodDeclare) InternalMethods::exit);
-        globalManager.setConstMethod(ScriptBuilder.VAR_CHECK_FILTER,
-                (UnConstableMethodDeclare) InternalMethods::checkFilter);
-        globalManager.setConstMethod(ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT,
-                InternalMethods::newFilterBreakpoint);
-    }
 
     private static FilterBreakpoint newFilterBreakpoint(InternalContext context, Object[] args) {
         Object index = ArraysUtil.get(args, 0, 0);
@@ -85,5 +73,17 @@ public class InternalMethods implements EnginePlugin {
         }
         // Pass, by default
         return null;
+    }
+
+    @Override
+    public void apply(Engine engine) {
+        GlobalManager globalManager = engine.getGlobalManager();
+
+        globalManager.setConstMethod(ScriptBuilder.VAR_EXIT,
+                (UnConstableMethodDeclare) InternalMethods::exit);
+        globalManager.setConstMethod(ScriptBuilder.VAR_CHECK_FILTER,
+                (UnConstableMethodDeclare) InternalMethods::checkFilter);
+        globalManager.setConstMethod(ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT,
+                InternalMethods::newFilterBreakpoint);
     }
 }

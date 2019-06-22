@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,45 +39,6 @@ public class AccessLogSourceFormat implements SourceFormat<String> {
     // internal
     private IndexedArrayInput.Indexer indexer;
     private int[] encodedIndexes;
-
-    @Override
-    public void init() {
-        Objects.requireNonNull(keys, "AccessLogSourceFormat: keys is required");
-        this.indexer = IndexedArrayInput.buildIndexer(StringUtil.toArrayOmitCommit(keys));
-        // resolve encoding columns
-        String[] encodingCols = StringUtil.toArrayOmitCommit(encodedColumns);
-        if (encodingCols.length != 0) {
-            encodedIndexes = new int[encodingCols.length];
-            for (int i = 0; i < encodingCols.length; i++) {
-                encodedIndexes[i] = indexer.getIndex(encodingCols[i]);
-            }
-        } else {
-            encodedIndexes = Defaults.emptyInts();
-        }
-    }
-
-    @Override
-    public void process(String input, Consumer<Input> collector) {
-        if (StringUtil.isEmpty(input)) {
-            return;
-        }
-        String[] values = parseAccessLog(input);
-        if (values.length == 0) {
-            return;
-        }
-        decode(values);
-        collector.accept(IndexedArrayInput.of(indexer, values));
-    }
-
-    private void decode(String[] values) {
-        int max = values.length - 1;
-        for (int index : encodedIndexes) {
-            if (index > max) {
-                continue;
-            }
-            values[index] = safeDecodeQuery(values[index]);
-        }
-    }
 
     private static String safeDecodeQuery(String src) {
         if (StringUtil.isEmpty(src)) {
@@ -123,5 +84,44 @@ public class AccessLogSourceFormat implements SourceFormat<String> {
             walker.skipSpaces();
         }
         return values.toArray(new String[values.size()]);
+    }
+
+    @Override
+    public void init() {
+        Objects.requireNonNull(keys, "AccessLogSourceFormat: keys is required");
+        this.indexer = IndexedArrayInput.buildIndexer(StringUtil.toArrayOmitCommit(keys));
+        // resolve encoding columns
+        String[] encodingCols = StringUtil.toArrayOmitCommit(encodedColumns);
+        if (encodingCols.length != 0) {
+            encodedIndexes = new int[encodingCols.length];
+            for (int i = 0; i < encodingCols.length; i++) {
+                encodedIndexes[i] = indexer.getIndex(encodingCols[i]);
+            }
+        } else {
+            encodedIndexes = Defaults.emptyInts();
+        }
+    }
+
+    @Override
+    public void process(String input, Consumer<Input> collector) {
+        if (StringUtil.isEmpty(input)) {
+            return;
+        }
+        String[] values = parseAccessLog(input);
+        if (values.length == 0) {
+            return;
+        }
+        decode(values);
+        collector.accept(IndexedArrayInput.of(indexer, values));
+    }
+
+    private void decode(String[] values) {
+        int max = values.length - 1;
+        for (int index : encodedIndexes) {
+            if (index > max) {
+                continue;
+            }
+            values[index] = safeDecodeQuery(values[index]);
+        }
     }
 }

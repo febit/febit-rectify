@@ -106,48 +106,6 @@ public class RectifierConf implements Serializable {
         void appendTo(ScriptBuilder.Context context);
     }
 
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    @JsonDeserialize(builder = Column.Builder.class)
-    @lombok.Builder(builderClassName = "Builder")
-    public static class Column implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        private final String type;
-        private final String name;
-        private final String expr;
-        private final String checkExpr;
-        private final String comment;
-
-        @JsonPOJOBuilder(withPrefix = "")
-        public static class Builder {
-        }
-
-        public String type() {
-            return type;
-        }
-
-        public String name() {
-            return name;
-        }
-
-        public String expr() {
-            return expr;
-        }
-
-        public String checkExpr() {
-            return checkExpr;
-        }
-
-        public String comment() {
-            return comment;
-        }
-    }
-
-    public static class Builder implements BuilderExtra {
-    }
-
     private interface BuilderExtra {
 
         Builder column(Column column);
@@ -186,5 +144,47 @@ public class RectifierConf implements Serializable {
             exprs.forEach(this::globalFilter);
             return (Builder) this;
         }
+    }
+
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    @JsonDeserialize(builder = Column.Builder.class)
+    @lombok.Builder(builderClassName = "Builder")
+    public static class Column implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private final String type;
+        private final String name;
+        private final String expr;
+        private final String checkExpr;
+        private final String comment;
+
+        public String type() {
+            return type;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public String expr() {
+            return expr;
+        }
+
+        public String checkExpr() {
+            return checkExpr;
+        }
+
+        public String comment() {
+            return comment;
+        }
+
+        @JsonPOJOBuilder(withPrefix = "")
+        public static class Builder {
+        }
+    }
+
+    public static class Builder implements BuilderExtra {
     }
 }

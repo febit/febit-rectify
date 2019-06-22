@@ -30,25 +30,6 @@ import java.util.stream.Collectors;
  */
 public class SourceFormats {
 
-    private static class ProviderHolder {
-        static final SourceFormatProvider[] PROVIDERS;
-        static final List<String> ALL_SUPPORTS;
-
-        static {
-            List<SourceFormatProvider> list = CollectionUtil.read(ServiceLoader.load(SourceFormatProvider.class));
-
-            PROVIDERS = list.stream()
-                    .sorted(Priority.DESC)
-                    .toArray(SourceFormatProvider[]::new);
-
-            ALL_SUPPORTS = list.stream()
-                    .flatMap(p -> p.supports().stream())
-                    .distinct()
-                    .sorted()
-                    .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
-        }
-    }
-
     public static List<String> supports() {
         return ProviderHolder.ALL_SUPPORTS;
     }
@@ -87,6 +68,25 @@ public class SourceFormats {
         }
         BeanUtil beanUtil = BeanUtil.declaredForced;
         props.forEach((k, v) -> beanUtil.setProperty(sourceFormat, k, v));
+    }
+
+    private static class ProviderHolder {
+        static final SourceFormatProvider[] PROVIDERS;
+        static final List<String> ALL_SUPPORTS;
+
+        static {
+            List<SourceFormatProvider> list = CollectionUtil.read(ServiceLoader.load(SourceFormatProvider.class));
+
+            PROVIDERS = list.stream()
+                    .sorted(Priority.DESC)
+                    .toArray(SourceFormatProvider[]::new);
+
+            ALL_SUPPORTS = list.stream()
+                    .flatMap(p -> p.supports().stream())
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+        }
     }
 
 }

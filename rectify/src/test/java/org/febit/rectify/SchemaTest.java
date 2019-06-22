@@ -1,12 +1,12 @@
 /**
  * Copyright 2018-present febit.org (support@febit.org)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,22 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.febit.rectify.Schema.Type.*;
-import static org.febit.rectify.Schema.*;
-import static org.junit.Assert.*;
+import static org.febit.rectify.Schema.Type.BIGINT;
+import static org.febit.rectify.Schema.Type.BOOLEAN;
+import static org.febit.rectify.Schema.Type.BYTES;
+import static org.febit.rectify.Schema.Type.DOUBLE;
+import static org.febit.rectify.Schema.Type.FLOAT;
+import static org.febit.rectify.Schema.Type.INT;
+import static org.febit.rectify.Schema.Type.STRING;
+import static org.febit.rectify.Schema.forArray;
+import static org.febit.rectify.Schema.forMap;
+import static org.febit.rectify.Schema.forOptional;
+import static org.febit.rectify.Schema.forPrimitive;
+import static org.febit.rectify.Schema.forStruct;
+import static org.febit.rectify.Schema.newField;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class SchemaTest {
 

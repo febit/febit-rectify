@@ -46,6 +46,15 @@ import java.util.function.Consumer;
 public class FlinkRectifier<I> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private final RectifierConf conf;
+    private transient RowTypeInfo typeInfo;
+    private transient TableSchema tableSchema;
+    private transient Rectifier<I, Row> rectifier;
+    private FlinkRectifier(RectifierConf conf) {
+        Objects.requireNonNull(conf);
+        this.conf = conf;
+        init();
+    }
 
     public static <I> FlinkRectifier<I> create(RectifierConf conf) {
         return new FlinkRectifier<>(conf);
@@ -59,17 +68,6 @@ public class FlinkRectifier<I> implements Serializable {
     public static <I> SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream, RectifierConf conf) {
         FlinkRectifier<I> rectifier = create(conf);
         return rectifier.rectify(dataStream);
-    }
-
-    private final RectifierConf conf;
-    private transient RowTypeInfo typeInfo;
-    private transient TableSchema tableSchema;
-    private transient Rectifier<I, Row> rectifier;
-
-    private FlinkRectifier(RectifierConf conf) {
-        Objects.requireNonNull(conf);
-        this.conf = conf;
-        init();
     }
 
     private void init() {
