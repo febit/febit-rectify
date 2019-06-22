@@ -1,0 +1,15 @@
+ext {
+  moduleName = 'Rectify Flink'
+  moduleDescription = 'Rectify support for Apache Flink'
+}
+
+dependencies {
+  compile project(":febit-rectify")
+  compileOnly 'org.apache.flink:flink-java'
+  compileOnly "org.apache.flink:flink-table_${versions.flinkScala}"
+  compileOnly "org.apache.flink:flink-streaming-scala_${versions.flinkScala}"
+
+  testCompile "org.apache.flink:flink-table_${versions.flinkScala}"
+  testCompile "org.apache.flink:flink-streaming-scala_${versions.flinkScala}"
+  testCompile "org.apache.flink:flink-clients_${versions.flinkScala}"
+}

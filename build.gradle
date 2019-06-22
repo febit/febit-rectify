@@ -1,0 +1,97 @@
+plugins {
+  id "io.freefair.lombok" version "3.6.6"
+  id "io.spring.dependency-management" version "1.0.8.RELEASE"
+}
+
+group 'org.febit.rectify'
+version '1.0.0-SNAPSHOT'
+
+ext {
+  versions = [
+      jodd      : '5.0.13',
+      wit       : '2.7.0-beta',
+      febit     : '2.8.0-SNAPSHOT',
+      calcite   : '1.19.0',
+      sqlline   : '1.8.0',
+      jackson   : '2.9.8',
+      slf4j     : '1.7.25',
+      junit     : '4.12',
+      flink     : '1.6.0',
+      flinkScala: '2.11',
+  ]
+}
+
+subprojects {
+
+  group rootProject.group
+  version rootProject.version
+
+  apply plugin: 'java'
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
+  apply plugin: 'io.freefair.lombok'
+  apply plugin: 'io.spring.dependency-management'
+
+  apply from: "${rootDir}/gradle/publish-maven.gradle"
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+
+  repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+  }
+
+  tasks.withType(Test) {
+    testLogging.events = ["FAILED", "PASSED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR"]
+  }
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.debug = true
+    options.compilerArgs << "-Xlint:unchecked"
+    options.compilerArgs << "-Xlint:deprecation"
+  }
+
+  tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+  }
+
+  dependencyManagement {
+    imports {
+      mavenBom "com.fasterxml.jackson:jackson-bom:${versions.jackson}"
+      mavenBom "org.jodd:jodd-bom:${versions.jodd}"
+    }
+    dependencies {
+      dependencySet(group: 'org.slf4j', version: "${versions.slf4j}") {
+        entry 'slf4j-api'
+        entry 'slf4j-simple'
+      }
+      dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
+        entry "flink-table_${versions.flinkScala}"
+        entry "flink-streaming-scala_${versions.flinkScala}"
+        entry "flink-clients_${versions.flinkScala}"
+        entry "flink-connector-kafka-0.8_${versions.flinkScala}"
+        entry "flink-connector-kafka-0.9_${versions.flinkScala}"
+        entry "flink-connector-kafka-0.10_${versions.flinkScala}"
+        entry "flink-connector-kafka-0.11_${versions.flinkScala}"
+      }
+      dependency "org.febit:febit-common:${versions.febit}"
+      dependency "org.febit.wit:wit-core:${versions.wit}"
+      dependency "org.apache.avro:avro:${versions.avro}"
+      dependency "org.apache.calcite:calcite-core:${versions.calcite}"
+      dependency "sqlline:sqlline:${versions.sqlline}"
+      dependency "junit:junit:${versions.junit}"
+    }
+  }
+
+  dependencies {
+    testCompile 'junit:junit'
+    testCompile 'org.slf4j:slf4j-simple'
+  }
+}
+
+wrapper {
+  gradleVersion = '5.4.1'
+}

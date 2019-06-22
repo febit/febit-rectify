@@ -1,0 +1,11 @@
+ext {
+  moduleName = 'Rectify Sqlline'
+  moduleDescription = 'Rectify support for Sqlline'
+}
+
+dependencies {
+  compile project(":febit-rectify")
+  compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+  compile 'org.apache.calcite:calcite-core'
+  compile 'sqlline:sqlline'
+}
