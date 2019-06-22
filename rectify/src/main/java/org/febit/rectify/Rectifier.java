@@ -23,7 +23,7 @@ import org.febit.wit.Context;
 import org.febit.wit.Engine;
 import org.febit.wit.Template;
 import org.febit.wit.Vars;
-import org.febit.wit.debug.BreakPointListener;
+import org.febit.wit.debug.BreakpointListener;
 import org.febit.wit.exceptions.ResourceNotFoundException;
 import org.febit.wit.exceptions.ScriptRuntimeException;
 import org.febit.wit.global.GlobalManager;
@@ -97,7 +97,7 @@ public class Rectifier<IN, OUT> {
      * @param <I>                input type
      * @return Rectifier
      */
-    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf, BreakPointListener breakpointListener) {
+    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf, BreakpointListener breakpointListener) {
         return create(conf, GenericStruct.model(), breakpointListener);
     }
 
@@ -126,7 +126,7 @@ public class Rectifier<IN, OUT> {
      * @param <O>                out type
      * @return
      */
-    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel, BreakPointListener breakpointListener) {
+    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
         Rectifier<I, O> processor;
         if (breakpointListener == null) {
             processor = new Rectifier<>(conf, false, resultModel);
@@ -230,16 +230,16 @@ public class Rectifier<IN, OUT> {
 
     private static class DebugRectifier<IN, OUT> extends Rectifier<IN, OUT> {
 
-        private final BreakPointListener breakPointListener;
+        private final BreakpointListener breakpointListener;
 
-        private DebugRectifier(RectifierConf conf, ResultModel<OUT> resultModel, BreakPointListener breakPointListener) {
+        private DebugRectifier(RectifierConf conf, ResultModel<OUT> resultModel, BreakpointListener breakpointListener) {
             super(conf, true, resultModel);
-            Objects.requireNonNull(breakPointListener);
-            this.breakPointListener = breakPointListener;
+            Objects.requireNonNull(breakpointListener);
+            this.breakpointListener = breakpointListener;
         }
 
         protected Context executeScript(Vars vars) {
-            return script.debug(vars, breakPointListener);
+            return script.debug(vars, breakpointListener);
         }
     }
 }
