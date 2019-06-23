@@ -15,25 +15,22 @@
  */
 package org.febit.rectify;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class GenericStructTest {
+class GenericStructTest {
 
     final Schema schema = Schema.parseFieldLines("demo", ""
             + "long id\n"
             + "string name\n"
             + "int level\n"
             + "string color\n");
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void test() {
+    void test() {
         ResultModel<GenericStruct> model = GenericStruct.model();
         GenericStruct struct = model.newStruct(schema);
 
@@ -66,16 +63,9 @@ public class GenericStructTest {
     }
 
     @Test
-    public void indexOutOfBoundsException1() {
-        expectedException.expect(ArrayIndexOutOfBoundsException.class);
+    void indexOutOfBounds() {
         GenericStruct struct = GenericStruct.of(schema);
-        struct.get(-1);
-    }
-
-    @Test
-    public void indexOutOfBoundsException2() {
-        expectedException.expect(ArrayIndexOutOfBoundsException.class);
-        GenericStruct struct = GenericStruct.of(schema);
-        struct.get(4);
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> struct.get(-1));
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> struct.get(4));
     }
 }

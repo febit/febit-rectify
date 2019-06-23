@@ -15,7 +15,7 @@
  */
 package org.febit.rectify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -32,9 +32,9 @@ import static org.febit.rectify.Schema.forOptional;
 import static org.febit.rectify.Schema.forPrimitive;
 import static org.febit.rectify.Schema.forStruct;
 import static org.febit.rectify.Schema.newField;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SchemaTest {
 

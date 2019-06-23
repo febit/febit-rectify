@@ -16,7 +16,7 @@ ext {
       sqlline   : '1.8.0',
       jackson   : '2.9.8',
       slf4j     : '1.7.25',
-      junit     : '4.12',
+      junit     : '5.4.2',
       flink     : '1.6.0',
       flinkScala: '2.11',
   ]
@@ -91,13 +91,18 @@ subprojects {
       dependency "org.apache.avro:avro:${versions.avro}"
       dependency "org.apache.calcite:calcite-core:${versions.calcite}"
       dependency "sqlline:sqlline:${versions.sqlline}"
-      dependency "junit:junit:${versions.junit}"
     }
   }
 
+  test {
+    useJUnitPlatform()
+  }
+
   dependencies {
-    testCompile 'junit:junit'
-    testCompile 'org.slf4j:slf4j-simple'
+    testCompile 'org.slf4j:slf4j-api'
+    testCompile "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+    testRuntime 'org.slf4j:slf4j-simple'
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
   }
 }
 
