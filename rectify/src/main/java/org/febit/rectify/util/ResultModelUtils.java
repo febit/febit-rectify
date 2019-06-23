@@ -34,7 +34,7 @@ import java.util.Map;
  * @author zqq90
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ResultModelUtil {
+public class ResultModelUtils {
 
     private static final Converter CONVERTER = Converter.get();
 

@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ResultModelUtilTest {
+class ResultModelUtilsTest {
 
     private static List<Object> asList(Object... items) {
         return Arrays.asList(items);
@@ -50,11 +50,11 @@ public class ResultModelUtilTest {
     }
 
     @Test
-    public void testConvertComplex() {
+    void testConvertComplex() {
         Schema schema = TestSchemas.COMPLEX;
         GenericStruct record;
 
-        record = (GenericStruct) ResultModelUtil.convert(schema, namedMap(
+        record = (GenericStruct) ResultModelUtils.convert(schema, namedMap(
                 "id", 1234L,
                 "name", "Mr.R",
                 "float", 11111D,

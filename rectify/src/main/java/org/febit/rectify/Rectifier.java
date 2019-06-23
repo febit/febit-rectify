@@ -18,7 +18,7 @@ package org.febit.rectify;
 import org.febit.lang.TerConsumer;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.ScriptBuilder;
-import org.febit.rectify.util.ResultModelUtil;
+import org.febit.rectify.util.ResultModelUtils;
 import org.febit.wit.Context;
 import org.febit.wit.Engine;
 import org.febit.wit.Template;
@@ -235,7 +235,7 @@ public class Rectifier<I, O> {
         }
         ResultRaw raw = (ResultRaw) resultOrReason;
         @SuppressWarnings("unchecked")
-        O record = (O) ResultModelUtil.convert(schema, raw, resultModel);
+        O record = (O) ResultModelUtils.convert(schema, raw, resultModel);
         action.accept(record, raw, null);
     }
 
