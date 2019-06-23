@@ -33,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings({
+        "squid:S1192" // String literals should not be duplicated
+})
 public class RectifierTest {
 
     final RectifierConf conf = RectifierConf.builder()
@@ -289,17 +292,17 @@ public class RectifierTest {
         assertEquals("status is not even", breakpoint._2);
     }
 
-    private static class AssertSingleTerConsumer<OUT> implements TerConsumer<OUT, ResultRaw, String> {
+    private static class AssertSingleTerConsumer<O> implements TerConsumer<O, ResultRaw, String> {
 
         boolean flag = false;
-        OUT out;
+        O out;
         ResultRaw resultRaw;
         String reason;
 
         @Override
-        public void accept(OUT out, ResultRaw resultRaw, String reason) {
+        public void accept(O out, ResultRaw resultRaw, String reason) {
             if (flag) {
-                throw new RuntimeException("Assert single item, but got more");
+                throw new AssertionError("Assert single item, but got more");
             }
             flag = true;
             this.out = out;

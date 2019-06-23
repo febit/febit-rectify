@@ -28,6 +28,7 @@ import org.febit.wit.exceptions.ResourceNotFoundException;
 import org.febit.wit.exceptions.ScriptRuntimeException;
 import org.febit.wit.global.GlobalManager;
 
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,20 +36,20 @@ import java.util.Objects;
 /**
  * Rectifier.
  *
- * @param <IN>  input Type
- * @param <OUT> out type
+ * @param <I> input Type
+ * @param <O> out type
  * @author zqq90
  */
-public class Rectifier<IN, OUT> {
+public class Rectifier<I, O> {
 
     protected final boolean debug;
     protected final RectifierConf conf;
     protected final ResultModel<?> resultModel;
     protected Schema schema;
     protected Template script;
-    protected SourceFormat<IN> sourceFormat;
+    protected SourceFormat<I> sourceFormat;
 
-    protected Rectifier(RectifierConf conf, boolean debug, ResultModel<OUT> resultModel) {
+    protected Rectifier(RectifierConf conf, boolean debug, ResultModel<O> resultModel) {
         Objects.requireNonNull(conf);
         Objects.requireNonNull(resultModel);
         this.conf = conf;
@@ -89,7 +90,7 @@ public class Rectifier<IN, OUT> {
 
     /**
      * Create a {@code DebugRectifier} by conf.
-     *
+     * <p>
      * WARN: Poor performance, not for production environment.
      *
      * @param conf               conf
@@ -116,7 +117,7 @@ public class Rectifier<IN, OUT> {
 
     /**
      * Create a {@code DebugRectifier} by conf.
-     *
+     * <p>
      * WARN: Poor performance, not for production environment.
      *
      * @param conf               conf
@@ -156,7 +157,7 @@ public class Rectifier<IN, OUT> {
      * @param input    input
      * @param consumer consumer
      */
-    public void process(IN input, TerConsumer<OUT, ResultRaw, String> consumer) {
+    public void process(I input, TerConsumer<O, ResultRaw, String> consumer) {
         this.sourceFormat.process(input, record -> process(record, consumer));
     }
 
@@ -172,7 +173,7 @@ public class Rectifier<IN, OUT> {
             // fast-fail check
             script.reload();
         } catch (ResourceNotFoundException ex) {
-            throw new RuntimeException("Failed to create template.", ex);
+            throw new UncheckedIOException("Failed to create template.", ex);
         }
     }
 
@@ -185,7 +186,7 @@ public class Rectifier<IN, OUT> {
     protected Object executeScript(Input input) {
         final ResultRaw result = new ResultRaw();
         try {
-            executeScript((accepter) -> {
+            executeScript(accepter -> {
                 accepter.set(ScriptBuilder.VAR_INPUT, input);
                 accepter.set(ScriptBuilder.VAR_RESULT, result);
             });
@@ -203,7 +204,7 @@ public class Rectifier<IN, OUT> {
         return script.merge(vars);
     }
 
-    private void process(Input input, TerConsumer<OUT, ResultRaw, String> action) {
+    private void process(Input input, TerConsumer<O, ResultRaw, String> action) {
         Object resultOrReason = executeScript(input);
         if (!(resultOrReason instanceof ResultRaw)) {
             action.accept(null, null,
@@ -212,7 +213,7 @@ public class Rectifier<IN, OUT> {
         }
         ResultRaw raw = (ResultRaw) resultOrReason;
         @SuppressWarnings("unchecked")
-        OUT record = (OUT) ResultModelUtil.convert(schema, raw, resultModel);
+        O record = (O) ResultModelUtil.convert(schema, raw, resultModel);
         action.accept(record, raw, null);
     }
 
@@ -228,16 +229,17 @@ public class Rectifier<IN, OUT> {
         static final Engine ENGINE = Engine.create("febit-rectifier-engine.wim");
     }
 
-    private static class DebugRectifier<IN, OUT> extends Rectifier<IN, OUT> {
+    private static class DebugRectifier<I, O> extends Rectifier<I, O> {
 
         private final BreakpointListener breakpointListener;
 
-        private DebugRectifier(RectifierConf conf, ResultModel<OUT> resultModel, BreakpointListener breakpointListener) {
+        private DebugRectifier(RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
             super(conf, true, resultModel);
             Objects.requireNonNull(breakpointListener);
             this.breakpointListener = breakpointListener;
         }
 
+        @Override
         protected Context executeScript(Vars vars) {
             return script.debug(vars, breakpointListener);
         }

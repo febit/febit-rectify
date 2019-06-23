@@ -28,7 +28,7 @@ public class AssertSingleConsumer<T> implements Consumer<T> {
     @Override
     public void accept(T next) {
         if (value != null) {
-            throw new RuntimeException("Assert single item, but got more");
+            throw new IllegalStateException("Assert single item, but got more");
         }
         this.value = next;
     }

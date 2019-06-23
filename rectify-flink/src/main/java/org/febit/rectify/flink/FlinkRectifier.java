@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -50,6 +51,7 @@ public class FlinkRectifier<I> implements Serializable {
     private transient RowTypeInfo typeInfo;
     private transient TableSchema tableSchema;
     private transient Rectifier<I, Row> rectifier;
+
     private FlinkRectifier(RectifierConf conf) {
         Objects.requireNonNull(conf);
         this.conf = conf;
@@ -107,7 +109,7 @@ public class FlinkRectifier<I> implements Serializable {
     public int requireFieldIndex(String fieldName) {
         int index = this.typeInfo.getFieldIndex(fieldName);
         if (index < 0) {
-            throw new RuntimeException("Not found field in schema '" + conf + "' : " + fieldName);
+            throw new NoSuchElementException("Not found field in schema '" + conf + "' : " + fieldName);
         }
         return index;
     }

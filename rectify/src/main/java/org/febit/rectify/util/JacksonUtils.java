@@ -19,12 +19,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * @author zqq90
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JacksonUtils {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();

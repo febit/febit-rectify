@@ -25,6 +25,9 @@ import org.febit.wit.lang.UnConstableMethodDeclare;
 /**
  * @author zqq90
  */
+@SuppressWarnings({
+        "squid:S1172" // Unused method parameters should be removed
+})
 public class InternalMethods implements EnginePlugin {
 
     private static FilterBreakpoint newFilterBreakpoint(InternalContext context, Object[] args) {

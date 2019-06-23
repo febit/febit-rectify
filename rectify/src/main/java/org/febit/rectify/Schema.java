@@ -38,6 +38,8 @@ public abstract class Schema implements Serializable {
     private static final char[] LINE_BREAKERS = "\r\n".toCharArray();
     private static final char[] LINE_BREAKERS_REPLACE = "  ".toCharArray();
     private static final Pattern NAME_PATTERN = Pattern.compile("^[_a-zA-Z][_a-zA-Z0-9]{1,64}$");
+    private static final String NOT_A_STRUCT = "Not a struct: ";
+
     final Type type;
 
     Schema(Type type) {
@@ -190,7 +192,7 @@ public abstract class Schema implements Serializable {
      * If this is a struct, returns the fields in lines string.
      */
     public String toFieldLinesString() {
-        throw new UnsupportedOperationException("Not a struct: " + this);
+        throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
     /**
@@ -207,21 +209,21 @@ public abstract class Schema implements Serializable {
      * @return field
      */
     public Field getField(String fieldname) {
-        throw new UnsupportedOperationException("Not a struct: " + this);
+        throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
     /**
      * If this is a struct, returns the fields in it.
      */
     public List<Field> fields() {
-        throw new UnsupportedOperationException("Not a struct: " + this);
+        throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
     /**
      * If this is a struct, returns the fields size.
      */
     public int fieldSize() {
-        throw new UnsupportedOperationException("Not a struct: " + this);
+        throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
     /**
@@ -457,10 +459,10 @@ public abstract class Schema implements Serializable {
 
         private static void requireAndJumpChar(StringWalker walker, char c) {
             if (walker.isEnd()) {
-                throw new RuntimeException("Unexpected EOF");
+                throw new IllegalArgumentException("Unexpected EOF");
             }
             if (walker.peek() != c) {
-                throw new RuntimeException(StringUtil.format(
+                throw new IllegalArgumentException(StringUtil.format(
                         "Unexpected char '{}' at {}, but need `{}` ", walker.peek(), walker.pos(), c));
             }
             walker.jump(1);
@@ -469,7 +471,7 @@ public abstract class Schema implements Serializable {
         /**
          * Parse fields in lines.
          *
-         * @param name schema name
+         * @param name  schema name
          * @param lines lines
          * @return a struct schema
          */
@@ -512,7 +514,7 @@ public abstract class Schema implements Serializable {
             }
             walker.skipBlanks();
             if (!walker.isEnd()) {
-                throw new RuntimeException("Invalid content: " + walker.readToEnd());
+                throw new IllegalArgumentException("Invalid content: " + walker.readToEnd());
             }
             return Schema.newField(name, schema, comment);
         }
@@ -547,7 +549,7 @@ public abstract class Schema implements Serializable {
                 case "optional":
                     return readOptionalType(space, name, walker);
                 default:
-                    throw new RuntimeException("Not support type name: " + typeName);
+                    throw new IllegalArgumentException("Not support type name: " + typeName);
             }
         }
 

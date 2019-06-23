@@ -36,10 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SchemaTest {
+@SuppressWarnings({
+        "squid:S1192" // String literals should not be duplicated
+})
+class SchemaTest {
 
     @Test
-    public void testParseAsFieldList() {
+    void testParseAsFieldList() {
         Schema schema = TestSchemas.COMPLEX;
 
         Schema.Field field;
@@ -137,7 +140,7 @@ public class SchemaTest {
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         Schema schema;
 
         assertEquals("int", forPrimitive(INT).toString());

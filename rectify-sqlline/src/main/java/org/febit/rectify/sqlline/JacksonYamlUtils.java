@@ -18,11 +18,14 @@ package org.febit.rectify.sqlline;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class JacksonYamlUtils {
 
     private static final YAMLMapper MAPPER = new YAMLMapper();

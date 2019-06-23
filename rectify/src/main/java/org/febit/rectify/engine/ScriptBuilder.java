@@ -15,6 +15,8 @@
  */
 package org.febit.rectify.engine;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.febit.rectify.RectifierConf;
 import org.febit.util.StringUtil;
 
@@ -23,6 +25,7 @@ import java.util.List;
 /**
  * @author zqq90
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScriptBuilder {
 
     public static final String VAR_INPUT = "$";

@@ -22,6 +22,7 @@ import org.febit.rectify.RectifierConf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -80,7 +81,7 @@ class RectifyEnumerator implements Enumerator<Object[]> {
                 return false;
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         rectifier.process(nextLine, (out, raw, reason) -> {
             if (out != null) {
@@ -101,7 +102,7 @@ class RectifyEnumerator implements Enumerator<Object[]> {
         try {
             reader.close();
         } catch (IOException e) {
-            throw new RuntimeException("Error closing reader", e);
+            throw new UncheckedIOException("Error closing reader", e);
         }
     }
 }

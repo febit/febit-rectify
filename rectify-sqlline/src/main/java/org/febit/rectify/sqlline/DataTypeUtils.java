@@ -15,6 +15,8 @@
  */
 package org.febit.rectify.sqlline;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.type.SqlTypeName;
@@ -26,6 +28,7 @@ import java.util.List;
 /**
  * @author zqq90
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class DataTypeUtils {
 
     static RelDataType toDataType(Schema schema, RelDataTypeFactory typeFactory) {

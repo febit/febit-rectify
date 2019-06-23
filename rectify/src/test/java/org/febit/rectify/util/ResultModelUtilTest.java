@@ -42,7 +42,8 @@ public class ResultModelUtilTest {
 
     private static Map<Object, Object> namedMap(Object... items) {
         Map<Object, Object> map = new HashMap<>();
-        for (int i = 0; i < items.length - 1; ) {
+        int i = 0;
+        while (i < items.length - 1) {
             map.put(items[i++], items[i++]);
         }
         return map;

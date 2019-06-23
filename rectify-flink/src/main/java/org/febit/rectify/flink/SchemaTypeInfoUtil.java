@@ -15,6 +15,8 @@
  */
 package org.febit.rectify.flink;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
@@ -28,6 +30,7 @@ import java.util.Objects;
 /**
  * @author zqq90
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SchemaTypeInfoUtil {
 
     public static RowTypeInfo ofRecord(Schema schema) {
@@ -46,6 +49,9 @@ public class SchemaTypeInfoUtil {
         return new RowTypeInfo(fieldTypes, fieldNames);
     }
 
+    @SuppressWarnings({
+            "squid:S1452" // Generic wildcard types should not be used in return parameters
+    })
     public static TypeInformation<?> ofSchema(Schema schema) {
         Objects.requireNonNull(schema);
         switch (schema.getType()) {

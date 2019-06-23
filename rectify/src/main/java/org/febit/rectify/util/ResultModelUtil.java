@@ -16,6 +16,8 @@
 package org.febit.rectify.util;
 
 import jodd.typeconverter.Converter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.febit.rectify.ResultModel;
 import org.febit.rectify.Schema;
 import org.febit.util.CollectionUtil;
@@ -31,6 +33,7 @@ import java.util.Map;
 /**
  * @author zqq90
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResultModelUtil {
 
     private static final Converter CONVERTER = Converter.get();
@@ -54,29 +57,18 @@ public class ResultModelUtil {
                 return CONVERTER.toLong(value, 0L);
             case STRING:
                 return value.toString();
-            case MAP: {
+            case MAP:
                 if (value instanceof Map) {
-                    return convertMap(schema, (Map<?, ?>) value, model);
+                    return convertToMap(schema, (Map<?, ?>) value, model);
                 }
                 throw new IllegalArgumentException("Unsupported map type: " + value.getClass());
-            }
-            case STRUCT: {
-                Object record = model.newStruct(schema);
+            case STRUCT:
                 if (value instanceof Map) {
-                    convertStruct(schema, record, (Map<?, ?>) value, model);
-                    return record;
+                    return convertToStruct(schema, (Map<?, ?>) value, model);
                 }
                 throw new IllegalArgumentException("Unsupported record type: " + value.getClass());
-            }
-            case ARRAY: {
-                Schema valueType = schema.valueType();
-                Iterator iter = CollectionUtil.toIterator(value);
-                List<Object> list = new ArrayList<>();
-                while (iter.hasNext()) {
-                    list.add(convert(valueType, iter.next(), model));
-                }
-                return list;
-            }
+            case ARRAY:
+                return convertToArray(schema, value, model);
             case BYTES:
                 // TODO need support bytes
             default:
@@ -105,9 +97,7 @@ public class ResultModelUtil {
             case BYTES:
                 return ByteBuffer.wrap(new byte[0]);
             case STRUCT:
-                Object struct = model.newStruct(schema);
-                convertStruct(schema, struct, Collections.emptyMap(), model);
-                return struct;
+                return convertToStruct(schema, Collections.emptyMap(), model);
             case OPTIONAL:
                 return null;
             default:
@@ -115,7 +105,17 @@ public class ResultModelUtil {
         }
     }
 
-    private static Map<String, Object> convertMap(Schema schema, Map<?, ?> value, ResultModel model) {
+    private static List<Object> convertToArray(Schema schema, Object value, ResultModel model) {
+        Iterator iter = CollectionUtil.toIterator(value);
+        List<Object> list = new ArrayList<>();
+        Schema valueType = schema.valueType();
+        while (iter.hasNext()) {
+            list.add(convert(valueType, iter.next(), model));
+        }
+        return list;
+    }
+
+    private static Map<String, Object> convertToMap(Schema schema, Map<?, ?> value, ResultModel model) {
         if (value == null) {
             return null;
         }
@@ -134,10 +134,12 @@ public class ResultModelUtil {
     }
 
     @SuppressWarnings("unchecked")
-    private static void convertStruct(Schema schema, Object struct, Map<?, ?> value, ResultModel model) {
+    private static Object convertToStruct(Schema schema, Map<?, ?> value, ResultModel model) {
+        Object struct = model.newStruct(schema);
         for (Schema.Field field : schema.fields()) {
             Object val = convert(field.schema(), value.get(field.name()), model);
             model.setField(struct, field, val);
         }
+        return struct;
     }
 }

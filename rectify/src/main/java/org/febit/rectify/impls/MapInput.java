@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.impls;
 
+import lombok.RequiredArgsConstructor;
 import org.febit.rectify.Input;
 
 import java.util.Iterator;
@@ -23,18 +24,12 @@ import java.util.Map;
 /**
  * @author zqq90
  */
+@RequiredArgsConstructor(staticName = "of")
 public class MapInput implements Input {
 
     private static final long serialVersionUID = 1L;
+
     private final Map<String, Object> attrs;
-
-    private MapInput(Map<String, Object> attrs) {
-        this.attrs = attrs;
-    }
-
-    public static MapInput of(Map<String, Object> attrs) {
-        return new MapInput(attrs);
-    }
 
     @Override
     public Object get(String key) {

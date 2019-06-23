@@ -16,6 +16,9 @@
 package org.febit.rectify;
 
 import jodd.bean.BeanUtil;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.val;
 import org.febit.util.CollectionUtil;
 import org.febit.util.Priority;
 
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 /**
  * @author zqq90
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SourceFormats {
 
     public static List<String> supports() {
@@ -39,22 +43,21 @@ public class SourceFormats {
     }
 
     public static <T> SourceFormat<T> create(String name, Map<String, String> props) {
-        @SuppressWarnings("unchecked")
-        SourceFormat<T> format = (SourceFormat<T>) lookup(name);
+        SourceFormat<T> format = lookup(name);
         if (format == null) {
-            throw new RuntimeException("Not found SourceFormat named: " + name);
+            throw new IllegalArgumentException("Not found SourceFormat named: " + name);
         }
         injectConfigs(format, props);
         format.init();
         return format;
     }
 
-    private static SourceFormat<?> lookup(String name) {
+    private static <T> SourceFormat<T> lookup(String name) {
         if (name == null) {
             return null;
         }
-        for (SourceFormatProvider sourceFormatProvider : ProviderHolder.PROVIDERS) {
-            SourceFormat<?> format = sourceFormatProvider.lookup(name);
+        for (val provider : ProviderHolder.PROVIDERS) {
+            SourceFormat<T> format = provider.lookup(name);
             if (format != null) {
                 return format;
             }
@@ -75,7 +78,7 @@ public class SourceFormats {
         static final List<String> ALL_SUPPORTS;
 
         static {
-            List<SourceFormatProvider> list = CollectionUtil.read(ServiceLoader.load(SourceFormatProvider.class));
+            val list = CollectionUtil.read(ServiceLoader.load(SourceFormatProvider.class));
 
             PROVIDERS = list.stream()
                     .sorted(Priority.DESC)

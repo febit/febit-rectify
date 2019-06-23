@@ -24,7 +24,7 @@ import java.util.List;
  */
 public interface SourceFormatProvider {
 
-    SourceFormat<?> lookup(String name);
+    <T> SourceFormat<T> lookup(String name);
 
     List<String> supports();
 }

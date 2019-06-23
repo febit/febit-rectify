@@ -19,6 +19,7 @@ import org.febit.lang.Defaults;
 import org.febit.rectify.Input;
 import org.febit.util.CollectionUtil;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -64,7 +65,7 @@ public class IndexedArrayInput implements Input {
         return this.indexer.size();
     }
 
-    public static class Indexer implements Iterable<String> {
+    public static class Indexer implements Iterable<String>, Serializable {
 
         private final String[] keys;
         private final HashMap<String, Integer> indexerMap;

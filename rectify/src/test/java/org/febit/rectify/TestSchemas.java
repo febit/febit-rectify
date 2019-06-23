@@ -15,6 +15,10 @@
  */
 package org.febit.rectify;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSchemas {
 
     public static final Schema COMPLEX = Schema.parseFieldLines("demo", "\n"
