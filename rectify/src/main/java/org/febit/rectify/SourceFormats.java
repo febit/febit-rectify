@@ -38,26 +38,26 @@ public class SourceFormats {
         return ProviderHolder.ALL_SUPPORTS;
     }
 
-    public static <T> SourceFormat<T> create(RectifierConf schema) {
-        return create(schema.sourceFormat(), schema.sourceFormatProps());
+    public static <T> SourceFormat<T> create(RectifierConf schema, Class<T> sourceType) {
+        return create(schema.sourceFormat(), sourceType, schema.sourceFormatProps());
     }
 
-    public static <T> SourceFormat<T> create(String name, Map<String, String> props) {
-        SourceFormat<T> format = lookup(name);
+    public static <T> SourceFormat<T> create(String name, Class<T> sourceType, Map<String, String> props) {
+        SourceFormat<T> format = lookup(name, sourceType);
         if (format == null) {
-            throw new IllegalArgumentException("Not found SourceFormat named: " + name);
+            throw new IllegalArgumentException("Not found SourceFormat named '" + name + "' for type: " + sourceType);
         }
         injectConfigs(format, props);
         format.init();
         return format;
     }
 
-    private static <T> SourceFormat<T> lookup(String name) {
+    private static <T> SourceFormat<T> lookup(String name, Class<T> sourceType) {
         if (name == null) {
             return null;
         }
         for (val provider : ProviderHolder.PROVIDERS) {
-            SourceFormat<T> format = provider.lookup(name);
+            SourceFormat<T> format = provider.lookup(name, sourceType);
             if (format != null) {
                 return format;
             }

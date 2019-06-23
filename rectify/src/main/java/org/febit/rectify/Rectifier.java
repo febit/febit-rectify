@@ -42,14 +42,16 @@ import java.util.Objects;
  */
 public class Rectifier<I, O> {
 
-    protected final boolean debug;
+    protected final Class<I> sourceType;
     protected final RectifierConf conf;
-    protected final ResultModel<?> resultModel;
+    protected final boolean debug;
+    protected final ResultModel<O> resultModel;
     protected Schema schema;
     protected Template script;
     protected SourceFormat<I> sourceFormat;
 
-    protected Rectifier(RectifierConf conf, boolean debug, ResultModel<O> resultModel) {
+    protected Rectifier(Class<I> sourceType, RectifierConf conf, boolean debug, ResultModel<O> resultModel) {
+        this.sourceType = sourceType;
         Objects.requireNonNull(conf);
         Objects.requireNonNull(resultModel);
         this.conf = conf;
@@ -78,14 +80,28 @@ public class Rectifier<I, O> {
     }
 
     /**
+     * @see #create(RectifierConf)
+     */
+    public static Rectifier<String, GenericStruct> create(RectifierConf conf) {
+        return create(String.class, conf, GenericStruct.model(), null);
+    }
+
+    /**
      * Create a {@code Rectifier} by conf.
      *
      * @param conf conf
      * @param <I>  input type
      * @return Rectifier
      */
-    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf) {
-        return create(conf, GenericStruct.model(), null);
+    public static <I> Rectifier<I, GenericStruct> create(Class<I> sourceType, RectifierConf conf) {
+        return create(sourceType, conf, GenericStruct.model(), null);
+    }
+
+    /**
+     * @see #create(Class, RectifierConf, BreakpointListener)
+     */
+    public static Rectifier<String, GenericStruct> create(RectifierConf conf, BreakpointListener breakpointListener) {
+        return create(String.class, conf, GenericStruct.model(), breakpointListener);
     }
 
     /**
@@ -98,8 +114,15 @@ public class Rectifier<I, O> {
      * @param <I>                input type
      * @return Rectifier
      */
-    public static <I> Rectifier<I, GenericStruct> create(RectifierConf conf, BreakpointListener breakpointListener) {
-        return create(conf, GenericStruct.model(), breakpointListener);
+    public static <I> Rectifier<I, GenericStruct> create(Class<I> sourceType, RectifierConf conf, BreakpointListener breakpointListener) {
+        return create(sourceType, conf, GenericStruct.model(), breakpointListener);
+    }
+
+    /**
+     * @see #create(Class, RectifierConf, ResultModel)
+     */
+    public static <O> Rectifier<String, O> create(RectifierConf conf, ResultModel<O> resultModel) {
+        return create(String.class, conf, resultModel, null);
     }
 
     /**
@@ -111,8 +134,8 @@ public class Rectifier<I, O> {
      * @param <O>         out type
      * @return Rectifier
      */
-    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel) {
-        return create(conf, resultModel, null);
+    public static <I, O> Rectifier<I, O> create(Class<I> sourceType, RectifierConf conf, ResultModel<O> resultModel) {
+        return create(sourceType, conf, resultModel, null);
     }
 
     /**
@@ -125,14 +148,13 @@ public class Rectifier<I, O> {
      * @param breakpointListener Wit breakpoint listener
      * @param <I>                input Type
      * @param <O>                out type
-     * @return
      */
-    public static <I, O> Rectifier<I, O> create(RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
+    public static <I, O> Rectifier<I, O> create(Class<I> sourceType, RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
         Rectifier<I, O> processor;
         if (breakpointListener == null) {
-            processor = new Rectifier<>(conf, false, resultModel);
+            processor = new Rectifier<>(sourceType, conf, false, resultModel);
         } else {
-            processor = new DebugRectifier<>(conf, resultModel, breakpointListener);
+            processor = new DebugRectifier<>(sourceType, conf, resultModel, breakpointListener);
         }
         processor.init();
         return processor;
@@ -164,7 +186,7 @@ public class Rectifier<I, O> {
     private void init() {
 
         schema = conf.schema();
-        sourceFormat = SourceFormats.create(conf);
+        sourceFormat = SourceFormats.create(conf, sourceType);
 
         // init script
         try {
@@ -233,8 +255,8 @@ public class Rectifier<I, O> {
 
         private final BreakpointListener breakpointListener;
 
-        private DebugRectifier(RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
-            super(conf, true, resultModel);
+        private DebugRectifier(Class<I> sourceType, RectifierConf conf, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
+            super(sourceType, conf, true, resultModel);
             Objects.requireNonNull(breakpointListener);
             this.breakpointListener = breakpointListener;
         }

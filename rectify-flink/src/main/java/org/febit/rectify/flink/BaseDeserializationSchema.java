@@ -31,8 +31,8 @@ public abstract class BaseDeserializationSchema<I> implements DeserializationSch
 
     private final FlinkRectifier<I> rectifier;
 
-    protected BaseDeserializationSchema(RectifierConf conf) {
-        this(FlinkRectifier.create(conf));
+    protected BaseDeserializationSchema(Class<I> sourceType, RectifierConf conf) {
+        this(FlinkRectifier.create(sourceType, conf));
     }
 
     protected BaseDeserializationSchema(FlinkRectifier<I> rectifier) {

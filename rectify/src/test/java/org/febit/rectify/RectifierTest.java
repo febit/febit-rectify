@@ -220,7 +220,7 @@ public class RectifierTest {
     @Test
     public void processInDebugMode() {
         List<Tuple2<FilterBreakpoint, Object>> breakpoints = new ArrayList<>();
-        Rectifier<String, GenericStruct> rectifier = Rectifier.create(conf, (label, context, statement, val) -> {
+        Rectifier<String, GenericStruct> rectifier = Rectifier.create(String.class, conf, (label, context, statement, val) -> {
             if (label instanceof FilterBreakpoint) {
                 FilterBreakpoint breakpoint = (FilterBreakpoint) label;
                 breakpoints.add(Tuple2.of(breakpoint, val));

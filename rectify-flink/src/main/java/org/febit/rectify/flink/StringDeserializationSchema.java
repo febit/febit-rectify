@@ -37,7 +37,7 @@ public class StringDeserializationSchema extends BaseDeserializationSchema<Strin
     }
 
     public StringDeserializationSchema(RectifierConf conf, Charset charset) {
-        super(conf);
+        super(String.class, conf);
         Objects.requireNonNull(charset);
         this.charset = charset;
     }

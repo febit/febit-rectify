@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.impls;
 
+import org.febit.rectify.Input;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.SourceFormatProvider;
 import org.febit.util.Priority;
@@ -36,22 +37,33 @@ public class DefaultSourceFormatProvider implements SourceFormatProvider {
     ));
 
     @Override
-    public SourceFormat<?> lookup(String name) {
-        SourceFormat format;
+    @SuppressWarnings({"unchecked"})
+    public <T> SourceFormat<T> lookup(String name, Class<T> sourceType) {
+        if (sourceType == String.class) {
+            return (SourceFormat<T>) lookupForString(name);
+        }
+        if (Input.class.isAssignableFrom(sourceType)) {
+            return (SourceFormat<T>) lookupForInput(name);
+        }
+        return null;
+    }
+
+    private SourceFormat<Input> lookupForInput(String name) {
+        if ("direct".equals(name)) {
+            return new DirectSourceFormat();
+        }
+        return null;
+    }
+
+    private SourceFormat<String> lookupForString(String name) {
         switch (name) {
-            case "direct":
-                format = new DirectSourceFormat();
-                break;
             case "json":
-                format = new JsonSourceFormat();
-                break;
+                return new JsonSourceFormat();
             case "access":
-                format = new AccessLogSourceFormat();
-                break;
+                return new AccessLogSourceFormat();
             default:
                 return null;
         }
-        return format;
     }
 
     @Override

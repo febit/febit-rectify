@@ -47,33 +47,37 @@ import java.util.function.Consumer;
 public class FlinkRectifier<I> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private final Class<I> sourceType;
     private final RectifierConf conf;
+
     private transient RowTypeInfo typeInfo;
     private transient TableSchema tableSchema;
     private transient Rectifier<I, Row> rectifier;
 
-    private FlinkRectifier(RectifierConf conf) {
+    private FlinkRectifier(Class<I> sourceType, RectifierConf conf) {
         Objects.requireNonNull(conf);
+        this.sourceType = sourceType;
         this.conf = conf;
         init();
     }
 
-    public static <I> FlinkRectifier<I> create(RectifierConf conf) {
-        return new FlinkRectifier<>(conf);
+    public static <I> FlinkRectifier<I> create(Class<I> sourceType, RectifierConf conf) {
+        return new FlinkRectifier<>(sourceType, conf);
     }
 
     public static <I> FlatMapOperator<I, Row> rectify(DataSet<I> dataSet, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(conf);
+        FlinkRectifier<I> rectifier = create(dataSet.getType().getTypeClass(), conf);
         return rectifier.rectify(dataSet);
     }
 
     public static <I> SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(conf);
+        FlinkRectifier<I> rectifier = create(dataStream.getType().getTypeClass(), conf);
         return rectifier.rectify(dataStream);
     }
 
     private void init() {
-        Rectifier<I, Row> processor = Rectifier.create(conf, RowResultModel.get());
+        Rectifier<I, Row> processor = Rectifier.create(sourceType, conf, RowResultModel.get());
         this.rectifier = processor;
         this.typeInfo = SchemaTypeInfoUtil.ofRecord(processor.schema());
         this.tableSchema = new TableSchema(

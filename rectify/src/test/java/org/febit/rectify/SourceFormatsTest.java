@@ -27,10 +27,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SourceFormatsTest {
+class SourceFormatsTest {
 
     @Test
-    public void testSupports() {
+    void testSupports() {
         List<String> supports = SourceFormats.supports();
         assertTrue(supports.contains("direct"));
         assertTrue(supports.contains("json"));
@@ -38,20 +38,20 @@ public class SourceFormatsTest {
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         SourceFormat format;
 
-        format = SourceFormats.create("direct", null);
+        format = SourceFormats.create("direct", Input.class, null);
         assertNotNull(format);
         assertTrue(format instanceof DirectSourceFormat);
 
-        format = SourceFormats.create("json", null);
+        format = SourceFormats.create("json", String.class, null);
         assertNotNull(format);
         assertTrue(format instanceof JsonSourceFormat);
 
         val props = new HashMap<String, String>();
         props.put("keys", "");
-        format = SourceFormats.create("access", props);
+        format = SourceFormats.create("access", String.class, props);
         assertNotNull(format);
         assertTrue(format instanceof AccessLogSourceFormat);
     }
