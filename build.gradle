@@ -17,8 +17,8 @@ ext {
       jackson   : '2.9.8',
       slf4j     : '1.7.25',
       junit     : '5.4.2',
-      flink     : '1.6.0',
-      flinkScala: '2.11',
+      flink     : '1.9.0',
+      flinkScala: '2.12',
   ]
 }
 
@@ -78,10 +78,9 @@ subprojects {
         entry 'slf4j-simple'
       }
       dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
-        entry "flink-table_${versions.flinkScala}"
-        entry "flink-streaming-scala_${versions.flinkScala}"
+        entry "flink-table-common"
+        entry "flink-streaming-java_${versions.flinkScala}"
         entry "flink-clients_${versions.flinkScala}"
-        entry "flink-connector-kafka-0.8_${versions.flinkScala}"
         entry "flink-connector-kafka-0.9_${versions.flinkScala}"
         entry "flink-connector-kafka-0.10_${versions.flinkScala}"
         entry "flink-connector-kafka-0.11_${versions.flinkScala}"

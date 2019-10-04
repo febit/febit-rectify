@@ -23,6 +23,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.operators.StreamFlatMap;
 import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.febit.lang.TerConsumer;
@@ -80,10 +81,12 @@ public class FlinkRectifier<I> implements Serializable {
         Rectifier<I, Row> processor = Rectifier.create(sourceType, conf, RowResultModel.get());
         this.rectifier = processor;
         this.typeInfo = SchemaTypeInfoUtil.ofRecord(processor.schema());
-        this.tableSchema = new TableSchema(
-                this.typeInfo.getFieldNames(),
-                this.typeInfo.getFieldTypes()
-        );
+        this.tableSchema = TableSchema.builder()
+                .fields(
+                        this.typeInfo.getFieldNames(),
+                        TypeConversions.fromLegacyInfoToDataType(this.typeInfo.getFieldTypes())
+                )
+                .build();
     }
 
     protected void process(I raw, Collector<Row> out) {

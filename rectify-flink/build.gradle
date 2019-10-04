@@ -6,10 +6,10 @@ ext {
 dependencies {
   compile project(":febit-rectify")
   compileOnly 'org.apache.flink:flink-java'
-  compileOnly "org.apache.flink:flink-table_${versions.flinkScala}"
-  compileOnly "org.apache.flink:flink-streaming-scala_${versions.flinkScala}"
+  compileOnly "org.apache.flink:flink-table-common"
+  compileOnly "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
 
-  testCompile "org.apache.flink:flink-table_${versions.flinkScala}"
-  testCompile "org.apache.flink:flink-streaming-scala_${versions.flinkScala}"
+  testCompile "org.apache.flink:flink-table-common"
+  testCompile "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
   testCompile "org.apache.flink:flink-clients_${versions.flinkScala}"
 }
