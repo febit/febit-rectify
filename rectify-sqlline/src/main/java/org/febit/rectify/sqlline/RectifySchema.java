@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.sqlline;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.calcite.schema.Table;
@@ -25,6 +24,8 @@ import org.apache.calcite.util.Sources;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -53,7 +54,7 @@ class RectifySchema extends AbstractSchema {
             log.warn("directory " + directoryFile + " not found");
             files = new File[0];
         }
-        final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
+        final Map<String, Table> map = new HashMap<>();
         for (File file : files) {
             TableConfig config;
             try {
@@ -62,9 +63,9 @@ class RectifySchema extends AbstractSchema {
                 throw new UncheckedIOException(e);
             }
             val table = createTable(config);
-            builder.put(config.getName(), table);
+            map.put(config.getName(), table);
         }
-        return builder.build();
+        return Collections.unmodifiableMap(map);
     }
 
     private Table createTable(TableConfig config) {

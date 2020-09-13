@@ -1,23 +1,23 @@
 plugins {
-  id "io.freefair.lombok" version "3.6.6"
-  id "com.github.hierynomus.license" version "0.15.0"
-  id "io.spring.dependency-management" version "1.0.8.RELEASE"
+  id 'io.freefair.lombok' version '5.1.0'
+  id 'com.github.hierynomus.license' version '0.15.0'
+  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 }
 
 group 'org.febit.rectify'
-version '1.0.0-SNAPSHOT'
+version '1.1.0-SNAPSHOT'
 
 ext {
   versions = [
-      jodd      : '5.0.13',
+      jodd      : '5.1.6',
       wit       : '2.7.0-beta',
-      febit     : '2.8.0-SNAPSHOT',
-      calcite   : '1.19.0',
-      sqlline   : '1.8.0',
-      jackson   : '2.9.8',
-      slf4j     : '1.7.25',
-      junit     : '5.4.2',
-      flink     : '1.9.0',
+      febit     : '2.9.0-SNAPSHOT',
+      calcite   : '1.25.0',
+      sqlline   : '1.9.0',
+      jackson   : '2.11.2',
+      slf4j     : '1.7.30',
+      junit     : '5.6.2',
+      flink     : '1.11.1',
       flinkScala: '2.12',
   ]
 }
@@ -106,5 +106,5 @@ subprojects {
 }
 
 wrapper {
-  gradleVersion = '5.4.1'
+  gradleVersion = '6.6.1'
 }

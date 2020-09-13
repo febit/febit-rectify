@@ -9,7 +9,7 @@ dependencies {
   compileOnly "org.apache.flink:flink-table-common"
   compileOnly "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
 
-  testCompile "org.apache.flink:flink-table-common"
-  testCompile "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
-  testCompile "org.apache.flink:flink-clients_${versions.flinkScala}"
+  testImplementation "org.apache.flink:flink-table-common"
+  testImplementation "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
+  testImplementation "org.apache.flink:flink-clients_${versions.flinkScala}"
 }
