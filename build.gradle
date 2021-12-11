@@ -12,12 +12,12 @@ ext {
             jodd      : '5.1.6',
             wit       : '2.7.0-beta',
             febit     : '2.9.0-SNAPSHOT',
-            calcite   : '1.25.0',
-            sqlline   : '1.9.0',
+            calcite   : '1.28.0',
+            sqlline   : '1.12.0',
             jackson   : '2.11.2',
             slf4j     : '1.7.32',
             junit     : '5.6.2',
-            flink     : '1.11.1',
+            flink     : '1.13.3',
             flinkScala: '2.12',
     ]
 }
