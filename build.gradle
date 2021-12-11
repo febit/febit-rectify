@@ -40,9 +40,12 @@ subprojects {
     targetCompatibility = 1.8
 
     license {
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
         include '**/*.java'
         strictCheck false
-        skipExistingHeaders true
+        skipExistingHeaders false
         header rootProject.file('etc/licenseheader.txt')
     }
 
