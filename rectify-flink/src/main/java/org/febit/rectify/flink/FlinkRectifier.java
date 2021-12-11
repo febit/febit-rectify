@@ -22,8 +22,6 @@ import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.operators.StreamFlatMap;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.febit.rectify.*;
@@ -43,8 +41,7 @@ public class FlinkRectifier<I> implements Serializable {
     private final RectifierConf conf;
     private final SourceFormat<I, Object> sourceFormat;
 
-    private transient RowTypeInfo typeInfo;
-    private transient TableSchema tableSchema;
+    private final RowTypeInfo typeInfo;
     private transient Rectifier<I, Row> rectifier;
 
     private FlinkRectifier(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
@@ -52,6 +49,7 @@ public class FlinkRectifier<I> implements Serializable {
         Objects.requireNonNull(sourceFormat);
         this.sourceFormat = sourceFormat;
         this.conf = conf;
+        this.typeInfo = SchemaTypeInfoUtil.ofRecord(conf.resolveSchema());
         init();
     }
 
@@ -70,16 +68,7 @@ public class FlinkRectifier<I> implements Serializable {
     }
 
     private void init() {
-        Rectifier<I, Row> processor = conf.build(RowResultModel.get())
-                .with(sourceFormat);
-        this.rectifier = processor;
-        this.typeInfo = SchemaTypeInfoUtil.ofRecord(processor.schema());
-        this.tableSchema = TableSchema.builder()
-                .fields(
-                        this.typeInfo.getFieldNames(),
-                        TypeConversions.fromLegacyInfoToDataType(this.typeInfo.getFieldTypes())
-                )
-                .build();
+        this.rectifier = conf.build(sourceFormat, RowResultModel.get());
     }
 
     protected void process(I raw, Collector<Row> out) {
@@ -116,10 +105,6 @@ public class FlinkRectifier<I> implements Serializable {
 
     public List<String> getFieldNameList() {
         return Collections.unmodifiableList(Arrays.asList(this.typeInfo.getFieldNames()));
-    }
-
-    public TableSchema getTableSchema() {
-        return this.tableSchema;
     }
 
     public Schema getRectifierSchema() {
