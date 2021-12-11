@@ -70,7 +70,7 @@ public class FlinkRectifierTest {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         DataSet<String> rawSet = env.fromCollection(source);
-        DataSet<Row> rowSet = FlinkRectifier.rectify(rawSet, new JsonSourceFormat(), conf);
+        DataSet<Row> rowSet = FlinkRectifier.operator(rawSet, new JsonSourceFormat(), conf);
 
         List<Row> rows = new ArrayList<>(rowSet.collect());
         rows.sort(Comparator.comparingLong(r -> (Long) r.getField(0)));
@@ -101,7 +101,7 @@ public class FlinkRectifierTest {
         env.setParallelism(2);
         DataStream<String> rawStream = env.fromCollection(source, BasicTypeInfo.STRING_TYPE_INFO);
 
-        DataStream<Row> rowStream = FlinkRectifier.rectify(rawStream, new JsonSourceFormat(), conf);
+        DataStream<Row> rowStream = FlinkRectifier.operator(rawStream, new JsonSourceFormat(), conf);
         rowStream.print();
         env.execute();
     }

@@ -15,8 +15,7 @@
  */
 package org.febit.rectify.flink;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
@@ -27,10 +26,10 @@ import org.febit.rectify.Schema;
 import java.util.List;
 import java.util.Objects;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SchemaTypeInfoUtil {
+@UtilityClass
+public class TypeInfoUtils {
 
-    public static RowTypeInfo ofRecord(Schema schema) {
+    public static RowTypeInfo ofRowType(Schema schema) {
         Objects.requireNonNull(schema);
         if (!schema.isStructType()) {
             throw new IllegalArgumentException("Not a record: " + schema);
@@ -41,7 +40,7 @@ public class SchemaTypeInfoUtil {
         for (int i = 0; i < fields.size(); i++) {
             Schema.Field field = fields.get(i);
             fieldNames[i] = field.name();
-            fieldTypes[i] = ofSchema(field.schema());
+            fieldTypes[i] = of(field.schema());
         }
         return new RowTypeInfo(fieldTypes, fieldNames);
     }
@@ -49,7 +48,7 @@ public class SchemaTypeInfoUtil {
     @SuppressWarnings({
             "squid:S1452" // Generic wildcard types should not be used in return parameters
     })
-    public static TypeInformation<?> ofSchema(Schema schema) {
+    public static TypeInformation<?> of(Schema schema) {
         Objects.requireNonNull(schema);
         switch (schema.getType()) {
             case BOOLEAN:
@@ -65,15 +64,15 @@ public class SchemaTypeInfoUtil {
             case STRING:
                 return BasicTypeInfo.STRING_TYPE_INFO;
             case STRUCT:
-                return ofRecord(schema);
+                return ofRowType(schema);
             case ARRAY:
-                TypeInformation<?> elementType = ofSchema(schema.valueType());
+                TypeInformation<?> elementType = of(schema.valueType());
                 return new ListTypeInfo<>(elementType);
             case MAP:
-                TypeInformation<?> valType = ofSchema(schema.valueType());
+                TypeInformation<?> valType = of(schema.valueType());
                 return new MapTypeInfo<>(BasicTypeInfo.STRING_TYPE_INFO, valType);
             case OPTIONAL:
-                return ofSchema(schema.valueType());
+                return of(schema.valueType());
             case BYTES:
                 throw new UnsupportedOperationException("type is not supported yet: " + schema.getType());
             default:

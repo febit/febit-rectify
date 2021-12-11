@@ -26,7 +26,6 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.febit.rectify.*;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -36,39 +35,50 @@ import java.util.function.Consumer;
  */
 public class FlinkRectifier<I> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
-    private final RectifierConf conf;
-    private final SourceFormat<I, Object> sourceFormat;
-
+    private final LazyRectifier<I, Row> rectifier;
     private final RowTypeInfo typeInfo;
-    private transient Rectifier<I, Row> rectifier;
 
-    private FlinkRectifier(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        Objects.requireNonNull(conf);
-        Objects.requireNonNull(sourceFormat);
-        this.sourceFormat = sourceFormat;
-        this.conf = conf;
-        this.typeInfo = SchemaTypeInfoUtil.ofRecord(conf.resolveSchema());
-        init();
+    private FlinkRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
+        Objects.requireNonNull(rectifierProvider);
+        Objects.requireNonNull(typeInfo);
+        this.rectifier = LazyRectifier.of(rectifierProvider);
+        this.typeInfo = typeInfo;
+    }
+
+    public static <I> FlinkRectifier<I> create(RectifierConf conf) {
+        return new FlinkRectifier<>(
+                () -> conf.build(RowResultModel.get()),
+                TypeInfoUtils.ofRowType(conf.resolveSchema())
+        );
     }
 
     public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        return new FlinkRectifier<>(sourceFormat, conf);
+        return new FlinkRectifier<>(
+                () -> conf.build(sourceFormat, RowResultModel.get()),
+                TypeInfoUtils.ofRowType(conf.resolveSchema())
+        );
     }
 
-    public static <I> FlatMapOperator<I, Row> rectify(DataSet<I> dataSet, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+    public static <I> FlatMapOperator<I, Row> operator(DataSet<I> dataSet, RectifierConf conf) {
+        FlinkRectifier<I> rectifier = create(conf);
+        return rectifier.operator(dataSet);
+    }
+
+    public static <I> FlatMapOperator<I, Row> operator(DataSet<I> dataSet, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         FlinkRectifier<I> rectifier = create(sourceFormat, conf);
-        return rectifier.rectify(dataSet);
+        return rectifier.operator(dataSet);
     }
 
-    public static <I> SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierConf conf) {
+        FlinkRectifier<I> rectifier = create(conf);
+        return rectifier.operator(dataStream);
+    }
+
+    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         FlinkRectifier<I> rectifier = create(sourceFormat, conf);
-        return rectifier.rectify(dataStream);
-    }
-
-    private void init() {
-        this.rectifier = conf.build(sourceFormat, RowResultModel.get());
+        return rectifier.operator(dataStream);
     }
 
     protected void process(I raw, Collector<Row> out) {
@@ -98,7 +108,7 @@ public class FlinkRectifier<I> implements Serializable {
     public int requireFieldIndex(String fieldName) {
         int index = this.typeInfo.getFieldIndex(fieldName);
         if (index < 0) {
-            throw new NoSuchElementException("Not found field in schema '" + conf + "' : " + fieldName);
+            throw new NoSuchElementException("Not found field in schema '" + rectifier.schema().fullname() + "' : " + fieldName);
         }
         return index;
     }
@@ -115,31 +125,22 @@ public class FlinkRectifier<I> implements Serializable {
         return toString();
     }
 
-    public FlatMapOperator<I, Row> rectify(DataSet<I> dataSet) {
+    public FlatMapOperator<I, Row> operator(DataSet<I> dataSet) {
         FlatMapFunction<I, Row> flatMapper = this::process;
         return new FlatMapOperator<>(dataSet, getReturnType(),
                 dataSet.clean(flatMapper), "FlinkRectifier");
     }
 
-    public SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream) {
+    public SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream) {
         FlatMapFunction<I, Row> flatMapper = this::process;
         return dataStream.transform("FlinkRectifier", getReturnType(),
                 new StreamFlatMap<>(dataStream.getExecutionEnvironment().clean(flatMapper)));
     }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        init();
-    }
-
     @Override
     public String toString() {
         return "FlinkRectifier{"
-                + "conf=" + conf
+                + "schema=" + rectifier.schema().fullname()
                 + '}';
     }
 
