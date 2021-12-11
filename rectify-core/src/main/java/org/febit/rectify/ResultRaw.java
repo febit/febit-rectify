@@ -13,26 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify;
 
-import java.util.function.Consumer;
+import java.util.HashMap;
 
 /**
- * @param <T>
+ * Raw result outed by script engine.
  */
-public class AssertSingleConsumer<T> implements Consumer<T> {
-
-    private T value;
-
-    @Override
-    public void accept(T next) {
-        if (value != null) {
-            throw new IllegalStateException("Assert single item, but got more");
-        }
-        this.value = next;
-    }
-
-    public T getValue() {
-        return value;
-    }
+public class ResultRaw extends HashMap<String, Object> {
 }

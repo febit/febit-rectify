@@ -1,9 +1,10 @@
 rootProject.name = 'febit-rectify'
 
-include 'febit-rectify'
-include 'febit-rectify-flink'
-include 'febit-rectify-sqlline'
+subModule 'rectify-core'
+subModule 'rectify-flink'
+subModule 'rectify-sqlline'
 
-project(":febit-rectify").projectDir = file("rectify")
-project(":febit-rectify-flink").projectDir = file("rectify-flink")
-project(":febit-rectify-sqlline").projectDir = file("rectify-sqlline")
+def subModule(String name) {
+  include ':febit-' + name
+  project(':febit-' + name).projectDir = file(name)
+}

@@ -4,8 +4,8 @@ Transform raw data (json, access log, csv, custom structured log, etc.) to struc
 
 ## Features
 
-+ JS Style & Java Friendly expression, use [febit-wit](https://github.com/febit/wit) as expression/script engine
-+ Free input, by defining your own `SourceFormat`, `SourceFormatProvider`(SPI)
++ JS Style & Java Friendly expression, using [febit-wit](https://github.com/febit/wit) as script engine
++ Free input, by defining your own `SourceFormat`
 + Free output, by defining your own `ResultModel`
 + Clean and free runtime environment, all internal methods prefixed by `$$_`, you can register your own methods by `EnginePlugin` (SPI)
 
@@ -14,11 +14,9 @@ Transform raw data (json, access log, csv, custom structured log, etc.) to struc
 ```java
 // `$` is input, can be used in global-filter, global-code (except const statement), column expressions
 // `$$` is current column value, can be used in column check expression
-RectifierConf conf = RectifierConf.builder()
+RectifierConf conf = RectifierConf.conf()
     // Named your schema
     .name("Demo")
-    // Source format
-    .sourceFormat("json")
     // Global code
     .globalCode(""
             + "var isTruly = obj -> {\n"
@@ -42,10 +40,9 @@ RectifierConf conf = RectifierConf.builder()
     .column("int", "status", "$.status")
     .column("boolean", "isEven", "isEven")
     .column("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
-    .column("string", "content", "\"prefix:\"+$.content")
-    .build();
+    .column("string", "content", "\"prefix:\"+$.content");
 
-Rectifier<String, GenericStruct> rectifier = Rectifier.create(conf);
+Rectifier<String, Map<String, Object>> rectifier = conf.build(new JsonSourceFormat());
 
 rectifier.process(json, consumer);
 ```

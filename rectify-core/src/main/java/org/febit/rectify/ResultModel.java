@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
-
-import java.util.function.Consumer;
+package org.febit.rectify;
 
 /**
- * @param <T>
+ * Model for the result object.
+ *
+ * @param <R>
+ * @see ResultModels
  */
-public class AssertSingleConsumer<T> implements Consumer<T> {
+public interface ResultModel<R> {
 
-    private T value;
+    R newStruct(Schema schema);
 
-    @Override
-    public void accept(T next) {
-        if (value != null) {
-            throw new IllegalStateException("Assert single item, but got more");
-        }
-        this.value = next;
-    }
+    void setField(R record, Schema.Field field, Object val);
 
-    public T getValue() {
-        return value;
-    }
+    Object getField(R record, Schema.Field field);
 }

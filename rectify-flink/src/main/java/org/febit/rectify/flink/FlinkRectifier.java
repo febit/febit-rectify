@@ -26,59 +26,52 @@ import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
-import org.febit.lang.TerConsumer;
-import org.febit.rectify.Rectifier;
-import org.febit.rectify.RectifierConf;
-import org.febit.rectify.ResultRaw;
-import org.febit.rectify.Schema;
+import org.febit.rectify.*;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * @param <I>
- * @author zqq90
  */
 public class FlinkRectifier<I> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Class<I> sourceType;
     private final RectifierConf conf;
+    private final SourceFormat<I, Object> sourceFormat;
 
     private transient RowTypeInfo typeInfo;
     private transient TableSchema tableSchema;
     private transient Rectifier<I, Row> rectifier;
 
-    private FlinkRectifier(Class<I> sourceType, RectifierConf conf) {
+    private FlinkRectifier(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         Objects.requireNonNull(conf);
-        this.sourceType = sourceType;
+        Objects.requireNonNull(sourceFormat);
+        this.sourceFormat = sourceFormat;
         this.conf = conf;
         init();
     }
 
-    public static <I> FlinkRectifier<I> create(Class<I> sourceType, RectifierConf conf) {
-        return new FlinkRectifier<>(sourceType, conf);
+    public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        return new FlinkRectifier<>(sourceFormat, conf);
     }
 
-    public static <I> FlatMapOperator<I, Row> rectify(DataSet<I> dataSet, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(dataSet.getType().getTypeClass(), conf);
+    public static <I> FlatMapOperator<I, Row> rectify(DataSet<I> dataSet, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        FlinkRectifier<I> rectifier = create(sourceFormat, conf);
         return rectifier.rectify(dataSet);
     }
 
-    public static <I> SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(dataStream.getType().getTypeClass(), conf);
+    public static <I> SingleOutputStreamOperator<Row> rectify(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        FlinkRectifier<I> rectifier = create(sourceFormat, conf);
         return rectifier.rectify(dataStream);
     }
 
     private void init() {
-        Rectifier<I, Row> processor = Rectifier.create(sourceType, conf, RowResultModel.get());
+        Rectifier<I, Row> processor = conf.build(RowResultModel.get())
+                .with(sourceFormat);
         this.rectifier = processor;
         this.typeInfo = SchemaTypeInfoUtil.ofRecord(processor.schema());
         this.tableSchema = TableSchema.builder()
@@ -93,7 +86,7 @@ public class FlinkRectifier<I> implements Serializable {
         process(raw, out::collect);
     }
 
-    protected void processRaw(I in, TerConsumer<Row, ResultRaw, String> out) {
+    protected void processRaw(I in, RectifierConsumer<Row> out) {
         this.rectifier.process(in, out);
     }
 

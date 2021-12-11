@@ -1,15 +1,19 @@
+plugins {
+    id 'java-library'
+}
+
 ext {
-  moduleName = 'Rectify Flink'
-  moduleDescription = 'Rectify support for Apache Flink'
+    moduleName = 'Rectify Flink'
+    moduleDescription = 'Rectify support for Apache Flink'
 }
 
 dependencies {
-  compile project(":febit-rectify")
-  compileOnly 'org.apache.flink:flink-java'
-  compileOnly "org.apache.flink:flink-table-common"
-  compileOnly "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
+    api project(":febit-rectify-core")
+    compileOnly 'org.apache.flink:flink-java'
+    compileOnly "org.apache.flink:flink-table-common"
+    compileOnly "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
 
-  testImplementation "org.apache.flink:flink-table-common"
-  testImplementation "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
-  testImplementation "org.apache.flink:flink-clients_${versions.flinkScala}"
+    testImplementation "org.apache.flink:flink-table-common"
+    testImplementation "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
+    testImplementation "org.apache.flink:flink-clients_${versions.flinkScala}"
 }

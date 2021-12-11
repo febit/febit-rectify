@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
-
-import java.util.function.Consumer;
+package org.febit.rectify.engine;
 
 /**
- * @param <T>
+ * Special exception to impl exit().
  */
-public class AssertSingleConsumer<T> implements Consumer<T> {
+public class ExitException extends RuntimeException {
 
-    private T value;
+    private final String reason;
 
-    @Override
-    public void accept(T next) {
-        if (value != null) {
-            throw new IllegalStateException("Assert single item, but got more");
-        }
-        this.value = next;
+    public ExitException(String reason) {
+        // disable stack trace
+        super(reason != null ? reason : "", null, true, false);
+        this.reason = reason;
     }
 
-    public T getValue() {
-        return value;
+    public String getReason() {
+        return reason;
     }
 }

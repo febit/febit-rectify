@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+ext {
+    moduleName = 'Rectify Core'
+    moduleDescription = 'Core of Rectify'
+}
+
+dependencies {
+    api 'org.slf4j:slf4j-api'
+    api 'org.febit:febit-common'
+    api 'org.apache.commons:commons-lang3'
+    api 'org.febit.wit:wit-core'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+}

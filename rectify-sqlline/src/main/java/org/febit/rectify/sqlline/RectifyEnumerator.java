@@ -19,6 +19,8 @@ import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.util.Source;
 import org.febit.rectify.Rectifier;
 import org.febit.rectify.RectifierConf;
+import org.febit.rectify.ResultModels;
+import org.febit.rectify.SourceFormat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,8 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Enumerator that reads from a log file.
- *
- * @author zqq90
  */
 class RectifyEnumerator implements Enumerator<Object[]> {
     private final BufferedReader reader;
@@ -46,9 +46,10 @@ class RectifyEnumerator implements Enumerator<Object[]> {
         this.peddings = new ArrayDeque<>();
     }
 
-    static RectifyEnumerator create(RectifierConf conf, Source source, AtomicBoolean cancelFlag) throws IOException {
+    static RectifyEnumerator create(RectifierConf conf, Source source, SourceFormat<String, Object> sourceFormat, AtomicBoolean cancelFlag) throws IOException {
         BufferedReader reader = new BufferedReader(source.reader());
-        Rectifier<String, Object[]> rectifier = Rectifier.create(conf, ObjectArrayResultModel.get());
+        Rectifier<String, Object[]> rectifier = conf.build(ResultModels.asObjectArray())
+                .with(sourceFormat);
         return new RectifyEnumerator(reader, rectifier, cancelFlag);
     }
 

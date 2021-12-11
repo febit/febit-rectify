@@ -25,23 +25,23 @@ import org.apache.calcite.schema.ScannableTable;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.util.Source;
 import org.febit.rectify.RectifierConf;
+import org.febit.rectify.SourceFormat;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * @author zqq90
- */
 class RectifyTable extends AbstractTable implements ScannableTable {
 
     protected final Source source;
     protected final RectifierConf conf;
+    protected final SourceFormat<String, Object> sourceFormat;
     protected RelDataType rowTypeCaching;
 
-    RectifyTable(Source source, RectifierConf rectifierConf) {
+    RectifyTable(Source source, RectifierConf rectifierConf, SourceFormat<String, Object> sourceFormat) {
         this.source = source;
         this.conf = rectifierConf;
+        this.sourceFormat = sourceFormat;
     }
 
     @Override
@@ -50,7 +50,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
         if (type != null) {
             return rowTypeCaching;
         }
-        type = DataTypeUtils.toDataType(conf.schema(), typeFactory);
+        type = DataTypeUtils.toDataType(conf.resolveSchema(), typeFactory);
         rowTypeCaching = type;
         return type;
     }
@@ -61,7 +61,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
         return new AbstractEnumerable<Object[]>() {
             public Enumerator<Object[]> enumerator() {
                 try {
-                    return RectifyEnumerator.create(conf, source, cancelFlag);
+                    return RectifyEnumerator.create(conf, source, sourceFormat, cancelFlag);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }

@@ -4,8 +4,8 @@ ext {
 }
 
 dependencies {
-  compile project(":febit-rectify")
-  compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-  compile 'org.apache.calcite:calcite-core'
-  compile 'sqlline:sqlline'
+  implementation project(":febit-rectify-core")
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+  implementation 'org.apache.calcite:calcite-core'
+  implementation 'sqlline:sqlline'
 }

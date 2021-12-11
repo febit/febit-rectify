@@ -5,6 +5,12 @@ ext {
   publishProfile = findProperty('publish.profile')
 }
 
+// Disabling Gradle Module Metadata publication
+//   see: https://docs.gradle.org/6.0/userguide/publishing_gradle_module_metadata.html#sub:disabling-gmm-publication
+tasks.withType(GenerateModuleMetadata) {
+  enabled = false
+}
+
 signing {
   required {
     publishProperty("sign").toString() == 'true'
@@ -34,6 +40,7 @@ task install(dependsOn: publishToMavenLocal) {
 publishing {
   repositories {
     maven {
+      allowInsecureProtocol = true
       credentials {
         username publishProperty("username")
         password publishProperty("password")

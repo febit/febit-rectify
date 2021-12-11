@@ -27,9 +27,6 @@ import org.febit.rectify.Schema;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @author zqq90
- */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SchemaTypeInfoUtil {
 

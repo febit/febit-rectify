@@ -1,110 +1,111 @@
 plugins {
-  id 'io.freefair.lombok' version '5.1.0'
-  id 'com.github.hierynomus.license' version '0.15.0'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'io.freefair.lombok' version '6.3.0'
+    id 'com.github.hierynomus.license' version '0.16.1'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 }
 
 group 'org.febit.rectify'
-version '1.1.0-SNAPSHOT'
+version '1.5.0-SNAPSHOT'
 
 ext {
-  versions = [
-      jodd      : '5.1.6',
-      wit       : '2.7.0-beta',
-      febit     : '2.9.0-SNAPSHOT',
-      calcite   : '1.25.0',
-      sqlline   : '1.9.0',
-      jackson   : '2.11.2',
-      slf4j     : '1.7.30',
-      junit     : '5.6.2',
-      flink     : '1.11.1',
-      flinkScala: '2.12',
-  ]
+    versions = [
+            jodd      : '5.1.6',
+            wit       : '2.7.0-beta',
+            febit     : '2.9.0-SNAPSHOT',
+            calcite   : '1.25.0',
+            sqlline   : '1.9.0',
+            jackson   : '2.11.2',
+            slf4j     : '1.7.32',
+            junit     : '5.6.2',
+            flink     : '1.11.1',
+            flinkScala: '2.12',
+    ]
 }
 
 subprojects {
 
-  group rootProject.group
-  version rootProject.version
+    group rootProject.group
+    version rootProject.version
 
-  apply plugin: 'java'
-  apply plugin: 'idea'
-  apply plugin: 'eclipse'
-  apply plugin: 'io.freefair.lombok'
-  apply plugin: 'com.github.hierynomus.license'
-  apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    apply plugin: 'io.freefair.lombok'
+    apply plugin: 'com.github.hierynomus.license'
+    apply plugin: 'io.spring.dependency-management'
 
-  apply from: "${rootDir}/gradle/publish-maven.gradle"
+    apply from: "${rootDir}/gradle/publish-maven.gradle"
 
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-  license {
-    include '**/*.java'
-    strictCheck false
-    skipExistingHeaders true
-    header rootProject.file('etc/licenseheader.txt')
-  }
-
-  repositories {
-    mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-  }
-
-  tasks.withType(Test) {
-    testLogging.events = ["FAILED", "PASSED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR"]
-  }
-
-  tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.debug = true
-    options.compilerArgs << "-Xlint:unchecked"
-    options.compilerArgs << "-Xlint:deprecation"
-  }
-
-  tasks.withType(Javadoc) {
-    options.encoding = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
-  }
-
-  dependencyManagement {
-    imports {
-      mavenBom "com.fasterxml.jackson:jackson-bom:${versions.jackson}"
-      mavenBom "org.jodd:jodd-bom:${versions.jodd}"
+    license {
+        include '**/*.java'
+        strictCheck false
+        skipExistingHeaders true
+        header rootProject.file('etc/licenseheader.txt')
     }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    }
+
+    tasks.withType(Test) {
+        testLogging.events = ["FAILED", "PASSED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR"]
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.debug = true
+        options.compilerArgs << "-Xlint:unchecked"
+        options.compilerArgs << "-Xlint:deprecation"
+    }
+
+    tasks.withType(Javadoc) {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "com.fasterxml.jackson:jackson-bom:${versions.jackson}"
+            mavenBom "org.jodd:jodd-bom:${versions.jodd}"
+        }
+        dependencies {
+            dependencySet(group: 'org.slf4j', version: "${versions.slf4j}") {
+                entry 'slf4j-api'
+                entry 'slf4j-simple'
+            }
+            dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
+                entry "flink-table-common"
+                entry "flink-streaming-java_${versions.flinkScala}"
+                entry "flink-clients_${versions.flinkScala}"
+                entry "flink-connector-kafka-0.9_${versions.flinkScala}"
+                entry "flink-connector-kafka-0.10_${versions.flinkScala}"
+                entry "flink-connector-kafka-0.11_${versions.flinkScala}"
+            }
+            dependency 'org.apache.commons:commons-lang3:3.12.0'
+            dependency "org.febit:febit-common:${versions.febit}"
+            dependency "org.febit.wit:wit-core:${versions.wit}"
+            dependency "org.apache.avro:avro:${versions.avro}"
+            dependency "org.apache.calcite:calcite-core:${versions.calcite}"
+            dependency "sqlline:sqlline:${versions.sqlline}"
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
     dependencies {
-      dependencySet(group: 'org.slf4j', version: "${versions.slf4j}") {
-        entry 'slf4j-api'
-        entry 'slf4j-simple'
-      }
-      dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
-        entry "flink-table-common"
-        entry "flink-streaming-java_${versions.flinkScala}"
-        entry "flink-clients_${versions.flinkScala}"
-        entry "flink-connector-kafka-0.9_${versions.flinkScala}"
-        entry "flink-connector-kafka-0.10_${versions.flinkScala}"
-        entry "flink-connector-kafka-0.11_${versions.flinkScala}"
-      }
-      dependency "org.febit:febit-common:${versions.febit}"
-      dependency "org.febit.wit:wit-core:${versions.wit}"
-      dependency "org.apache.avro:avro:${versions.avro}"
-      dependency "org.apache.calcite:calcite-core:${versions.calcite}"
-      dependency "sqlline:sqlline:${versions.sqlline}"
+        testImplementation 'org.slf4j:slf4j-api'
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+        testRuntimeOnly 'org.slf4j:slf4j-simple'
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
     }
-  }
-
-  test {
-    useJUnitPlatform()
-  }
-
-  dependencies {
-    testCompile 'org.slf4j:slf4j-api'
-    testCompile "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
-    testRuntime 'org.slf4j:slf4j-simple'
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
-  }
 }
 
 wrapper {
-  gradleVersion = '6.6.1'
+    gradleVersion = '6.6.1'
 }

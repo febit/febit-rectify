@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify.engine;
 
-import java.util.function.Consumer;
+import org.febit.rectify.EnginePlugin;
+import org.febit.wit.Engine;
+import org.febit.wit.Init;
+import org.febit.wit.loggers.Logger;
 
-/**
- * @param <T>
- */
-public class AssertSingleConsumer<T> implements Consumer<T> {
+import java.util.ServiceLoader;
 
-    private T value;
+public class EnginePluginCollector {
 
-    @Override
-    public void accept(T next) {
-        if (value != null) {
-            throw new IllegalStateException("Assert single item, but got more");
+    @Init
+    public void init(Engine engine, Logger logger) {
+        for (EnginePlugin plugin : ServiceLoader.load(EnginePlugin.class)) {
+            String name = plugin.getClass().getName();
+            logger.info("Applying rectify engine spi plugin: {}.", name);
+            engine.inject(name, plugin);
+            plugin.apply(engine);
         }
-        this.value = next;
-    }
-
-    public T getValue() {
-        return value;
     }
 }

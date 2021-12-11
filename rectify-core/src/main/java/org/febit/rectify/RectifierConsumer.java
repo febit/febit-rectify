@@ -13,26 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify;
 
-import java.util.function.Consumer;
+@FunctionalInterface
+public interface RectifierConsumer<O> {
 
-/**
- * @param <T>
- */
-public class AssertSingleConsumer<T> implements Consumer<T> {
+    void onCompleted(O out, ResultRaw resultRaw, String reason);
 
-    private T value;
-
-    @Override
-    public void accept(T next) {
-        if (value != null) {
-            throw new IllegalStateException("Assert single item, but got more");
-        }
-        this.value = next;
+    default void onSucceed(O out, ResultRaw resultRaw) {
+        this.onCompleted(out, resultRaw, null);
     }
 
-    public T getValue() {
-        return value;
+    default void onFailed(ResultRaw resultRaw, String reason) {
+        this.onCompleted(null, resultRaw, reason);
     }
 }

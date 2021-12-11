@@ -22,30 +22,24 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.rectify.RectifierConf;
+import org.febit.rectify.impls.JsonSourceFormat;
 import org.febit.rectify.util.JacksonUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlinkRectifierTest {
 
-    final RectifierConf conf = RectifierConf.builder()
+    final RectifierConf conf = RectifierConf.create()
             .name("Demo")
-            .sourceFormat("json")
             .globalFilter("$.status > 0")
             .globalFilter("$.status < 100 || \"status should <100\"")
             .column("long", "id", "$.id")
             .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
             .column("int", "status", "$.status")
-            .column("string", "content", "\"prefix:\"+$.content")
-            .build();
+            .column("string", "content", "\"prefix:\"+$.content");
 
     final List<String> source = Arrays.asList(
             buildInput(6, true, 6, "666"),
@@ -76,7 +70,7 @@ public class FlinkRectifierTest {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         DataSet<String> rawSet = env.fromCollection(source);
-        DataSet<Row> rowSet = FlinkRectifier.rectify(rawSet, conf);
+        DataSet<Row> rowSet = FlinkRectifier.rectify(rawSet, new JsonSourceFormat(), conf);
 
         List<Row> rows = new ArrayList<>(rowSet.collect());
         rows.sort(Comparator.comparingLong(r -> (Long) r.getField(0)));
@@ -107,7 +101,7 @@ public class FlinkRectifierTest {
         env.setParallelism(2);
         DataStream<String> rawStream = env.fromCollection(source, BasicTypeInfo.STRING_TYPE_INFO);
 
-        DataStream<Row> rowStream = FlinkRectifier.rectify(rawStream, conf);
+        DataStream<Row> rowStream = FlinkRectifier.rectify(rawStream, new JsonSourceFormat(), conf);
         rowStream.print();
         env.execute();
     }

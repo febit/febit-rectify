@@ -25,9 +25,6 @@ import org.febit.rectify.Schema;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author zqq90
- */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class DataTypeUtils {
 

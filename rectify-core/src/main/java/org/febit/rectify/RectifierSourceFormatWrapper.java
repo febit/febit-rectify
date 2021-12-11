@@ -13,33 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify;
 
-import org.apache.flink.types.Row;
-import org.febit.rectify.ResultModel;
-import org.febit.rectify.Schema;
+import lombok.RequiredArgsConstructor;
 
-public class RowResultModel implements ResultModel<Row> {
+import java.util.List;
+import java.util.function.BiConsumer;
 
-    private static final RowResultModel INSTANCE = new RowResultModel();
+@RequiredArgsConstructor(staticName = "wrap")
+class RectifierSourceFormatWrapper<S, I, O> implements Rectifier<S, O> {
 
-    public static RowResultModel get() {
-        return INSTANCE;
+    private final SourceFormat<S, I> sourceFormat;
+    private final Rectifier<I, O> delegated;
+
+    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<ResultRaw, String> onFailed) {
+        sourceFormat.process(source, in -> delegated.process(in, onSucceed, onFailed));
     }
 
     @Override
-    public Row newStruct(Schema schema) {
-        return new Row(schema.fieldSize());
+    public Schema schema() {
+        return delegated.schema();
     }
 
     @Override
-    public void setField(Row record, Schema.Field field, Object val) {
-        record.setField(field.pos(), val);
+    public List<String> getHints() {
+        return delegated.getHints();
     }
-
-    @Override
-    public Object getField(Row record, Schema.Field field) {
-        return record.getField(field.pos());
-    }
-
 }

@@ -28,9 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author zqq90
- */
 @Slf4j
 class RectifySchema extends AbstractSchema {
     private final File directoryFile;
@@ -51,7 +48,7 @@ class RectifySchema extends AbstractSchema {
     private Map<String, Table> createTableMap() {
         File[] files = directoryFile.listFiles((dir, name) -> name.endsWith(".rectify.yml"));
         if (files == null) {
-            log.warn("directory " + directoryFile + " not found");
+            log.warn("Directory not found: {}", directoryFile);
             files = new File[0];
         }
         final Map<String, Table> map = new HashMap<>();
@@ -70,6 +67,6 @@ class RectifySchema extends AbstractSchema {
 
     private Table createTable(TableConfig config) {
         val source = Sources.of(new File(directoryFile, config.getSource()));
-        return new RectifyTable(source, config.toRectifierConf());
+        return new RectifyTable(source, config.toRectifierConf(), config.createSourceFormat());
     }
 }

@@ -25,8 +25,6 @@ import java.util.Map;
 
 /**
  * Factory that creates a {@link RectifySchema}.
- *
- * @author zqq90
  */
 @SuppressWarnings("UnusedDeclaration")
 public class RectifySchemaFactory implements SchemaFactory {
