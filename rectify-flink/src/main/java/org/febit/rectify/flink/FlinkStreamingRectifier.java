@@ -1,0 +1,65 @@
+/*
+ * Copyright 2018-present febit.org (support@febit.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.febit.rectify.flink;
+
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.operators.StreamFlatMap;
+import org.apache.flink.types.Row;
+import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierProvider;
+import org.febit.rectify.SourceFormat;
+
+public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
+
+    protected FlinkStreamingRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
+        super(rectifierProvider, typeInfo);
+    }
+
+
+    public static <I> FlinkStreamingRectifier<I> create(RectifierConf conf) {
+        return new FlinkStreamingRectifier<>(
+                () -> conf.build(RowResultModel.get()),
+                TypeInfoUtils.ofRowType(conf.resolveSchema())
+        );
+    }
+
+    public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        return new FlinkStreamingRectifier<>(
+                () -> conf.build(sourceFormat, RowResultModel.get()),
+                TypeInfoUtils.ofRowType(conf.resolveSchema())
+        );
+    }
+
+    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierConf conf) {
+        FlinkStreamingRectifier<I> rectifier = create(conf);
+        return rectifier.operator(dataStream);
+    }
+
+    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        FlinkStreamingRectifier<I> rectifier = create(sourceFormat, conf);
+        return rectifier.operator(dataStream);
+    }
+
+    public SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream) {
+        FlatMapFunction<I, Row> flatMapper = this::process;
+        return dataStream.transform("FlinkRectifier", getReturnType(),
+                new StreamFlatMap<>(dataStream.getExecutionEnvironment().clean(flatMapper)));
+    }
+
+}

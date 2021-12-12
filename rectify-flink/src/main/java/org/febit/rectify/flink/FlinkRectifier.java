@@ -19,9 +19,6 @@ import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.operators.FlatMapOperator;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.operators.StreamFlatMap;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.febit.rectify.*;
@@ -40,7 +37,7 @@ public class FlinkRectifier<I> implements Serializable {
     private final LazyRectifier<I, Row> rectifier;
     private final RowTypeInfo typeInfo;
 
-    private FlinkRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
+    protected FlinkRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
         Objects.requireNonNull(rectifierProvider);
         Objects.requireNonNull(typeInfo);
         this.rectifier = LazyRectifier.of(rectifierProvider);
@@ -69,16 +66,6 @@ public class FlinkRectifier<I> implements Serializable {
     public static <I> FlatMapOperator<I, Row> operator(DataSet<I> dataSet, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         FlinkRectifier<I> rectifier = create(sourceFormat, conf);
         return rectifier.operator(dataSet);
-    }
-
-    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(conf);
-        return rectifier.operator(dataStream);
-    }
-
-    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(sourceFormat, conf);
-        return rectifier.operator(dataStream);
     }
 
     protected void process(I raw, Collector<Row> out) {
@@ -129,12 +116,6 @@ public class FlinkRectifier<I> implements Serializable {
         FlatMapFunction<I, Row> flatMapper = this::process;
         return new FlatMapOperator<>(dataSet, getReturnType(),
                 dataSet.clean(flatMapper), "FlinkRectifier");
-    }
-
-    public SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream) {
-        FlatMapFunction<I, Row> flatMapper = this::process;
-        return dataStream.transform("FlinkRectifier", getReturnType(),
-                new StreamFlatMap<>(dataStream.getExecutionEnvironment().clean(flatMapper)));
     }
 
     @Override

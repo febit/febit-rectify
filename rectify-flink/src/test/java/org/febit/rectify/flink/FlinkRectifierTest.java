@@ -15,11 +15,8 @@
  */
 package org.febit.rectify.flink;
 
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.format.JsonSourceFormat;
@@ -32,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlinkRectifierTest {
 
-    final RectifierConf conf = RectifierConf.create()
+    static final RectifierConf conf = RectifierConf.create()
             .name("Demo")
             .globalFilter("$.status > 0")
             .globalFilter("$.status < 100 || \"status should <100\"")
@@ -41,7 +38,7 @@ public class FlinkRectifierTest {
             .column("int", "status", "$.status")
             .column("string", "content", "\"prefix:\"+$.content");
 
-    final List<String> source = Arrays.asList(
+    static final List<String> source = Arrays.asList(
             buildInput(6, true, 6, "666"),
             buildInput(5, true, 50, "5555"),
             // not pass: status <= 0
@@ -95,14 +92,4 @@ public class FlinkRectifierTest {
         assertEquals("prefix:666", row.getField(3));
     }
 
-    @Test
-    public void processDataStream() throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
-        DataStream<String> rawStream = env.fromCollection(source, BasicTypeInfo.STRING_TYPE_INFO);
-
-        DataStream<Row> rowStream = FlinkRectifier.operator(rawStream, new JsonSourceFormat(), conf);
-        rowStream.print();
-        env.execute();
-    }
 }
