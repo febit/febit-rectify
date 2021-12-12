@@ -22,7 +22,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.rectify.RectifierConf;
-import org.febit.rectify.impls.JsonSourceFormat;
+import org.febit.rectify.format.JsonSourceFormat;
 import org.febit.rectify.util.JacksonUtils;
 import org.junit.jupiter.api.Test;
 

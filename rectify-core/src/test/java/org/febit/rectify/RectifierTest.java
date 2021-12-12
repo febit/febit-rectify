@@ -19,7 +19,7 @@ import lombok.val;
 import org.febit.lang.Tuple2;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
-import org.febit.rectify.impls.JsonSourceFormat;
+import org.febit.rectify.format.JsonSourceFormat;
 import org.febit.rectify.util.JacksonUtils;
 import org.junit.jupiter.api.Test;
 

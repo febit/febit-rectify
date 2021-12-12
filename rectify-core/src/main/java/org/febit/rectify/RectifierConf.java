@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Rectifier Config / Factory.
+ * Rectifier Config / Factory, Serializable.
  */
 @Getter
 @Setter

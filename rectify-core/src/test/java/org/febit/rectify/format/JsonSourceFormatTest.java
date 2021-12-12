@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.impls;
+package org.febit.rectify.format;
 
 import org.junit.jupiter.api.Test;
 

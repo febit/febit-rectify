@@ -13,44 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.impls;
+package org.febit.rectify.format;
 
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.util.IndexedArrayBag;
 import org.febit.rectify.util.StringWalker;
 
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
-    // settings
-    @Setter
-    protected List<String> keys;
-    @Setter
-    protected List<String> encodedColumns;
+    private final IndexedArrayBag.Indexer indexer;
 
-    // internal
-    private IndexedArrayBag.Indexer indexer;
-    private int[] encodedIndexes;
-
-    private static String safeDecodeQuery(String src) {
-        if (StringUtils.isEmpty(src)) {
-            return src;
-        }
-        try {
-            return URLDecoder.decode(src, "UTF-8");
-        } catch (Exception e) {
-            return src;
-        }
+    public static AccessLogSourceFormat create(String... columns) {
+        return create(Arrays.asList(columns));
     }
 
-    private static String fixAccessLogValue(String value) {
+    public static AccessLogSourceFormat create(Collection<String> columns) {
+        Objects.requireNonNull(columns, "Columns is required to create a AccessLogSourceFormat");
+        val indexer = IndexedArrayBag.buildIndexer(columns);
+        return new AccessLogSourceFormat(indexer);
+    }
+
+    private static String unescape(String value) {
         if (value == null
                 || value.equals("-")) {
             return null;
@@ -58,7 +49,7 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
         return value;
     }
 
-    static String[] parseAccessLog(String src) {
+    public static String[] parse(String src) {
         if (StringUtils.isEmpty(src)) {
             return new String[0];
         }
@@ -71,32 +62,18 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
             switch (walker.peek()) {
                 case '[':
                     walker.jump(1);
-                    values.add(fixAccessLogValue(walker.readTo(']', false)));
+                    values.add(unescape(walker.readTo(']', false)));
                     break;
                 case '"':
                     walker.jump(1);
-                    values.add(fixAccessLogValue(walker.readTo('"', false)));
+                    values.add(unescape(walker.readTo('"', false)));
                     break;
                 default:
-                    values.add(fixAccessLogValue(walker.readTo(' ', false)));
+                    values.add(unescape(walker.readTo(' ', false)));
             }
             walker.skipSpaces();
         }
         return values.toArray(new String[0]);
-    }
-
-    public void init() {
-        Objects.requireNonNull(keys, "AccessLogSourceFormat: keys is required");
-        this.indexer = IndexedArrayBag.buildIndexer(keys);
-        // resolve encoding columns
-        if (encodedColumns != null) {
-            encodedIndexes = new int[encodedColumns.size()];
-            for (int i = 0; i < encodedColumns.size(); i++) {
-                encodedIndexes[i] = indexer.getIndex(encodedColumns.get(i));
-            }
-        } else {
-            encodedIndexes = new int[0];
-        }
     }
 
     @Override
@@ -104,21 +81,10 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
         if (StringUtils.isEmpty(input)) {
             return;
         }
-        String[] values = parseAccessLog(input);
+        String[] values = parse(input);
         if (values.length == 0) {
             return;
         }
-        decode(values);
         collector.accept(IndexedArrayBag.of(indexer, values));
-    }
-
-    private void decode(String[] values) {
-        int max = values.length - 1;
-        for (int index : encodedIndexes) {
-            if (index > max) {
-                continue;
-            }
-            values[index] = safeDecodeQuery(values[index]);
-        }
     }
 }

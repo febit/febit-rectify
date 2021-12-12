@@ -17,10 +17,10 @@ package org.febit.rectify.sqlline;
 
 import lombok.val;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.impls.AccessLogSourceFormat;
-import org.febit.rectify.impls.JsonSourceFormat;
-import org.febit.rectify.util.JacksonUtils;
+import org.febit.rectify.format.AccessLogSourceFormat;
+import org.febit.rectify.format.JsonSourceFormat;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class SourceFormatProvider {
@@ -30,9 +30,9 @@ public class SourceFormatProvider {
             case "json":
                 return new JsonSourceFormat();
             case "access": {
-                val fmt = JacksonUtils.convert(props, AccessLogSourceFormat.class);
-                fmt.init();
-                return fmt;
+                @SuppressWarnings({"unchecked"})
+                val columns = (Collection<String>) props.get("columns");
+                return AccessLogSourceFormat.create(columns);
             }
             default:
                 throw new IllegalArgumentException("Unspported format: " + name);

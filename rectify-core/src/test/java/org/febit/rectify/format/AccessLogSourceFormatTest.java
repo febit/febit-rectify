@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.impls;
+package org.febit.rectify.format;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ public class AccessLogSourceFormatTest {
     public void test() {
         String log = "100.001.002.003 - - [2/Aug/2018:01:02:03 +0800] \"PUT /path/to/action HTTP/1.1\" 200 111 \"-\" \"HttpClient\" 0.011"
                 + " \"test.febit.org\" [-some thing very bad \"\" {{}{}}\"\"]";
-        String[] values = AccessLogSourceFormat.parseAccessLog(log);
+        String[] values = AccessLogSourceFormat.parse(log);
 
         assertEquals("100.001.002.003", values[0]);
         assertNull(values[1]);
