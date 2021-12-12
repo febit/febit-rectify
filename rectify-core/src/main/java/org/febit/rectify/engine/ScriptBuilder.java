@@ -19,7 +19,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.rectify.RectifierConf;
-import org.febit.rectify.util.JacksonUtils;
 
 import java.util.List;
 
@@ -35,11 +34,49 @@ public class ScriptBuilder {
     public static final String VAR_CHECK_FILTER = "$$_CHECK_FILTER";
     public static final String VAR_NEW_FILTER_BREAKPOINT = "$$_NEW_FILTER_BREAKPOINT";
 
-    private static String escapeForString(String str) {
+    static String escapeForString(String str) {
         if (str == null) {
             return "null";
         }
-        return JacksonUtils.toJsonString(str);
+        final int len = str.length();
+        final StringBuilder buf = new StringBuilder(len + 16);
+        buf.append('"');
+
+        char ch;
+        for (int i = 0; i < len; i++) {
+            ch = str.charAt(i);
+            char replace;
+            switch (ch) {
+                case '\b':
+                case '\f':
+                    // Ignore ctrl chars
+                    continue;
+                case '\n':
+                    replace = 'n';
+                    break;
+                case '\r':
+                    replace = 'r';
+                    break;
+                case '\t':
+                    replace = 't';
+                    break;
+                case '"':
+                    replace = '"';
+                    break;
+                case '/':
+                    replace = '/';
+                    break;
+                case '\\':
+                    replace = '\\';
+                    break;
+                default:
+                    buf.append(ch);
+                    continue;
+            }
+            buf.append('\\').append(replace);
+        }
+        buf.append('"');
+        return buf.toString();
     }
 
     public static String build(RectifierConf conf, boolean debug) {

@@ -16,7 +16,7 @@
 package org.febit.rectify.engine;
 
 import org.febit.rectify.EnginePlugin;
-import org.febit.util.ArraysUtil;
+import org.febit.rectify.util.ArrayUtils;
 import org.febit.wit.Engine;
 import org.febit.wit.InternalContext;
 import org.febit.wit.global.GlobalManager;
@@ -28,9 +28,9 @@ import org.febit.wit.lang.UnConstableMethodDeclare;
 public class InternalMethods implements EnginePlugin {
 
     private static FilterBreakpoint newFilterBreakpoint(InternalContext context, Object[] args) {
-        Object index = ArraysUtil.get(args, 0, 0);
-        Object field = ArraysUtil.get(args, 1);
-        Object expr = ArraysUtil.get(args, 2);
+        Object index = ArrayUtils.get(args, 0, 0);
+        Object field = ArrayUtils.get(args, 1);
+        Object expr = ArrayUtils.get(args, 2);
         return FilterBreakpoint.of(
                 index instanceof Number
                         ? ((Number) index).intValue()
@@ -45,7 +45,7 @@ public class InternalMethods implements EnginePlugin {
     }
 
     private static Object exit(InternalContext context, Object[] args) {
-        Object msg = ArraysUtil.get(args, 0);
+        Object msg = ArrayUtils.get(args, 0);
         return exit(msg);
     }
 

@@ -62,10 +62,6 @@ public class JacksonUtils {
         return MAPPER.convertValue(source, TYPE_FACTORY.constructType(type));
     }
 
-    public static <T> T parse(String json, Class<T> type) {
-        return parse(json, TYPE_FACTORY.constructType(type));
-    }
-
     public static Map<String, Object> parseAsNamedMap(String json) {
         return parse(json, TYPE_NAMED_MAP);
     }

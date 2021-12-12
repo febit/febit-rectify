@@ -16,8 +16,7 @@
 package org.febit.rectify;
 
 import org.apache.commons.lang3.StringUtils;
-import org.febit.util.ArraysUtil;
-import org.febit.util.StringWalker;
+import org.febit.rectify.util.StringWalker;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -436,10 +435,10 @@ public abstract class Schema implements Serializable {
 
     private static class SchemaParser {
 
-        private static final char[] TYPE_NAME_END_CHARS = "\r\n \t\f\b<>[],.:;+-=#".toCharArray();
+        private static final String TYPE_NAME_END_CHARS = "\r\n \t\f\b<>[],.:;+-=#";
 
         private static boolean isTypeNameEnding(char c) {
-            return ArraysUtil.contains(TYPE_NAME_END_CHARS, c);
+            return TYPE_NAME_END_CHARS.indexOf(c) >= 0;
         }
 
         private static String buildNamespace(String space, String name) {

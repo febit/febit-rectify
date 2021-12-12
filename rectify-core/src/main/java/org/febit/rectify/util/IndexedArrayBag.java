@@ -18,10 +18,7 @@ package org.febit.rectify.util;
 import org.febit.wit.lang.Bag;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class IndexedArrayBag implements Bag, Serializable {
 
@@ -39,8 +36,8 @@ public class IndexedArrayBag implements Bag, Serializable {
         return new IndexedArrayBag(indexer, values);
     }
 
-    public static Indexer buildIndexer(List<String> keys) {
-        return new Indexer(keys);
+    public static Indexer buildIndexer(Collection<String> keys) {
+        return new Indexer(new ArrayList<>(keys));
     }
 
     private int resolveIndex(Object key) {

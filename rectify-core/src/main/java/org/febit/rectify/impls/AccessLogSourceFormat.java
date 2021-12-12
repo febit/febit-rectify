@@ -15,14 +15,13 @@
  */
 package org.febit.rectify.impls;
 
-import jodd.net.URLDecoder;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.febit.lang.Defaults;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.util.IndexedArrayBag;
-import org.febit.util.StringWalker;
+import org.febit.rectify.util.StringWalker;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +44,7 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
             return src;
         }
         try {
-            return URLDecoder.decodeQuery(src, "UTF-8");
+            return URLDecoder.decode(src, "UTF-8");
         } catch (Exception e) {
             return src;
         }
@@ -61,7 +60,7 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
     static String[] parseAccessLog(String src) {
         if (StringUtils.isEmpty(src)) {
-            return Defaults.EMPTY_STRINGS;
+            return new String[0];
         }
 
         List<String> values = new ArrayList<>();
@@ -96,7 +95,7 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
                 encodedIndexes[i] = indexer.getIndex(encodedColumns.get(i));
             }
         } else {
-            encodedIndexes = Defaults.emptyInts();
+            encodedIndexes = new int[0];
         }
     }
 

@@ -17,9 +17,9 @@ package org.febit.rectify.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.IteratorUtils;
 import org.febit.rectify.ResultModel;
 import org.febit.rectify.Schema;
-import org.febit.util.CollectionUtil;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -129,7 +129,7 @@ public class ResultModelUtils {
     }
 
     private static List<Object> convertToArray(Schema schema, Object value, ResultModel model) {
-        Iterator iter = CollectionUtil.toIterator(value);
+        Iterator iter = toIterator(value);
         List<Object> list = new ArrayList<>();
         Schema valueType = schema.valueType();
         while (iter.hasNext()) {
@@ -165,4 +165,29 @@ public class ResultModelUtils {
         }
         return struct;
     }
+
+    @SuppressWarnings("unchecked")
+    private static Iterator toIterator(final Object o1) {
+        final Class clazz;
+        if (o1 == null) {
+            return Collections.emptyIterator();
+        }
+        if (o1 instanceof Iterator) {
+            return (Iterator) o1;
+        }
+        if (o1 instanceof Iterable) {
+            return ((Iterable) o1).iterator();
+        }
+        if (o1 instanceof Object[]) {
+            return IteratorUtils.arrayIterator((Object[]) o1);
+        }
+        if (o1 instanceof Enumeration) {
+            return IteratorUtils.asIterator((Enumeration) o1);
+        }
+        if (o1.getClass().isArray()) {
+            return IteratorUtils.arrayIterator(o1);
+        }
+        throw new RuntimeException("Can't convert to iter: " + o1.getClass());
+    }
+
 }
