@@ -1,7 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '6.3.0'
     id 'com.github.hierynomus.license' version '0.16.1'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group 'org.febit.rectify'
@@ -9,16 +9,17 @@ version '1.5.0-SNAPSHOT'
 
 ext {
     versions = [
-            jodd      : '5.1.6',
-            wit       : '2.7.0-beta',
-            febit     : '2.9.0-SNAPSHOT',
-            calcite   : '1.28.0',
-            sqlline   : '1.12.0',
-            jackson   : '2.11.2',
-            slf4j     : '1.7.32',
-            junit     : '5.6.2',
-            flink     : '1.13.3',
-            flinkScala: '2.12',
+            commonsCollections4: '4.4',
+            commonsLang3       : '3.12.0',
+            wit                : '2.7.0-beta',
+            febit              : '2.9.0-SNAPSHOT',
+            calcite            : '1.28.0',
+            sqlline            : '1.12.0',
+            jackson            : '2.12.5',
+            slf4j              : '1.7.32',
+            junit              : '5.8.2',
+            flink              : '1.13.3',
+            flinkScala         : '2.12',
     ]
 }
 
@@ -73,7 +74,6 @@ subprojects {
     dependencyManagement {
         imports {
             mavenBom "com.fasterxml.jackson:jackson-bom:${versions.jackson}"
-            mavenBom "org.jodd:jodd-bom:${versions.jodd}"
         }
         dependencies {
             dependencySet(group: 'org.slf4j', version: "${versions.slf4j}") {
@@ -84,12 +84,9 @@ subprojects {
                 entry "flink-table-common"
                 entry "flink-streaming-java_${versions.flinkScala}"
                 entry "flink-clients_${versions.flinkScala}"
-                entry "flink-connector-kafka-0.9_${versions.flinkScala}"
-                entry "flink-connector-kafka-0.10_${versions.flinkScala}"
-                entry "flink-connector-kafka-0.11_${versions.flinkScala}"
             }
-            dependency 'org.apache.commons:commons-collections4:4.4'
-            dependency 'org.apache.commons:commons-lang3:3.12.0'
+            dependency "org.apache.commons:commons-collections4:${versions.commonsCollections4}"
+            dependency "org.apache.commons:commons-lang3:${versions.commonsLang3}"
             dependency "org.febit:febit-common:${versions.febit}"
             dependency "org.febit.wit:wit-core:${versions.wit}"
             dependency "org.apache.avro:avro:${versions.avro}"
