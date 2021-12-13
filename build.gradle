@@ -20,6 +20,7 @@ ext {
             junit              : '5.8.2',
             flink              : '1.13.3',
             flinkScala         : '2.12',
+            assertjVersion     : '3.20.2',
     ]
 }
 
@@ -103,6 +104,7 @@ subprojects {
         testImplementation 'org.febit:febit-common'
         testImplementation 'org.slf4j:slf4j-api'
         testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+        testImplementation "org.assertj:assertj-core:${versions.assertjVersion}"
         testRuntimeOnly 'org.slf4j:slf4j-simple'
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
     }
