@@ -48,7 +48,7 @@ public class RectifierConf implements Serializable {
 
     private String name = "Unnamed";
     private List<Column> columns = new ArrayList<>();
-    private List<GlobalSegment> globalSegments = new ArrayList<>();
+    private List<Segment> frontSegments = new ArrayList<>();
     private EngineProvider engineProvider = RectifierConf::defaultEngine;
 
     public static RectifierConf create() {
@@ -100,17 +100,22 @@ public class RectifierConf implements Serializable {
         return this;
     }
 
-    public RectifierConf globalSegments(GlobalSegment... segments) {
-        return globalSegments(Arrays.asList(segments));
-    }
-
-    public RectifierConf globalSegments(List<GlobalSegment> segments) {
-        this.globalSegments.addAll(segments);
+    public RectifierConf frontSegment(Segment segment) {
+        this.frontSegments.add(segment);
         return this;
     }
 
-    public RectifierConf globalSegment(GlobalSegment segment) {
-        this.globalSegments.add(segment);
+    public RectifierConf frontSegments(Segment... segments) {
+        this.frontSegments.addAll(Arrays.asList(segments));
+        return this;
+    }
+
+    public RectifierConf frontSegment(String code) {
+        return frontSegment(context -> context.append(code));
+    }
+
+    public RectifierConf frontSegments(Collection<String> codes) {
+        codes.forEach(this::frontSegment);
         return this;
     }
 
@@ -129,21 +134,12 @@ public class RectifierConf implements Serializable {
         return column(column);
     }
 
-    public RectifierConf globalCode(String code) {
-        return globalSegment(context -> context.append(code));
+    public RectifierConf frontFilter(String expr) {
+        return frontSegment(context -> ScriptBuilder.appendFilter(context, expr));
     }
 
-    public RectifierConf globalCodes(Collection<String> codes) {
-        codes.forEach(this::globalCode);
-        return this;
-    }
-
-    public RectifierConf globalFilter(String expr) {
-        return globalSegment(context -> ScriptBuilder.appendGlobalFilter(context, expr));
-    }
-
-    public RectifierConf globalFilters(Collection<String> exprs) {
-        exprs.forEach(this::globalFilter);
+    public RectifierConf frontFilters(Collection<String> exprs) {
+        exprs.forEach(this::frontFilter);
         return this;
     }
 
@@ -259,12 +255,12 @@ public class RectifierConf implements Serializable {
     }
 
     @FunctionalInterface
-    public interface GlobalSegment extends Serializable {
+    public interface Segment extends Serializable {
         void appendTo(ScriptBuilder.Context context);
     }
 
     @EqualsAndHashCode
-    @AllArgsConstructor
+    @AllArgsConstructor(staticName = "create")
     @JsonDeserialize(builder = Column.Builder.class)
     @lombok.Builder(builderClassName = "Builder")
     public static class Column implements Serializable {

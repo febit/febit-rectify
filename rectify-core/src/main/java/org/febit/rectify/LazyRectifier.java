@@ -58,7 +58,7 @@ public class LazyRectifier<I, O> implements Rectifier<I, O>, Serializable {
     }
 
     @Override
-    public void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<ResultRaw, String> onFailed) {
+    public void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
         delegated().process(input, onSucceed, onFailed);
     }
 

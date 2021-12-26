@@ -31,8 +31,8 @@ public class FlinkRectifierTest {
 
     static final RectifierConf conf = RectifierConf.create()
             .name("Demo")
-            .globalFilter("$.status > 0")
-            .globalFilter("$.status < 100 || \"status should <100\"")
+            .frontFilter("$.status > 0")
+            .frontFilter("$.status < 100 || \"status should <100\"")
             .column("long", "id", "$.id")
             .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
             .column("int", "status", "$.status")

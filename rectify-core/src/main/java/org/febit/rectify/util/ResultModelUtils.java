@@ -15,8 +15,7 @@
  */
 package org.febit.rectify.util;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.collections4.IteratorUtils;
 import org.febit.rectify.ResultModel;
 import org.febit.rectify.Schema;
@@ -26,10 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * @author zqq90
- */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class ResultModelUtils {
 
     public static Object convert(Schema schema, Object value, ResultModel model) {
@@ -156,7 +152,7 @@ public class ResultModelUtils {
         return distMap;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Object convertToStruct(Schema schema, Map<?, ?> value, ResultModel model) {
         Object struct = model.newStruct(schema);
         for (Schema.Field field : schema.fields()) {
@@ -166,9 +162,8 @@ public class ResultModelUtils {
         return struct;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     private static Iterator toIterator(final Object o1) {
-        final Class clazz;
         if (o1 == null) {
             return Collections.emptyIterator();
         }

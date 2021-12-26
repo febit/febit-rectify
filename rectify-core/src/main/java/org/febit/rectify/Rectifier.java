@@ -17,6 +17,7 @@ package org.febit.rectify;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface Rectifier<I, O> {
@@ -26,7 +27,7 @@ public interface Rectifier<I, O> {
      *
      * @param input input
      */
-    void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<ResultRaw, String> onFailed);
+    void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed);
 
     /**
      * Process input one by one.
@@ -35,6 +36,15 @@ public interface Rectifier<I, O> {
      */
     default void process(I input, RectifierConsumer<O> onCompleted) {
         process(input, onCompleted::onSucceed, onCompleted::onFailed);
+    }
+
+    /**
+     * Process input one by one.
+     *
+     * @param input input
+     */
+    default void process(I input, Consumer<O> onSucceed, Consumer<String> onFailed) {
+        process(input, (o, raw) -> onSucceed.accept(o), (reason, raw) -> onFailed.accept(reason));
     }
 
     Schema schema();

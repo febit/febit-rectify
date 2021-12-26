@@ -29,7 +29,7 @@ class RectifierFunctionWrapper<S, I, O> implements Rectifier<S, O> {
     private final Rectifier<I, O> delegated;
 
     @Override
-    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<ResultRaw, String> onFailed) {
+    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
         val in = transfer.apply(source);
         delegated.process(in, onSucceed, onFailed);
     }

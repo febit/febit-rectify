@@ -87,7 +87,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         return script.merge(vars);
     }
 
-    public void process(I input, BiConsumer<O, ResultRaw> onSuccess, BiConsumer<ResultRaw, String> onFailed) {
+    public void process(I input, BiConsumer<O, ResultRaw> onSuccess, BiConsumer<String, ResultRaw> onFailed) {
         final ResultRaw resultRaw = new ResultRaw();
         try {
             executeScript(accepter -> {
@@ -97,7 +97,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         } catch (ScriptRuntimeException e) {
             ExitException exitException = searchExitException(e);
             if (exitException != null) {
-                onFailed.accept(resultRaw, exitException.getReason());
+                onFailed.accept(exitException.getReason(), resultRaw);
                 return;
             }
             throw e;

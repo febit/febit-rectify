@@ -24,7 +24,7 @@ public interface RectifierConsumer<O> {
         this.onCompleted(out, resultRaw, null);
     }
 
-    default void onFailed(ResultRaw resultRaw, String reason) {
+    default void onFailed(String reason, ResultRaw resultRaw) {
         this.onCompleted(null, resultRaw, reason);
     }
 }

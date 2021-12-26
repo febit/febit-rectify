@@ -102,7 +102,7 @@ public class ScriptBuilder {
         context.append("\n"
                 + "// -- Global Segments:\n"
         );
-        for (RectifierConf.GlobalSegment segment : conf.getGlobalSegments()) {
+        for (RectifierConf.Segment segment : conf.getFrontSegments()) {
             context.append("//-\n");
             segment.appendTo(context);
             context.append(";\n");
@@ -118,7 +118,7 @@ public class ScriptBuilder {
         return context.toString();
     }
 
-    public static void appendGlobalFilter(Context context, String filterExpr) {
+    public static void appendFilter(Context context, String filterExpr) {
         appendFilter(context, filterExpr, context.getAndIncFilterCounter(), null);
     }
 

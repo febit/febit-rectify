@@ -519,6 +519,7 @@ public abstract class Schema implements Serializable {
             String typeName = walker.readToFlag(SchemaParser::isTypeNameEnding, true).toLowerCase();
             switch (typeName) {
                 case "int":
+                case "integer":
                     return Schema.forPrimitive(Type.INT);
                 case "long":
                 case "bigint":

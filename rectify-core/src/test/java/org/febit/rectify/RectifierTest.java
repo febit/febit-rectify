@@ -39,7 +39,7 @@ public class RectifierTest {
             // Named your schema
             .name("Demo")
             // Global code
-            .globalCode(""
+            .frontSegment(""
                     + "var isTruly = obj -> {\n"
                     + "   return obj == true \n"
                     + "              || obj == \"on\" || obj == \"true\"\n"
@@ -47,13 +47,13 @@ public class RectifierTest {
                     + "};")
             // Global filters:
             //    Notice: only a Boolean.FALSE or a non-null String (reason) can ban current row, others pass.
-            .globalFilter("$.status > 0")
+            .frontFilter("$.status > 0")
             //    Recommend: give a reason if falsely, `||` is logic OR (just what it means to in JS, feel free!).
-            .globalFilter("$.status < 100 || \"status should <100\"")
+            .frontFilter("$.status < 100 || \"status should <100\"")
             // Global code and filters, Will be executed in defined order.
-            .globalCode("var isEven = $.status % 2 == 0 ")
-            .globalCode("var statusCopy = $.status")
-            .globalFilter("isEven || \"status is not even\"")
+            .frontSegment("var isEven = $.status % 2 == 0 ")
+            .frontSegment("var statusCopy = $.status")
+            .frontFilter("isEven || \"status is not even\"")
             // Columns
             .column("long", "id", "$.id")
             // column with check expression

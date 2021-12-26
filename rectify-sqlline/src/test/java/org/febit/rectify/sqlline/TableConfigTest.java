@@ -57,8 +57,8 @@ public class TableConfigTest {
         assertEquals("var statusCopy = $.status", codes.get(1));
 
         assertEquals(Arrays.asList(
-                new RectifierConf.Column("long", "id", "$.id", null, null),
-                new RectifierConf.Column("boolean", "enable", null, "$$ || \"enable is falsely\"", null)
+                RectifierConf.Column.create("long", "id", "$.id", null, null),
+                RectifierConf.Column.create("boolean", "enable", null, "$$ || \"enable is falsely\"", null)
         ), columns);
 
     }

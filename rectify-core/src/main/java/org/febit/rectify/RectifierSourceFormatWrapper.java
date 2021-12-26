@@ -26,7 +26,7 @@ class RectifierSourceFormatWrapper<S, I, O> implements Rectifier<S, O> {
     private final SourceFormat<S, I> sourceFormat;
     private final Rectifier<I, O> delegated;
 
-    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<ResultRaw, String> onFailed) {
+    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
         sourceFormat.process(source, in -> delegated.process(in, onSucceed, onFailed));
     }
 

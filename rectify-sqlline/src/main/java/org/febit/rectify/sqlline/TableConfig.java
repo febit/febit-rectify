@@ -50,7 +50,7 @@ public class TableConfig {
         val conf = RectifierConf.create()
                 .name(name);
         if (globalCodes != null) {
-            conf.globalCodes(globalCodes);
+            conf.frontSegments(globalCodes);
         }
         if (columns != null) {
             conf.columns(columns);
