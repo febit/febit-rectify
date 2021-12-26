@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.rectify.function;
 
-import org.febit.wit.Engine;
+import org.febit.wit.InternalContext;
+import org.febit.wit.lang.MethodDeclare;
 
-/**
- * Plugin interface to extend engine for Rectifier.
- */
+import static org.febit.rectify.util.Args.*;
+
 @FunctionalInterface
-public interface EnginePlugin {
+public interface IntStrStrFunc extends MethodDeclare {
 
-    void apply(Engine engine);
+    Object invoke(Integer i, String str1, String str2);
+
+    @Override
+    default Object invoke(InternalContext context, Object[] args) {
+        return invoke(int0(args), string1(args), string2(args));
+    }
 }
-

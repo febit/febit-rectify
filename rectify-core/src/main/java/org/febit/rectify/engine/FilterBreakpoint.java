@@ -27,11 +27,14 @@ public class FilterBreakpoint {
         this.expr = expr;
     }
 
-    public static FilterBreakpoint of(int index, String expr) {
+    public static FilterBreakpoint of(Integer index, String expr) {
+        if (index == null) {
+            index = 0;
+        }
         return of(index, null, expr);
     }
 
-    public static FilterBreakpoint of(int index, String field, String expr) {
+    public static FilterBreakpoint of(Integer index, String field, String expr) {
         return new FilterBreakpoint(index, field, expr);
     }
 

@@ -162,7 +162,7 @@ public class ResultModelUtils {
         return struct;
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Iterator toIterator(final Object o1) {
         if (o1 == null) {
             return Collections.emptyIterator();

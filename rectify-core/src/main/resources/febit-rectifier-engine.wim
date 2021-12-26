@@ -1,6 +1,6 @@
 
 @global +='''
-  org.febit.rectify.engine.EnginePluginCollector
+  org.febit.rectify.engine.SpiPluginCollector
 '''
 
 [logger :slf4jLogger]

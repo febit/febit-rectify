@@ -34,6 +34,7 @@ public class JacksonUtils {
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
+
     public static final TypeFactory TYPE_FACTORY = MAPPER.getTypeFactory();
 
     private static final JavaType TYPE_NAMED_MAP = TYPE_FACTORY

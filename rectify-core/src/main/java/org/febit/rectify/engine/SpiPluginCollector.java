@@ -15,22 +15,18 @@
  */
 package org.febit.rectify.engine;
 
-import org.febit.rectify.EnginePlugin;
+import org.febit.rectify.RectifierEnginePlugin;
 import org.febit.wit.Engine;
 import org.febit.wit.Init;
 import org.febit.wit.loggers.Logger;
 
 import java.util.ServiceLoader;
 
-public class EnginePluginCollector {
+public class SpiPluginCollector {
 
     @Init
     public void init(Engine engine, Logger logger) {
-        for (EnginePlugin plugin : ServiceLoader.load(EnginePlugin.class)) {
-            String name = plugin.getClass().getName();
-            logger.info("Applying rectify engine spi plugin: {}.", name);
-            engine.inject(name, plugin);
-            plugin.apply(engine);
-        }
+        ServiceLoader.load(RectifierEnginePlugin.class)
+                .forEach(p -> p.initAndApply(engine, logger));
     }
 }
