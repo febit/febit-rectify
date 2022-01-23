@@ -259,6 +259,7 @@ public class RectifierConf implements Serializable {
         void appendTo(ScriptBuilder.Context context);
     }
 
+    @Getter
     @EqualsAndHashCode
     @AllArgsConstructor(staticName = "create")
     @JsonDeserialize(builder = Column.Builder.class)

@@ -15,14 +15,11 @@
  */
 package org.febit.rectify.function;
 
-import lombok.val;
 import org.febit.rectify.RectifierEnginePlugin;
+import org.febit.rectify.util.FunctionUtils;
 import org.febit.wit.Engine;
-import org.febit.wit.exceptions.UncheckedException;
-import org.febit.wit.util.ClassUtil;
 
 import java.lang.annotation.*;
-import java.lang.reflect.Field;
 
 public interface IFunctions extends RectifierEnginePlugin {
 
@@ -37,33 +34,6 @@ public interface IFunctions extends RectifierEnginePlugin {
 
     @Override
     default void apply(Engine engine) {
-        val globalMgr = engine.getGlobalManager();
-
-        for (Field field : getClass().getFields()) {
-            if (!ClassUtil.isStatic(field)
-                    || !ClassUtil.isFinal(field)) {
-                continue;
-            }
-            Object fieldValue;
-            try {
-                fieldValue = field.get(null);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new UncheckedException(e);
-            }
-
-            val originName = field.getName();
-            val aliasAnno = field.getAnnotation(Alias.class);
-            if (aliasAnno == null) {
-                globalMgr.setConst(originName, fieldValue);
-                return;
-            }
-            if (aliasAnno.keepOriginName()) {
-                globalMgr.setConst(originName, fieldValue);
-                return;
-            }
-            for (val alias : aliasAnno.value()) {
-                globalMgr.setConst(alias, fieldValue);
-            }
-        }
+        FunctionUtils.scanConstFields(engine.getGlobalManager()::setConst, getClass());
     }
 }
