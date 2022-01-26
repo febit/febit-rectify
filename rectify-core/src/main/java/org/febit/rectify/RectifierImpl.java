@@ -100,7 +100,8 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
                 onFailed.accept(exitException.getReason(), resultRaw);
                 return;
             }
-            throw e;
+            onFailed.accept("RUNTIME_ERROR: " + e.getMessage(), resultRaw);
+            return;
         }
         @SuppressWarnings("unchecked")
         O record = (O) ResultModelUtils.convert(schema, resultRaw, resultModel);
