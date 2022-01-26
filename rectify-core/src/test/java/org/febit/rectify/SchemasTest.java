@@ -17,16 +17,13 @@ package org.febit.rectify;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
 import static org.febit.rectify.Schema.Type.*;
-import static org.febit.rectify.Schema.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({
         "squid:S1192" // String literals should not be duplicated
 })
-class SchemaTest {
+class SchemasTest {
 
     @Test
     void testParseAsFieldList() {
@@ -39,57 +36,57 @@ class SchemaTest {
         assertTrue(schema.isStructType());
         assertNull(schema.comment());
 
-        field = schema.getField("id");
+        field = schema.field("id");
         assertTrue(field.schema().isIntType());
         assertNull(schema.comment());
         assertEquals(0, field.pos());
 
-        field = schema.getField("name");
+        field = schema.field("name");
         assertTrue(field.schema().isStringType());
         assertEquals(1, field.pos());
 
-        field = schema.getField("ints");
+        field = schema.field("ints");
         assertEquals(2, field.pos());
         assertNull(field.comment());
         assertTrue(field.schema().isArrayType());
         assertTrue(field.schema().valueType().isIntType());
 
-        assertTrue(schema.getField("float").schema().isFloatType());
-        assertTrue(schema.getField("double").schema().isDoubleType());
+        assertTrue(schema.field("float").schema().isFloatType());
+        assertTrue(schema.field("double").schema().isDoubleType());
 
-        field = schema.getField("strings");
+        field = schema.field("strings");
         assertEquals(5, field.pos());
         assertEquals("comment test", field.comment());
         assertTrue(field.schema().isArrayType());
         assertTrue(field.schema().valueType().isStringType());
 
-        field = schema.getField("longMap");
+        field = schema.field("longMap");
         assertEquals(6, field.pos());
         assertNull(field.comment());
         assertTrue(field.schema().isMapType());
         assertTrue(field.schema().valueType().isBigintType());
 
-        field = schema.getField("stringMap");
+        field = schema.field("stringMap");
         assertEquals(7, field.pos());
         assertTrue(field.schema().isMapType());
         assertTrue(field.schema().valueType().isStringType());
 
-        field = schema.getField("optionalStringMap");
+        field = schema.field("optionalStringMap");
         assertEquals(8, field.pos());
         assertTrue(field.schema().isOptionalType());
         assertTrue(field.schema().valueType().isMapType());
         assertTrue(field.schema().valueType().valueType().isStringType());
 
-        field = schema.getField("session");
+        field = schema.field("session");
         assertEquals(9, field.pos());
         assertTrue(field.schema().isStructType());
         assertEquals(4, field.schema().fieldSize());
-        assertTrue(field.schema().getField("id").schema().isStringType());
-        assertTrue(field.schema().getField("launch").schema().isBigintType());
-        assertTrue(field.schema().getField("du").schema().isBigintType());
-        assertTrue(field.schema().getField("date").schema().isIntType());
+        assertTrue(field.schema().field("id").schema().isStringType());
+        assertTrue(field.schema().field("launch").schema().isBigintType());
+        assertTrue(field.schema().field("du").schema().isBigintType());
+        assertTrue(field.schema().field("date").schema().isIntType());
 
-        field = schema.getField("events");
+        field = schema.field("events");
         assertEquals(10, field.pos());
         assertTrue(field.schema().isArrayType());
 
@@ -97,29 +94,29 @@ class SchemaTest {
         assertTrue(eventSchema.isStructType());
         assertEquals("demo._col10.item", eventSchema.fullname());
 
-        assertTrue(eventSchema.getField("name").schema().isStringType());
-        assertEquals(1, eventSchema.getField("name").pos());
+        assertTrue(eventSchema.field("name").schema().isStringType());
+        assertEquals(1, eventSchema.field("name").pos());
 
-        assertTrue(eventSchema.getField("attrs").schema().isMapType());
-        assertEquals(3, eventSchema.getField("attrs").pos());
+        assertTrue(eventSchema.field("attrs").schema().isMapType());
+        assertEquals(3, eventSchema.field("attrs").pos());
 
-        assertTrue(eventSchema.getField("du").schema().isBigintType());
-        assertEquals(0, eventSchema.getField("du").pos());
+        assertTrue(eventSchema.field("du").schema().isBigintType());
+        assertEquals(0, eventSchema.field("du").pos());
 
-        assertTrue(eventSchema.getField("ts").schema().isOptionalType());
-        assertTrue(eventSchema.getField("ts").schema().valueType().isBigintType());
-        assertEquals(2, eventSchema.getField("ts").pos());
+        assertTrue(eventSchema.field("ts").schema().isOptionalType());
+        assertTrue(eventSchema.field("ts").schema().valueType().isBigintType());
+        assertEquals(2, eventSchema.field("ts").pos());
 
-        assertTrue(eventSchema.getField("struct").schema().isStructType());
-        assertEquals(4, eventSchema.getField("struct").pos());
-        assertEquals("demo._col10.item", eventSchema.getField("struct").schema().namespace());
-        assertEquals("demo._col10.item.struct", eventSchema.getField("struct").schema().fullname());
+        assertTrue(eventSchema.field("struct").schema().isStructType());
+        assertEquals(4, eventSchema.field("struct").pos());
+        assertEquals("demo._col10.item", eventSchema.field("struct").schema().namespace());
+        assertEquals("demo._col10.item.struct", eventSchema.field("struct").schema().fullname());
 
-        assertTrue(eventSchema.getField("flag").schema().isBooleanType());
-        assertEquals(5, eventSchema.getField("flag").pos());
+        assertTrue(eventSchema.field("flag").schema().isBooleanType());
+        assertEquals(5, eventSchema.field("flag").pos());
 
         assertEquals(
-                eventSchema.getField("flag"),
+                eventSchema.field("flag"),
                 schema.fields().get(10).schema() // event array
                         .valueType() // event type
                         .fields().get(5) // flag
@@ -130,32 +127,39 @@ class SchemaTest {
     void testToString() {
         Schema schema;
 
-        assertEquals("int", forPrimitive(INT).toString());
-        assertEquals("bigint", forPrimitive(BIGINT).toString());
-        assertEquals("boolean", forPrimitive(BOOLEAN).toString());
-        assertEquals("bytes", forPrimitive(BYTES).toString());
-        assertEquals("string", forPrimitive(STRING).toString());
-        assertEquals("float", forPrimitive(FLOAT).toString());
-        assertEquals("double", forPrimitive(DOUBLE).toString());
+        assertEquals("int", Schemas.ofPrimitive(INT).toString());
+        assertEquals("bigint", Schemas.ofPrimitive(BIGINT).toString());
+        assertEquals("boolean", Schemas.ofPrimitive(BOOLEAN).toString());
+        assertEquals("bytes", Schemas.ofPrimitive(BYTES).toString());
+        assertEquals("string", Schemas.ofPrimitive(STRING).toString());
+        assertEquals("float", Schemas.ofPrimitive(FLOAT).toString());
+        assertEquals("double", Schemas.ofPrimitive(DOUBLE).toString());
 
-        assertEquals("optional<double>", forOptional(forPrimitive(DOUBLE)).toString());
-        assertEquals("array<int>", forArray(forPrimitive(INT)).toString());
-        assertEquals("map<string>", forMap(forPrimitive(STRING)).toString());
+        assertEquals("optional<double>", Schemas.ofOptional(Schemas.ofPrimitive(DOUBLE)).toString());
+        assertEquals("array<int>", Schemas.ofArray(Schemas.ofPrimitive(INT)).toString());
+        assertEquals("map<string>", Schemas.ofMap(Schemas.ofPrimitive(STRING)).toString());
 
-        schema = forStruct("org.febit", "demo",
-                Arrays.asList(
-                        newField("id", forPrimitive(STRING), "ID"),
-                        newField("ints", forArray(forPrimitive(INT))),
-                        newField("optionalStringMap", forOptional(forMap(forPrimitive(STRING)))),
-                        newField("complex", forStruct("febit.demo", "complex",
-                                Arrays.asList(
-                                        newField("intMap", forMap(forPrimitive(INT))),
-                                        newField("name", forPrimitive(STRING))
-                                ),
-                                "Complex"))
-                ),
-                "this is a demo"
-        );
+        schema = Schemas.structSchemaBuilder()
+                .space("org.febit")
+                .name("demo")
+                .comment("this is a demo")
+                .field("id", Schemas.ofPrimitive(STRING), "ID")
+                .field("ints",
+                        Schemas.ofArray(Schemas.ofPrimitive(INT))
+                )
+                .field("optionalStringMap",
+                        Schemas.ofOptional(Schemas.ofMap(Schemas.ofPrimitive(STRING)))
+                )
+                .field("complex",
+                        Schemas.structSchemaBuilder()
+                                .space("febit.demo")
+                                .name("complex")
+                                .comment("Complex")
+                                .field("intMap", Schemas.ofMap(Schemas.ofPrimitive(INT)))
+                                .field("name", Schemas.ofPrimitive(STRING))
+                                .build()
+                )
+                .build();
 
         assertEquals(
                 "struct<"
