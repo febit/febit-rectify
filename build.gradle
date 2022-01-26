@@ -109,7 +109,3 @@ subprojects {
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
     }
 }
-
-wrapper {
-    gradleVersion = '7.3.1'
-}
