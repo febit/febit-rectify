@@ -55,7 +55,7 @@ public class TypeInfoUtils {
                 return Types.BOOLEAN;
             case INT:
                 return Types.INT;
-            case BIGINT:
+            case INT64:
                 return Types.LONG;
             case FLOAT:
                 return Types.FLOAT;

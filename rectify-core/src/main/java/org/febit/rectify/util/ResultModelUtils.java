@@ -46,7 +46,7 @@ public class ResultModelUtils {
                 return toNumber(value, Number::intValue, 0);
             case BOOLEAN:
                 return toBoolean(value);
-            case BIGINT:
+            case INT64:
                 return toNumber(value, Number::longValue, 0L);
             case STRING:
                 return value.toString();
@@ -149,7 +149,7 @@ public class ResultModelUtils {
                 return Boolean.FALSE;
             case INT:
                 return 0;
-            case BIGINT:
+            case INT64:
                 return 0L;
             case FLOAT:
                 return 0F;

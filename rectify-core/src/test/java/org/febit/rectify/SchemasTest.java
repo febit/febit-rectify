@@ -143,7 +143,7 @@ class SchemasTest {
         Schema schema;
 
         assertEquals("int", Schemas.ofPrimitive(INT).toString());
-        assertEquals("bigint", Schemas.ofPrimitive(BIGINT).toString());
+        assertEquals("int64", Schemas.ofPrimitive(INT64).toString());
         assertEquals("boolean", Schemas.ofPrimitive(BOOLEAN).toString());
         assertEquals("bytes", Schemas.ofPrimitive(BYTES).toString());
         assertEquals("string", Schemas.ofPrimitive(STRING).toString());

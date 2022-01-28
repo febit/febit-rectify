@@ -58,7 +58,7 @@ public interface Schema extends Serializable {
     }
 
     default boolean isBigintType() {
-        return isType(Type.BIGINT);
+        return isType(Type.INT64);
     }
 
     default boolean isFloatType() {
@@ -157,7 +157,7 @@ public interface Schema extends Serializable {
         BYTES,
         BOOLEAN,
         INT,
-        BIGINT,
+        INT64,
         FLOAT,
         DOUBLE,
 

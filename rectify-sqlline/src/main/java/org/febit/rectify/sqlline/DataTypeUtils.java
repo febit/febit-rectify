@@ -62,7 +62,7 @@ class DataTypeUtils {
                 return typeFactory.createSqlType(SqlTypeName.BOOLEAN);
             case INT:
                 return typeFactory.createSqlType(SqlTypeName.INTEGER);
-            case BIGINT:
+            case INT64:
                 return typeFactory.createSqlType(SqlTypeName.BIGINT);
             case FLOAT:
                 return typeFactory.createSqlType(SqlTypeName.FLOAT);

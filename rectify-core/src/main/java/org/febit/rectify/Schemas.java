@@ -57,7 +57,7 @@ class Schemas {
             case STRING:
             case BYTES:
             case INT:
-            case BIGINT:
+            case INT64:
             case FLOAT:
             case DOUBLE:
             case BOOLEAN:
@@ -392,11 +392,13 @@ class Schemas {
         String typeName = walker.readToFlag(Schemas::isTypeNameEnding, true).toLowerCase();
         switch (typeName) {
             case "int":
+            case "int32":
             case "integer":
                 return ofPrimitive(Schema.Type.INT);
             case "long":
+            case "int64":
             case "bigint":
-                return ofPrimitive(Schema.Type.BIGINT);
+                return ofPrimitive(Schema.Type.INT64);
             case "string":
                 return ofPrimitive(Schema.Type.STRING);
             case "bool":
@@ -417,8 +419,8 @@ class Schemas {
             case "datetime":
             case "timestamp":
                 return ofPrimitive(Schema.Type.DATETIME);
-            case "datetime_with_timzone":
-            case "timestamp_with_timzone":
+            case "datetime_with_timezone":
+            case "timestamp_with_timezone":
             case "timestampz":
             case "datetimez":
                 return ofPrimitive(Schema.Type.DATETIME_WITH_TIMEZONE);
