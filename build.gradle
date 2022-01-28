@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'org.febit.rectify'
-version '1.5.0-SNAPSHOT'
+version '1.6.0-SNAPSHOT'
 
 ext {
     versions = [
@@ -20,7 +20,8 @@ ext {
             junit              : '5.8.2',
             flink              : '1.13.3',
             flinkScala         : '2.12',
-            assertjVersion     : '3.20.2',
+            assertj            : '3.20.2',
+            jsr305             : '3.0.2'
     ]
 }
 
@@ -86,6 +87,7 @@ subprojects {
                 entry "flink-streaming-java_${versions.flinkScala}"
                 entry "flink-clients_${versions.flinkScala}"
             }
+            dependency "com.google.code.findbugs:jsr305:${versions.jsr305}"
             dependency "org.apache.commons:commons-collections4:${versions.commonsCollections4}"
             dependency "org.apache.commons:commons-lang3:${versions.commonsLang3}"
             dependency "org.febit:febit-common:${versions.febit}"
@@ -101,15 +103,13 @@ subprojects {
     }
 
     dependencies {
+        compileOnly 'com.google.code.findbugs:jsr305'
+
         testImplementation 'org.febit:febit-common'
         testImplementation 'org.slf4j:slf4j-api'
         testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
-        testImplementation "org.assertj:assertj-core:${versions.assertjVersion}"
+        testImplementation "org.assertj:assertj-core:${versions.assertj}"
         testRuntimeOnly 'org.slf4j:slf4j-simple'
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
     }
-}
-
-wrapper {
-    gradleVersion = '7.3.1'
 }

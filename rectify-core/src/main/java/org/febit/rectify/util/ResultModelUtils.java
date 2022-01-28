@@ -22,13 +22,16 @@ import org.febit.rectify.Schema;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.time.*;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
 
 @UtilityClass
 public class ResultModelUtils {
 
-    public static Object convert(Schema schema, Object value, ResultModel model) {
+    public static Object convert(Schema schema, Object value, ResultModel<?> model) {
         if (value == null) {
             return getDefaultValue(schema, model);
         }
@@ -43,10 +46,20 @@ public class ResultModelUtils {
                 return toNumber(value, Number::intValue, 0);
             case BOOLEAN:
                 return toBoolean(value);
-            case BIGINT:
+            case INT64:
                 return toNumber(value, Number::longValue, 0L);
             case STRING:
                 return value.toString();
+            case DATE:
+                return toLocalDate(value);
+            case TIME:
+                return toLocalTime(value);
+            case DATETIME:
+                return toLocalDateTime(value);
+            case DATETIME_WITH_TIMEZONE:
+                return toZonedDateTime(value);
+            case INSTANT:
+                return toInstant(value);
             case MAP:
                 if (value instanceof Map) {
                     return convertToMap(schema, (Map<?, ?>) value, model);
@@ -64,6 +77,41 @@ public class ResultModelUtils {
             default:
                 throw new IllegalArgumentException("Unsupported type: " + schema.getType());
         }
+    }
+
+    private static Instant toInstant(Object obj) {
+        if (obj instanceof Temporal) {
+            return TimeUtils.instant((Temporal) obj);
+        }
+        return TimeUtils.parseInstant(obj.toString());
+    }
+
+    private static ZonedDateTime toZonedDateTime(Object obj) {
+        if (obj instanceof Temporal) {
+            return TimeUtils.zonedDateTime((Temporal) obj);
+        }
+        return TimeUtils.parseZonedDateTime(obj.toString());
+    }
+
+    private static LocalDateTime toLocalDateTime(Object obj) {
+        if (obj instanceof TemporalAccessor) {
+            return TimeUtils.localDateTime((TemporalAccessor) obj);
+        }
+        return TimeUtils.parseDateTime(obj.toString());
+    }
+
+    private static LocalDate toLocalDate(Object obj) {
+        if (obj instanceof TemporalAccessor) {
+            return TimeUtils.localDate((TemporalAccessor) obj);
+        }
+        return TimeUtils.parseDate(obj.toString());
+    }
+
+    private static LocalTime toLocalTime(Object obj) {
+        if (obj instanceof TemporalAccessor) {
+            return TimeUtils.localTime((TemporalAccessor) obj);
+        }
+        return TimeUtils.parseTime(obj.toString());
     }
 
     private static Boolean toBoolean(Object raw) {
@@ -95,13 +143,13 @@ public class ResultModelUtils {
         return converter.apply(number);
     }
 
-    private static Object getDefaultValue(Schema schema, ResultModel model) {
+    private static Object getDefaultValue(Schema schema, ResultModel<?> model) {
         switch (schema.getType()) {
             case BOOLEAN:
                 return Boolean.FALSE;
             case INT:
                 return 0;
-            case BIGINT:
+            case INT64:
                 return 0L;
             case FLOAT:
                 return 0F;
@@ -119,13 +167,23 @@ public class ResultModelUtils {
                 return convertToStruct(schema, Collections.emptyMap(), model);
             case OPTIONAL:
                 return null;
+            case INSTANT:
+                return TimeUtils.INSTANT_DEFAULT;
+            case DATE:
+                return TimeUtils.DATE_DEFAULT;
+            case TIME:
+                return TimeUtils.TIME_DEFAULT;
+            case DATETIME:
+                return TimeUtils.DATETIME_DEFAULT;
+            case DATETIME_WITH_TIMEZONE:
+                return TimeUtils.ZONED_DATETIME_DEFAULT;
             default:
-                return null;
+                throw new IllegalArgumentException("Unsupported type: " + schema.getType());
         }
     }
 
-    private static List<Object> convertToArray(Schema schema, Object value, ResultModel model) {
-        Iterator iter = toIterator(value);
+    private static List<Object> convertToArray(Schema schema, Object value, ResultModel<?> model) {
+        Iterator<Object> iter = toIterator(value);
         List<Object> list = new ArrayList<>();
         Schema valueType = schema.valueType();
         while (iter.hasNext()) {
@@ -134,7 +192,7 @@ public class ResultModelUtils {
         return list;
     }
 
-    private static Map<String, Object> convertToMap(Schema schema, Map<?, ?> value, ResultModel model) {
+    private static Map<String, Object> convertToMap(Schema schema, Map<?, ?> value, ResultModel<?> model) {
         if (value == null) {
             return null;
         }
@@ -162,22 +220,22 @@ public class ResultModelUtils {
         return struct;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Iterator toIterator(final Object o1) {
+    @SuppressWarnings({"unchecked"})
+    private static Iterator<Object> toIterator(final Object o1) {
         if (o1 == null) {
             return Collections.emptyIterator();
         }
         if (o1 instanceof Iterator) {
-            return (Iterator) o1;
+            return (Iterator<Object>) o1;
         }
         if (o1 instanceof Iterable) {
-            return ((Iterable) o1).iterator();
+            return ((Iterable<Object>) o1).iterator();
         }
         if (o1 instanceof Object[]) {
             return IteratorUtils.arrayIterator((Object[]) o1);
         }
         if (o1 instanceof Enumeration) {
-            return IteratorUtils.asIterator((Enumeration) o1);
+            return IteratorUtils.asIterator((Enumeration<Object>) o1);
         }
         if (o1.getClass().isArray()) {
             return IteratorUtils.arrayIterator(o1);

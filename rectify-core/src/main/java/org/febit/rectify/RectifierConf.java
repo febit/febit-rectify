@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Rectifier Config / Factory, Serializable.
@@ -59,21 +58,19 @@ public class RectifierConf implements Serializable {
         return EngineLazyHolder.ENGINE;
     }
 
-    private Schema.Field columnToSchemaField(Column column) {
-        Schema fieldSchema = Schema.parse(name, column.name(), column.type());
-        return Schema.newField(column.name, fieldSchema, column.comment);
-    }
-
     public Schema resolveSchema() {
         return resolveSchema(col -> true);
     }
 
     public Schema resolveSchema(Predicate<Column> filter) {
-        val fields = this.columns.stream()
+        val builder = Schemas.structSchemaBuilder();
+        this.columns.stream()
                 .filter(filter)
-                .map(this::columnToSchemaField)
-                .collect(Collectors.toList());
-        return Schema.forStruct(null, name, fields);
+                .forEach(col -> {
+                    val colSchema = Schema.parse(name, col.name(), col.type());
+                    builder.field(col.name(), colSchema, col.comment());
+                });
+        return builder.build();
     }
 
     public RectifierConf engineSupplier(EngineProvider provider) {

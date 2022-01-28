@@ -22,20 +22,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ResultModelsTest {
 
-    final Schema schema = Schema.parseFieldLines("demo", ""
-            + "long id\n"
-            + "string name\n"
-            + "int level\n"
-            + "string color\n");
+    final Schema schema = Schema.parseLinesAsStruct("demo",
+            "long id",
+            "string name",
+            "int level",
+            "string color"
+    );
 
     @Test
     void asObjectArray() {
         ResultModel<Object[]> model = ResultModels.asObjectArray();
         Object[] struct = model.newStruct(schema);
 
-        model.setField(struct, schema.getField("id"), 12345L);
-        model.setField(struct, schema.getField("name"), "Mr.R");
-        model.setField(struct, schema.getField("color"), "blue");
+        model.setField(struct, schema.field("id"), 12345L);
+        model.setField(struct, schema.field("name"), "Mr.R");
+        model.setField(struct, schema.field("color"), "blue");
 
         assertEquals(12345L, struct[0]);
         assertEquals("Mr.R", struct[1]);
@@ -43,16 +44,16 @@ class ResultModelsTest {
         assertEquals("blue", struct[3]);
 
         assertEquals(struct[0],
-                model.getField(struct, schema.getField("id"))
+                model.getField(struct, schema.field("id"))
         );
         assertEquals(struct[1],
-                model.getField(struct, schema.getField("name"))
+                model.getField(struct, schema.field("name"))
         );
         assertEquals(struct[2],
-                model.getField(struct, schema.getField("level"))
+                model.getField(struct, schema.field("level"))
         );
         assertEquals(struct[3],
-                model.getField(struct, schema.getField("color"))
+                model.getField(struct, schema.field("color"))
         );
     }
 }

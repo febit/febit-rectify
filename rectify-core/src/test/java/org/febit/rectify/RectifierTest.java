@@ -107,9 +107,9 @@ public class RectifierTest {
         Schema schema = rectifier.schema();
         assertTrue(schema.isStructType());
         assertEquals(6, schema.fieldSize());
-        assertEquals(0, schema.getField("id").pos());
-        assertEquals(1, schema.getField("enable").pos());
-        assertEquals(2, schema.getField("status").pos());
+        assertEquals(0, schema.field("id").pos());
+        assertEquals(1, schema.field("enable").pos());
+        assertEquals(2, schema.field("status").pos());
     }
 
     @Test

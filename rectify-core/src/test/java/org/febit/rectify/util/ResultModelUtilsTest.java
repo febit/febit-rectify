@@ -20,6 +20,7 @@ import org.febit.rectify.Schema;
 import org.febit.rectify.TestSchemas;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +48,8 @@ class ResultModelUtilsTest {
     void testConvertComplex() {
         Schema schema = TestSchemas.COMPLEX;
 
+        ZonedDateTime time = ZonedDateTime.parse("2022-01-23T02:03:56+07:00");
+
         @SuppressWarnings("unchecked")
         List<Object> record = (List<Object>) ResultModelUtils.convert(schema, namedMap(
                 "id", 1234L,
@@ -61,6 +64,16 @@ class ResultModelUtilsTest {
                         namedMap("name", 1, "du", 2L, "ts", 3, "flag", true),
                         namedMap("name", "2", "du", 2L, "attrs", namedMap(1, 1, "2", 2L, "NULL", null)),
                         namedMap("struct", namedMap("xx", "yy"))
+                ),
+                "times", asList(
+                        namedMap(),
+                        namedMap(
+                                "time", time.toLocalTime().toString(),
+                                "date", time.toLocalDate(),
+                                "dt", time.toLocalDateTime(),
+                                "instant", time,
+                                "dtz", time.toString()
+                        )
                 ),
                 "unused", "unused field"
         ), new ListResultModel());
@@ -100,7 +113,7 @@ class ResultModelUtilsTest {
                         asArray(""),
                         // event.flag
                         true
-                ), Arrays.asList(
+                        ), Arrays.asList(
                         // event.du
                         2L,
                         // event.name
@@ -113,7 +126,7 @@ class ResultModelUtilsTest {
                         asArray(""),
                         // event.flag
                         false
-                ), Arrays.asList(
+                        ), Arrays.asList(
                         // event.du
                         0L,
                         // event.name
@@ -126,7 +139,12 @@ class ResultModelUtilsTest {
                         asArray("yy"),
                         // event.flag
                         false
-                ))
+                        )
+                ),
+                asArray(
+                        asList(TimeUtils.TIME_DEFAULT, TimeUtils.DATE_DEFAULT, TimeUtils.DATETIME_DEFAULT, TimeUtils.ZONED_DATETIME_DEFAULT, TimeUtils.INSTANT_DEFAULT),
+                        asList(time.toLocalTime(), time.toLocalDate(), time.toLocalDateTime(), time, time.toInstant())
+                )
         ), record);
     }
 

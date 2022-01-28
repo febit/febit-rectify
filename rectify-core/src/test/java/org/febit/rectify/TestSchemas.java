@@ -21,20 +21,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSchemas {
 
-    public static final Schema COMPLEX = Schema.parseFieldLines("demo", "\n"
-            + "# comment\n"
-            + "  \n"
-            + " int id  \n"
-            + " sTring name\n"
-            + " array<int> ints  # \n"
-            + " float float  # \n"
-            + " double double  # \n"
-            + " ArRAy < string >   strings  # comment test \n "
-            + " map<long> longMap\n"
-            + "    #  comment\n"
-            + " map < string> stringMap \n"
-            + " optional<map < string>> optionalStringMap \n"
-            + " struct<id:string,launch:bigint,du:long,date:int> session\n"
-            + " array<struct< du: bigint, name : string  ,  ts:optional<bigint>, attrs:map<String> , struct:struct<xx:String>, flag:boolean>  >  events\n"
-            + "");
+    public static final Schema COMPLEX = Schema.parseLinesAsStruct("demo", "\n"
+            , "# comment\n"
+            , "  \n"
+            , " int id  \n"
+            , " sTring name\n"
+            , " array<int> ints  # \n"
+            , " float float  # \n"
+            , " double double  # \n"
+            , " ArRAy < string >   strings  # comment test \n "
+            , " map<long> longMap\n"
+            , "    #  comment\n"
+            , " map < string> stringMap \n"
+            , " optional<map < string>> optionalStringMap \n"
+            , " struct<id:string,launch:int64,du:long,date:int> session\n"
+            , " array<struct< du: int64, name : string  ,  ts:optional<int64>, attrs:map<String> , struct:struct<xx:String>, flag:boolean>  >  events\n"
+            , " array<struct<time:time,date:date,dt:datetime,dtz:datetimez,instant:instant>> times"
+            , "");
 }
