@@ -63,11 +63,11 @@ public class RectifierConf implements Serializable {
     }
 
     public Schema resolveSchema(Predicate<Column> filter) {
-        var builder = Schemas.structSchemaBuilder();
+        val builder = Schemas.structSchemaBuilder();
         this.columns.stream()
                 .filter(filter)
                 .forEach(col -> {
-                    var colSchema = Schema.parse(name, col.name(), col.type());
+                    val colSchema = Schema.parse(name, col.name(), col.type());
                     builder.field(col.name(), colSchema, col.comment());
                 });
         return builder.build();

@@ -160,6 +160,12 @@ public interface Schema extends Serializable {
         BIGINT,
         FLOAT,
         DOUBLE,
+
+        INSTANT,
+        DATE,
+        TIME,
+        DATETIME,
+        DATETIME_WITH_TIMEZONE("datetimez"),
         ;
 
         @Getter
@@ -167,6 +173,10 @@ public interface Schema extends Serializable {
 
         Type() {
             this.name = this.name().toLowerCase();
+        }
+
+        Type(String name) {
+            this.name = name;
         }
     }
 

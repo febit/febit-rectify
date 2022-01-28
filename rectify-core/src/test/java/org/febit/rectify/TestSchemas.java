@@ -36,5 +36,6 @@ public class TestSchemas {
             , " optional<map < string>> optionalStringMap \n"
             , " struct<id:string,launch:bigint,du:long,date:int> session\n"
             , " array<struct< du: bigint, name : string  ,  ts:optional<bigint>, attrs:map<String> , struct:struct<xx:String>, flag:boolean>  >  events\n"
+            , " array<struct<time:time,date:date,dt:datetime,dtz:datetimez,instant:instant>> times"
             , "");
 }

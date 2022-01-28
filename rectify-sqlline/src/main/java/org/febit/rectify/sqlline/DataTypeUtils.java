@@ -68,6 +68,15 @@ class DataTypeUtils {
                 return typeFactory.createSqlType(SqlTypeName.FLOAT);
             case DOUBLE:
                 return typeFactory.createSqlType(SqlTypeName.DOUBLE);
+            case DATE:
+                return typeFactory.createSqlType(SqlTypeName.DATE);
+            case TIME:
+                return typeFactory.createSqlType(SqlTypeName.TIME);
+            case INSTANT:
+            case DATETIME:
+                return typeFactory.createSqlType(SqlTypeName.TIMESTAMP);
+            case DATETIME_WITH_TIMEZONE:
+                return typeFactory.createSqlType(SqlTypeName.TIMESTAMP_WITH_LOCAL_TIME_ZONE);
             default:
                 throw new IllegalArgumentException("Unsupported type: " + schema.getType());
         }

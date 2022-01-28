@@ -32,7 +32,7 @@ class SchemasTest {
         Schema.Field field;
 
         assertEquals("demo", schema.name());
-        assertEquals(11, schema.fieldSize());
+        assertEquals(12, schema.fieldSize());
         assertTrue(schema.isStructType());
         assertNull(schema.comment());
 
@@ -121,6 +121,21 @@ class SchemasTest {
                         .valueType() // event type
                         .fields().get(5) // flag
         );
+
+        // Times
+        field = schema.field("times");
+        assertEquals(11, field.pos());
+        assertTrue(field.schema().isArrayType());
+
+        Schema timeSchema = field.schema().valueType();
+        assertTrue(timeSchema.isStructType());
+        assertEquals("demo._col11.item", timeSchema.fullname());
+
+        assertTrue(timeSchema.field("time").schema().isType(TIME));
+        assertTrue(timeSchema.field("date").schema().isType(DATE));
+        assertTrue(timeSchema.field("dt").schema().isType(DATETIME));
+        assertTrue(timeSchema.field("dtz").schema().isType(DATETIME_WITH_TIMEZONE));
+        assertTrue(timeSchema.field("instant").schema().isType(INSTANT));
     }
 
     @Test
@@ -159,6 +174,18 @@ class SchemasTest {
                                 .field("name", Schemas.ofPrimitive(STRING))
                                 .build()
                 )
+                .field("times",
+                        Schemas.structSchemaBuilder()
+                                .space("febit.demo")
+                                .name("times")
+                                .comment("times")
+                                .field("t", Schemas.ofPrimitive(TIME))
+                                .field("d", Schemas.ofPrimitive(DATE))
+                                .field("dt", Schemas.ofPrimitive(DATETIME))
+                                .field("dtz", Schemas.ofPrimitive(DATETIME_WITH_TIMEZONE))
+                                .field("i", Schemas.ofPrimitive(INSTANT))
+                                .build()
+                )
                 .build();
 
         assertEquals(
@@ -166,16 +193,18 @@ class SchemasTest {
                         + "id:string,"
                         + "ints:array<int>,"
                         + "optionalStringMap:optional<map<string>>,"
-                        + "complex:struct<intMap:map<int>,name:string>"
+                        + "complex:struct<intMap:map<int>,name:string>,"
+                        + "times:struct<t:time,d:date,dt:datetime,dtz:datetimez,i:instant>"
                         + ">",
                 schema.toString()
         );
 
         assertEquals(
-                "string id #ID\n" +
-                        "array<int> ints\n" +
-                        "optional<map<string>> optionalStringMap\n" +
-                        "struct<intMap:map<int>,name:string> complex\n",
+                "string id #ID\n"
+                        + "array<int> ints\n"
+                        + "optional<map<string>> optionalStringMap\n"
+                        + "struct<intMap:map<int>,name:string> complex\n"
+                        + "struct<t:time,d:date,dt:datetime,dtz:datetimez,i:instant> times\n",
                 schema.toFieldLinesString()
         );
     }

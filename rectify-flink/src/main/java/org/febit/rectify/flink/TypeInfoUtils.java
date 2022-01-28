@@ -16,8 +16,8 @@
 package org.febit.rectify.flink;
 
 import lombok.experimental.UtilityClass;
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
@@ -52,17 +52,25 @@ public class TypeInfoUtils {
         Objects.requireNonNull(schema);
         switch (schema.getType()) {
             case BOOLEAN:
-                return BasicTypeInfo.BOOLEAN_TYPE_INFO;
+                return Types.BOOLEAN;
             case INT:
-                return BasicTypeInfo.INT_TYPE_INFO;
+                return Types.INT;
             case BIGINT:
-                return BasicTypeInfo.LONG_TYPE_INFO;
+                return Types.LONG;
             case FLOAT:
-                return BasicTypeInfo.FLOAT_TYPE_INFO;
+                return Types.FLOAT;
             case DOUBLE:
-                return BasicTypeInfo.DOUBLE_TYPE_INFO;
+                return Types.DOUBLE;
             case STRING:
-                return BasicTypeInfo.STRING_TYPE_INFO;
+                return Types.STRING;
+            case DATE:
+                return Types.LOCAL_DATE;
+            case TIME:
+                return Types.LOCAL_TIME;
+            case DATETIME:
+                return Types.LOCAL_DATE_TIME;
+            case INSTANT:
+                return Types.INSTANT;
             case STRUCT:
                 return ofRowType(schema);
             case ARRAY:
@@ -70,9 +78,10 @@ public class TypeInfoUtils {
                 return new ListTypeInfo<>(elementType);
             case MAP:
                 TypeInformation<?> valType = of(schema.valueType());
-                return new MapTypeInfo<>(BasicTypeInfo.STRING_TYPE_INFO, valType);
+                return new MapTypeInfo<>(Types.STRING, valType);
             case OPTIONAL:
                 return of(schema.valueType());
+            case DATETIME_WITH_TIMEZONE: // FIXME: should support ZONED_DATE_TIME
             case BYTES:
                 throw new UnsupportedOperationException("type is not supported yet: " + schema.getType());
             default:
