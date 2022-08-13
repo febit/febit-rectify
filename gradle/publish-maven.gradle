@@ -2,39 +2,14 @@ apply plugin: 'signing'
 apply plugin: 'maven-publish'
 
 ext {
-  publishProfile = findProperty('publish.profile')
-}
-
-// Disabling Gradle Module Metadata publication
-//   see: https://docs.gradle.org/6.0/userguide/publishing_gradle_module_metadata.html#sub:disabling-gmm-publication
-tasks.withType(GenerateModuleMetadata) {
-  enabled = false
+    publishProfile = findProperty('publish.profile')
 }
 
 signing {
-  required {
-    publishProperty("sign").toString() == 'true'
-  }
-  sign publishing.publications
-}
-
-artifacts {
-  archives jar
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-  archiveClassifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  archiveClassifier = 'javadoc'
-  from javadoc.destinationDir
-}
-
-task install(dependsOn: publishToMavenLocal) {
-  group = 'Publishing'
-  description = 'Installs artifacts to local Maven repository'
+    required {
+        publishProperty("sign").toString() == 'true'
+    }
+    sign publishing.publications
 }
 
 publishing {

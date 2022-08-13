@@ -1,10 +1,18 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+}
+
 rootProject.name = 'febit-rectify'
 
-subModule 'rectify-core'
-subModule 'rectify-flink'
-subModule 'rectify-sqlline'
+sub 'rectify-core'
+sub 'rectify-flink'
+sub 'rectify-sqlline'
 
-def subModule(String name) {
+def sub(String name) {
   include ':febit-' + name
   project(':febit-' + name).projectDir = file(name)
 }

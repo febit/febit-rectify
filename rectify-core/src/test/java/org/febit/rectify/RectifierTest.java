@@ -251,25 +251,25 @@ public class RectifierTest {
 
         assertEquals(4, breakpoints.size());
         breakpoint = breakpoints.get(0);
-        assertEquals(0, breakpoint._1.getIndex());
-        assertNull(breakpoint._1.getField());
-        assertEquals("$.status > 0", breakpoint._1.getExpr());
-        assertEquals(true, breakpoint._2);
+        assertEquals(0, breakpoint.a.getIndex());
+        assertNull(breakpoint.a.getField());
+        assertEquals("$.status > 0", breakpoint.a.getExpr());
+        assertEquals(true, breakpoint.b);
         breakpoint = breakpoints.get(1);
-        assertEquals(1, breakpoint._1.getIndex());
-        assertNull(breakpoint._1.getField());
-        assertEquals("$.status < 100 || \"status should <100\"", breakpoint._1.getExpr());
-        assertEquals(true, breakpoint._2);
+        assertEquals(1, breakpoint.a.getIndex());
+        assertNull(breakpoint.a.getField());
+        assertEquals("$.status < 100 || \"status should <100\"", breakpoint.a.getExpr());
+        assertEquals(true, breakpoint.b);
         breakpoint = breakpoints.get(2);
-        assertEquals(2, breakpoint._1.getIndex());
-        assertNull(breakpoint._1.getField());
-        assertEquals("isEven || \"status is not even\"", breakpoint._1.getExpr());
-        assertEquals(true, breakpoint._2);
+        assertEquals(2, breakpoint.a.getIndex());
+        assertNull(breakpoint.a.getField());
+        assertEquals("isEven || \"status is not even\"", breakpoint.a.getExpr());
+        assertEquals(true, breakpoint.b);
         breakpoint = breakpoints.get(3);
-        assertEquals(1, breakpoint._1.getIndex());
-        assertEquals("enable", breakpoint._1.getField());
-        assertEquals("$$ || \"enable is falsely\"", breakpoint._1.getExpr());
-        assertEquals(true, breakpoint._2);
+        assertEquals(1, breakpoint.a.getIndex());
+        assertEquals("enable", breakpoint.a.getField());
+        assertEquals("$$ || \"enable is falsely\"", breakpoint.a.getExpr());
+        assertEquals(true, breakpoint.b);
 
         breakpoints.clear();
         consumer = new AssertSingleRectifierConsumer<>();
@@ -287,7 +287,7 @@ public class RectifierTest {
 
         assertEquals(3, breakpoints.size());
         breakpoint = breakpoints.get(2);
-        assertEquals("status is not even", breakpoint._2);
+        assertEquals("status is not even", breakpoint.b);
     }
 
     private static class AssertSingleRectifierConsumer<O> implements RectifierConsumer<O> {

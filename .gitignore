@@ -1,12 +1,8 @@
 .DS_Store
 
-dist/
-out/
 target/
 build/
 
-!**/src/**/dist/
-!**/src/**/out/
 !**/src/**/target/
 !**/src/**/build/
 
@@ -19,6 +15,3 @@ lombok.config
 .project
 .classpath
 .settings
-nbproject
-nb-configuration.xml
-nbactions.xml

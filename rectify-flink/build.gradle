@@ -10,8 +10,8 @@ ext {
 dependencies {
     api project(":febit-rectify-core")
     compileOnly 'org.apache.flink:flink-java'
-    compileOnly "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
+    compileOnly "org.apache.flink:flink-streaming-java"
 
-    testImplementation "org.apache.flink:flink-streaming-java_${versions.flinkScala}"
-    testImplementation "org.apache.flink:flink-clients_${versions.flinkScala}"
+    testImplementation "org.apache.flink:flink-streaming-java"
+    testImplementation "org.apache.flink:flink-clients"
 }
