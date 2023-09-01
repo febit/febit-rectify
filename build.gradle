@@ -1,6 +1,8 @@
 plugins {
   id 'com.github.hierynomus.license' version '0.16.1'
-  id 'org.febit.standard-java' version '1.0.0-SNAPSHOT'
+  id 'org.febit.standard-java' version '1.1.0-SNAPSHOT'
+  id 'org.febit.standard-maven-publish' version '1.1.0-SNAPSHOT'
+  id 'org.febit.codegen-module' version '1.1.0-SNAPSHOT'
 }
 
 group 'org.febit.rectify'
@@ -8,33 +10,35 @@ version '1.7.0-SNAPSHOT'
 
 ext {
   versions = [
-      slf4j              : '1.7.36',
-      jsr305             : '3.0.2',
-      commonsLang3       : '3.12.0',
-      commonsCollections4: '4.4',
-      assertj            : '3.24.2',
-      jackson            : '2.14.2',
-      junit              : '5.9.2',
-      wit                : '2.7.0-beta',
-      febit              : '3.0.0-SNAPSHOT',
-      calcite            : '1.34.0',
-      sqlline            : '1.12.0',
-      flink              : '1.17.0',
+      febitCommons: '3.0.0-SNAPSHOT',
+      wit         : '2.7.0-beta',
+      calcite     : '1.34.0',
+      sqlline     : '1.12.0',
+      flink       : '1.17.0',
   ]
 }
 
-subprojects {
+allprojects {
+  apply plugin: 'com.github.hierynomus.license'
+
 
   group rootProject.group
   version rootProject.version
 
-  apply plugin: 'java'
-  apply plugin: 'com.github.hierynomus.license'
+  repositories {
+    maven { url "https://maven.aliyun.com/repository/central" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+  }
 
-  apply from: "${rootDir}/gradle/publish-maven.gradle"
+  standardMavenPublish {
+    pom {
+      customPom(it)
+    }
+  }
 
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  codegenModule {
+    defaultTemplate = fromFile("$rootDir/etc/module.java.tmpl")
+  }
 
   license {
     mapping {
@@ -43,49 +47,33 @@ subprojects {
     include '**/*.java'
     strictCheck false
     skipExistingHeaders false
-    header rootProject.file('etc/licenseheader.txt')
+    header rootProject.file('etc/license-header.txt')
   }
 
-  repositories {
-    mavenLocal()
-    maven { url "https://maven.aliyun.com/repository/central" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-  }
+}
 
-  tasks.withType(Test) {
-    testLogging.events = ["FAILED", "PASSED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR"]
-  }
+configure(subprojects.findAll {
+  !it.name.endsWith('-bom')
+}) {
+  apply plugin: 'java-library'
 
-  tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.debug = true
-    options.compilerArgs << "-Xlint:unchecked"
-    options.compilerArgs << "-Xlint:deprecation"
-  }
+  java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
-  tasks.withType(Javadoc) {
-    options.encoding = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
+    withSourcesJar()
   }
 
   dependencyManagement {
     imports {
-      mavenBom "com.fasterxml.jackson:jackson-bom:${versions.jackson}"
+      mavenBom "org.febit:febit-commons-dependencies:${versions.febitCommons}"
     }
     dependencies {
-      dependencySet(group: 'org.slf4j', version: "${versions.slf4j}") {
-        entry 'slf4j-api'
-        entry 'slf4j-simple'
-      }
       dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
         entry "flink-table-common"
         entry "flink-streaming-java"
         entry "flink-clients"
       }
-      dependency "com.google.code.findbugs:jsr305:${versions.jsr305}"
-      dependency "org.apache.commons:commons-collections4:${versions.commonsCollections4}"
-      dependency "org.apache.commons:commons-lang3:${versions.commonsLang3}"
-      dependency "org.febit:febit-lang:${versions.febit}"
       dependency "org.febit.wit:wit-core:${versions.wit}"
       dependency "org.apache.avro:avro:${versions.avro}"
       dependency "org.apache.calcite:calcite-core:${versions.calcite}"
@@ -98,13 +86,46 @@ subprojects {
   }
 
   dependencies {
-    compileOnly 'com.google.code.findbugs:jsr305'
+    compileOnly 'org.febit:febit-annotations-optional'
+    testCompileOnly 'org.febit:febit-annotations-optional'
 
-    testImplementation 'org.febit:febit-lang'
-    testImplementation 'org.slf4j:slf4j-api'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
-    testImplementation "org.assertj:assertj-core:${versions.assertj}"
+    testImplementation 'org.febit:febit-test-common'
     testRuntimeOnly 'org.slf4j:slf4j-simple'
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  }
+}
+
+def customPom(MavenPom pom) {
+  pom.with {
+    url = 'https://github.com/febit/febit-rectify'
+    organization {
+      name = 'Febit'
+      url = 'https://github.com/febit'
+    }
+    licenses {
+      license {
+        name = 'Apache License, Version 2.0'
+        url = 'https://github.com/febit/febit-rectify/blob/master/LICENSE.txt'
+        distribution = 'repo'
+      }
+    }
+    scm {
+      url = 'https://github.com/febit/febit-rectify'
+      connection = 'scm:git:https://github.com/febit/febit-rectify.git'
+      developerConnection = 'scm:git:https://github.com/febit/febit-rectify.git'
+    }
+    issueManagement {
+      system = 'GitHub'
+      url = 'https://github.com/febit/febit-rectify/issues'
+    }
+    developers {
+      developer {
+        id = 'zqq'
+        name = 'Zhu Qingqing'
+        email = 'zqq@febit.org'
+        timezone = '+8'
+      }
+    }
   }
 }

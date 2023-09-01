@@ -8,6 +8,7 @@ pluginManagement {
 
 rootProject.name = 'febit-rectify'
 
+sub 'rectify-bom'
 sub 'rectify-core'
 sub 'rectify-flink'
 sub 'rectify-sqlline'
