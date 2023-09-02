@@ -16,8 +16,8 @@
 package org.febit.rectify.format;
 
 import org.apache.commons.lang3.StringUtils;
+import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.util.JacksonUtils;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -31,7 +31,7 @@ public class JsonSourceFormat implements SourceFormat<String, Object> {
         }
         Map<String, Object> values;
         try {
-            values = JacksonUtils.parseAsNamedMap(input);
+            values = JacksonUtils.parseToNamedMap(input);
         } catch (Exception e) {
             //XXX: log this bad case
             return;

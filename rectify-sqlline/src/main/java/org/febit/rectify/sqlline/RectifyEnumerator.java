@@ -37,13 +37,13 @@ class RectifyEnumerator implements Enumerator<Object[]> {
     private final Rectifier<String, Object[]> rectifier;
     private final AtomicBoolean cancelFlag;
 
-    private final Queue<Object[]> peddings;
+    private final Queue<Object[]> pending;
 
     private RectifyEnumerator(BufferedReader reader, Rectifier<String, Object[]> rectifier, AtomicBoolean cancelFlag) {
         this.reader = reader;
         this.rectifier = rectifier;
         this.cancelFlag = cancelFlag;
-        this.peddings = new ArrayDeque<>();
+        this.pending = new ArrayDeque<>();
     }
 
     static RectifyEnumerator create(RectifierConf conf, Source source, SourceFormat<String, Object> sourceFormat, AtomicBoolean cancelFlag) throws IOException {
@@ -55,7 +55,7 @@ class RectifyEnumerator implements Enumerator<Object[]> {
 
     @Override
     public Object[] current() {
-        return peddings.element();
+        return pending.element();
     }
 
     @Override
@@ -65,9 +65,9 @@ class RectifyEnumerator implements Enumerator<Object[]> {
 
     private boolean moveNext(boolean poll) {
         if (poll) {
-            peddings.poll();
+            pending.poll();
         }
-        if (!peddings.isEmpty()) {
+        if (!pending.isEmpty()) {
             return true;
         }
         if (cancelFlag.get()) {
@@ -86,7 +86,7 @@ class RectifyEnumerator implements Enumerator<Object[]> {
         }
         rectifier.process(nextLine, (out, raw, reason) -> {
             if (out != null) {
-                peddings.add(out);
+                pending.add(out);
             }
             // TODO: should record errors.
         });

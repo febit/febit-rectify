@@ -19,11 +19,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.util.IndexedArrayBag;
-import org.febit.rectify.util.StringWalker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

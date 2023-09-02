@@ -17,6 +17,7 @@ package org.febit.rectify.sqlline;
 
 import lombok.Data;
 import lombok.val;
+import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
 
@@ -35,11 +36,11 @@ public class TableConfig {
     private List<RectifierConf.Column> columns;
 
     public static TableConfig fromYaml(Reader reader) {
-        return JacksonYamlUtils.parse(reader, TableConfig.class);
+        return JacksonUtils.yaml().parse(reader, TableConfig.class);
     }
 
     public static TableConfig fromYaml(String yaml) {
-        return JacksonYamlUtils.parse(yaml, TableConfig.class);
+        return JacksonUtils.yaml().parse(yaml, TableConfig.class);
     }
 
     public SourceFormat<String, Object> createSourceFormat() {

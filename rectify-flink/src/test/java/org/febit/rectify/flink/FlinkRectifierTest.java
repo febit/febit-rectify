@@ -18,14 +18,19 @@ package org.febit.rectify.flink;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.types.Row;
+import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.format.JsonSourceFormat;
-import org.febit.rectify.util.JacksonUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FlinkRectifierTest {
 
