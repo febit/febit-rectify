@@ -15,6 +15,8 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
+
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -27,14 +29,14 @@ public interface Rectifier<I, O> {
      *
      * @param input input
      */
-    void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed);
+    void process(@Nullable I input, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed);
 
     /**
      * Process input one by one.
      *
      * @param input input
      */
-    default void process(I input, RectifierConsumer<O> onCompleted) {
+    default void process(@Nullable I input, RectifierConsumer<O> onCompleted) {
         process(input, onCompleted::onSucceed, onCompleted::onFailed);
     }
 
@@ -43,7 +45,7 @@ public interface Rectifier<I, O> {
      *
      * @param input input
      */
-    default void process(I input, Consumer<O> onSucceed, Consumer<String> onFailed) {
+    default void process(@Nullable I input, Consumer<O> onSucceed, Consumer<String> onFailed) {
         process(input, (o, raw) -> onSucceed.accept(o), (reason, raw) -> onFailed.accept(reason));
     }
 

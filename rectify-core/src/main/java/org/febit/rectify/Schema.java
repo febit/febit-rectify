@@ -15,7 +15,9 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -31,7 +33,7 @@ public interface Schema extends Serializable {
         return parse(null, null, str);
     }
 
-    static Schema parse(String space, String name, String str) {
+    static Schema parse(@Nullable String space, @Nullable String name, String str) {
         return Schemas.parse(space, name, str);
     }
 
@@ -89,14 +91,17 @@ public interface Schema extends Serializable {
         return isType(Type.STRUCT);
     }
 
+    @Nullable
     default String comment() {
         return null;
     }
 
+    @Nullable
     default String name() {
         return getType().getName();
     }
 
+    @Nullable
     default String fullname() {
         return name();
     }
@@ -111,6 +116,7 @@ public interface Schema extends Serializable {
     /**
      * If this is a struct, enum or fixed, returns its namespace.
      */
+    @Nullable
     default String namespace() {
         throw new UnsupportedOperationException("Not a named type: " + this);
     }
@@ -118,10 +124,10 @@ public interface Schema extends Serializable {
     /**
      * If this is a struct, returns the Field with the given name.
      *
-     * @param fieldname field name
+     * @param name field name
      * @return field
      */
-    default Field field(String fieldname) {
+    default Field field(String name) {
         throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
@@ -146,6 +152,7 @@ public interface Schema extends Serializable {
         throw new UnsupportedOperationException("Not an array, map or optional: " + this);
     }
 
+    @RequiredArgsConstructor
     enum Type {
 
         OPTIONAL,
@@ -165,7 +172,7 @@ public interface Schema extends Serializable {
         DATE,
         TIME,
         DATETIME,
-        DATETIME_WITH_TIMEZONE("datetimez"),
+        DATETIME_WITH_TIMEZONE("datetimetz"),
         ;
 
         @Getter
@@ -173,10 +180,6 @@ public interface Schema extends Serializable {
 
         Type() {
             this.name = this.name().toLowerCase();
-        }
-
-        Type(String name) {
-            this.name = name;
         }
     }
 
@@ -187,6 +190,7 @@ public interface Schema extends Serializable {
 
         Schema schema();
 
+        @Nullable
         String comment();
     }
 

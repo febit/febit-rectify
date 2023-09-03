@@ -15,8 +15,9 @@
  */
 package org.febit.rectify.util;
 
+import jakarta.annotation.Nullable;
 import org.febit.lang.util.TimeUtils;
-import org.febit.rectify.ResultModel;
+import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
 import org.febit.rectify.TestSchemas;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ResultModelUtilsTest {
+class OutputModelUtilsTest {
 
     private static List<Object> asList(Object... items) {
         return Arrays.asList(items);
@@ -56,7 +57,7 @@ class ResultModelUtilsTest {
         ZonedDateTime time = ZonedDateTime.parse("2022-01-23T02:03:56+07:00");
 
         @SuppressWarnings("unchecked")
-        List<Object> record = (List<Object>) ResultModelUtils.convert(schema, namedMap(
+        List<Object> record = (List<Object>) OutputModelUtils.convert(schema, namedMap(
                 "id", 1234L,
                 "name", "Mr.R",
                 "float", 11111D,
@@ -81,7 +82,7 @@ class ResultModelUtilsTest {
                         )
                 ),
                 "unused", "unused field"
-        ), new ListResultModel());
+        ), new ListOutputModel());
 
         assertEquals(asArray(
                 // 0 id
@@ -153,8 +154,7 @@ class ResultModelUtilsTest {
         ), record);
     }
 
-
-    private static class ListResultModel implements ResultModel<List<Object>> {
+    private static class ListOutputModel implements OutputModel<List<Object>> {
 
         @Override
         public List<Object> newStruct(Schema schema) {
@@ -162,7 +162,7 @@ class ResultModelUtilsTest {
         }
 
         @Override
-        public void setField(List<Object> record, Schema.Field field, Object val) {
+        public void setField(List<Object> record, Schema.Field field, @Nullable Object val) {
             record.set(field.pos(), val);
         }
 

@@ -15,15 +15,16 @@
  */
 package org.febit.rectify.flink;
 
+import jakarta.annotation.Nullable;
 import org.apache.flink.types.Row;
-import org.febit.rectify.ResultModel;
+import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
 
-public class RowResultModel implements ResultModel<Row> {
+public class RowOutputModel implements OutputModel<Row> {
 
-    private static final RowResultModel INSTANCE = new RowResultModel();
+    private static final RowOutputModel INSTANCE = new RowOutputModel();
 
-    public static RowResultModel get() {
+    public static RowOutputModel get() {
         return INSTANCE;
     }
 
@@ -33,10 +34,11 @@ public class RowResultModel implements ResultModel<Row> {
     }
 
     @Override
-    public void setField(Row record, Schema.Field field, Object val) {
+    public void setField(Row record, Schema.Field field, @Nullable Object val) {
         record.setField(field.pos(), val);
     }
 
+    @Nullable
     @Override
     public Object getField(Row record, Schema.Field field) {
         return record.getField(field.pos());

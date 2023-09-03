@@ -15,26 +15,32 @@
  */
 package org.febit.rectify.engine;
 
+import jakarta.annotation.Nullable;
+
+import java.util.Objects;
+
 public class FilterBreakpoint {
 
     private final int index;
+    @Nullable
     private final String field;
     private final String expr;
 
-    private FilterBreakpoint(int index, String field, String expr) {
+    private FilterBreakpoint(int index, @Nullable String field, String expr) {
         this.index = index;
         this.field = field;
         this.expr = expr;
     }
 
-    public static FilterBreakpoint of(Integer index, String expr) {
-        if (index == null) {
-            index = 0;
-        }
+    public static FilterBreakpoint of(@Nullable Integer index, String expr) {
         return of(index, null, expr);
     }
 
-    public static FilterBreakpoint of(Integer index, String field, String expr) {
+    public static FilterBreakpoint of(@Nullable Integer index, @Nullable String field, @Nullable String expr) {
+        if (index == null) {
+            index = 0;
+        }
+        Objects.requireNonNull(expr);
         return new FilterBreakpoint(index, field, expr);
     }
 
@@ -47,6 +53,7 @@ public class FilterBreakpoint {
         return index;
     }
 
+    @Nullable
     public String getField() {
         return field;
     }

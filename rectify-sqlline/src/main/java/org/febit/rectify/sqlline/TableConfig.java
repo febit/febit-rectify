@@ -16,7 +16,6 @@
 package org.febit.rectify.sqlline;
 
 import lombok.Data;
-import lombok.val;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
@@ -24,6 +23,7 @@ import org.febit.rectify.SourceFormat;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 public class TableConfig {
@@ -36,11 +36,15 @@ public class TableConfig {
     private List<RectifierConf.Column> columns;
 
     public static TableConfig fromYaml(Reader reader) {
-        return JacksonUtils.yaml().parse(reader, TableConfig.class);
+        var conf = JacksonUtils.yaml().parse(reader, TableConfig.class);
+        Objects.requireNonNull(conf);
+        return conf;
     }
 
     public static TableConfig fromYaml(String yaml) {
-        return JacksonUtils.yaml().parse(yaml, TableConfig.class);
+        var conf = JacksonUtils.yaml().parse(yaml, TableConfig.class);
+        Objects.requireNonNull(conf);
+        return conf;
     }
 
     public SourceFormat<String, Object> createSourceFormat() {
@@ -48,7 +52,7 @@ public class TableConfig {
     }
 
     public RectifierConf toRectifierConf() {
-        val conf = RectifierConf.create()
+        var conf = RectifierConf.create()
                 .name(name);
         if (globalCodes != null) {
             conf.frontSegments(globalCodes);

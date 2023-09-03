@@ -16,7 +16,6 @@
 package org.febit.rectify.sqlline;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.calcite.util.Sources;
@@ -59,14 +58,14 @@ class RectifySchema extends AbstractSchema {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            val table = createTable(config);
+            var table = createTable(config);
             map.put(config.getName(), table);
         }
         return Collections.unmodifiableMap(map);
     }
 
     private Table createTable(TableConfig config) {
-        val source = Sources.of(new File(directoryFile, config.getSource()));
+        var source = Sources.of(new File(directoryFile, config.getSource()));
         return new RectifyTable(source, config.toRectifierConf(), config.createSourceFormat());
     }
 }

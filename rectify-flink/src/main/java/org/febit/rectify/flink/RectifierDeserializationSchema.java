@@ -19,6 +19,7 @@ import lombok.Getter;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
+import org.febit.lang.SingleElementConsumer;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.Schema;
 import org.febit.rectify.SourceFormat;
@@ -36,7 +37,7 @@ public class RectifierDeserializationSchema implements DeserializationSchema<Row
 
     @Override
     public Row deserialize(byte[] message) {
-        AssertSingleConsumer<Row> cell = new AssertSingleConsumer<>();
+        var cell = new SingleElementConsumer<Row>();
         this.rectifier.process(message, cell);
         return cell.getValue();
     }

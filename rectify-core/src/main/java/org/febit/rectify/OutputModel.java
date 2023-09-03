@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.function;
+package org.febit.rectify;
 
 import jakarta.annotation.Nullable;
-import org.febit.wit.InternalContext;
-import org.febit.wit.lang.MethodDeclare;
 
-import static org.febit.rectify.util.Args.int0;
-import static org.febit.rectify.util.Args.string1;
-import static org.febit.rectify.util.Args.string2;
+/**
+ * Model for outputs.
+ *
+ * @param <R>
+ * @see OutputModels
+ */
+public interface OutputModel<R> {
 
-@FunctionalInterface
-public interface IntStrStrFunc extends MethodDeclare {
+    R newStruct(Schema schema);
+
+    void setField(R record, Schema.Field field, @Nullable Object value);
 
     @Nullable
-    Object invoke(@Nullable Integer i, @Nullable String str1, @Nullable String str2);
-
-    @Nullable
-    @Override
-    default Object invoke(InternalContext context, Object[] args) {
-        return invoke(int0(args), string1(args), string2(args));
-    }
+    Object getField(R record, Schema.Field field);
 }

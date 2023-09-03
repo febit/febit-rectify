@@ -15,6 +15,7 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -26,7 +27,7 @@ class RectifierSourceFormatWrapper<S, I, O> implements Rectifier<S, O> {
     private final SourceFormat<S, I> sourceFormat;
     private final Rectifier<I, O> delegated;
 
-    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
+    public void process(@Nullable S source, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed) {
         sourceFormat.process(source, in -> delegated.process(in, onSucceed, onFailed));
     }
 

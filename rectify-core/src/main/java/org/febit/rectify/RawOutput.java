@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.engine;
+package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
+import java.util.HashMap;
 
 /**
- * Special exception to impl exit().
+ * Raw result outed by script engine.
  */
-public class ExitException extends RuntimeException {
-
-    private final String reason;
-
-    public ExitException(@Nullable String reason) {
-        // disable stack trace
-        super(reason != null ? reason : "", null, true, false);
-        this.reason = reason;
-    }
-
-    public String getReason() {
-        return reason;
-    }
+public class RawOutput extends HashMap<String, Object> {
 }

@@ -26,8 +26,13 @@ class RectifierDebugImpl<I, O> extends RectifierImpl<I, O> {
 
     private final BreakpointListener breakpointListener;
 
-    protected RectifierDebugImpl(Template script, Schema schema, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
-        super(script, schema, resultModel);
+    protected RectifierDebugImpl(
+            Template script,
+            Schema schema,
+            OutputModel<O> outputModel,
+            BreakpointListener breakpointListener
+    ) {
+        super(script, schema, outputModel);
         Objects.requireNonNull(breakpointListener);
         this.breakpointListener = breakpointListener;
     }

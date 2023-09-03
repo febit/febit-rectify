@@ -17,7 +17,11 @@ package org.febit.rectify;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import lombok.*;
+import jakarta.annotation.Nullable;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.febit.rectify.engine.ScriptBuilder;
 import org.febit.wit.Engine;
 import org.febit.wit.Template;
@@ -26,7 +30,11 @@ import org.febit.wit.exceptions.ResourceNotFoundException;
 
 import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -50,6 +58,9 @@ public class RectifierConf implements Serializable {
     private List<Segment> frontSegments = new ArrayList<>();
     private EngineProvider engineProvider = RectifierConf::defaultEngine;
 
+    @Nullable
+    private BreakpointListener breakpointListener;
+
     public static RectifierConf create() {
         return new RectifierConf();
     }
@@ -63,11 +74,11 @@ public class RectifierConf implements Serializable {
     }
 
     public Schema resolveSchema(Predicate<Column> filter) {
-        val builder = Schemas.structSchemaBuilder();
+        var builder = Schemas.newStruct();
         this.columns.stream()
                 .filter(filter)
                 .forEach(col -> {
-                    val colSchema = Schema.parse(name, col.name(), col.type());
+                    var colSchema = Schema.parse(name, col.name(), col.type());
                     builder.field(col.name(), colSchema, col.comment());
                 });
         return builder.build();
@@ -80,6 +91,11 @@ public class RectifierConf implements Serializable {
 
     public RectifierConf name(String name) {
         setName(name);
+        return this;
+    }
+
+    public RectifierConf breakpointListener(@Nullable BreakpointListener listener) {
+        setBreakpointListener(listener);
         return this;
     }
 
@@ -111,6 +127,7 @@ public class RectifierConf implements Serializable {
         return frontSegment(context -> context.append(code));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public RectifierConf frontSegments(Collection<String> codes) {
         codes.forEach(this::frontSegment);
         return this;
@@ -120,13 +137,16 @@ public class RectifierConf implements Serializable {
         return column(type, name, expr, null, null);
     }
 
-    public RectifierConf column(String type, String name, String expr, String checkExpr) {
+    public RectifierConf column(String type, String name, String expr, @Nullable String checkExpr) {
         return column(type, name, expr, checkExpr, null);
     }
 
-    public RectifierConf column(String type, String name,
-                                String expr, String checkExpr,
-                                String comment) {
+    public RectifierConf column(
+            String type, String name,
+            String expr,
+            @Nullable String checkExpr,
+            @Nullable String comment
+    ) {
         Column column = new Column(type, name, expr, checkExpr, comment);
         return column(column);
     }
@@ -147,48 +167,21 @@ public class RectifierConf implements Serializable {
      * @return Rectifier
      */
     public <I> Rectifier<I, Map<String, Object>> build() {
-        return build(ResultModels.asMap(), null);
-    }
-
-    /**
-     * Create a {@code DebugRectifier} by conf.
-     * <p>
-     * WARN: Poor performance, not for production environment.
-     *
-     * @param breakpointListener Wit breakpoint listener
-     * @param <I>                input type
-     * @return Rectifier
-     */
-    public <I> Rectifier<I, Map<String, Object>> build(BreakpointListener breakpointListener) {
-        return build(ResultModels.asMap(), breakpointListener);
+        return build(OutputModels.asMap());
     }
 
     /**
      * Create a {@code Rectifier} by conf.
      *
-     * @param resultModel ResultModel
+     * @param outputModel OutputModel
      * @param <I>         input Type
      * @param <O>         out type
      * @return Rectifier
      */
-    public <I, O> Rectifier<I, O> build(ResultModel<O> resultModel) {
-        return build(resultModel, null);
-    }
-
-    /**
-     * Create a {@code DebugRectifier} by conf.
-     * <p>
-     * WARN: Poor performance, not for production environment.
-     *
-     * @param resultModel        ResultModel
-     * @param breakpointListener Wit breakpoint listener
-     * @param <I>                input Type
-     * @param <O>                out type
-     */
-    public <I, O> Rectifier<I, O> build(ResultModel<O> resultModel, BreakpointListener breakpointListener) {
+    public <I, O> Rectifier<I, O> build(OutputModel<O> outputModel) {
         // init script
-        val isDebugEnabled = breakpointListener != null;
-        val schema = resolveSchema();
+        var isDebugEnabled = breakpointListener != null;
+        var schema = resolveSchema();
 
         final Template script;
         try {
@@ -201,42 +194,26 @@ public class RectifierConf implements Serializable {
         }
 
         if (breakpointListener == null) {
-            return new RectifierImpl<>(script, schema, resultModel);
+            return new RectifierImpl<>(script, schema, outputModel);
         }
-        return new RectifierDebugImpl<>(script, schema, resultModel, breakpointListener);
+        return new RectifierDebugImpl<>(script, schema, outputModel, breakpointListener);
     }
 
     public <S, I> Rectifier<S, Map<String, Object>> build(SourceFormat<S, I> sourceFormat) {
-        return build(sourceFormat, ResultModels.asMap(), null);
+        return build(sourceFormat, OutputModels.asMap());
     }
 
-    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, ResultModel<O> resultModel) {
-        return build(sourceFormat, resultModel, null);
-    }
-
-    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, BreakpointListener breakpointListener) {
-        return build(sourceFormat, null, breakpointListener);
-    }
-
-    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
-        Rectifier<I, O> inner = build(resultModel, breakpointListener);
+    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, OutputModel<O> outputModel) {
+        Rectifier<I, O> inner = build(outputModel);
         return inner.with(sourceFormat);
     }
 
     public <S, I> Rectifier<S, Map<String, Object>> build(Function<S, I> transfer) {
-        return build(transfer, ResultModels.asMap(), null);
+        return build(transfer, OutputModels.asMap());
     }
 
-    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, ResultModel<O> resultModel) {
-        return build(transfer, resultModel, null);
-    }
-
-    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, BreakpointListener breakpointListener) {
-        return build(transfer, null, breakpointListener);
-    }
-
-    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, ResultModel<O> resultModel, BreakpointListener breakpointListener) {
-        Rectifier<I, O> inner = build(resultModel, breakpointListener);
+    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, OutputModel<O> outputModel) {
+        Rectifier<I, O> inner = build(outputModel);
         return inner.with(transfer);
     }
 
@@ -268,7 +245,11 @@ public class RectifierConf implements Serializable {
         private final String type;
         private final String name;
         private final String expr;
+
+        @Nullable
         private final String checkExpr;
+
+        @Nullable
         private final String comment;
 
         public String type() {
@@ -283,10 +264,12 @@ public class RectifierConf implements Serializable {
             return expr;
         }
 
+        @Nullable
         public String checkExpr() {
             return checkExpr;
         }
 
+        @Nullable
         public String comment() {
             return comment;
         }

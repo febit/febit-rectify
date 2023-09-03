@@ -15,16 +15,21 @@
  */
 package org.febit.rectify.function;
 
+import jakarta.annotation.Nullable;
 import org.febit.wit.InternalContext;
 import org.febit.wit.lang.MethodDeclare;
 
-import static org.febit.rectify.util.Args.*;
+import static org.febit.rectify.util.Args.string0;
+import static org.febit.rectify.util.Args.string1;
+import static org.febit.rectify.util.Args.string2;
 
 @FunctionalInterface
 public interface StrStrStrFunc extends MethodDeclare {
 
-    Object invoke(String a, String b, String c);
+    @Nullable
+    Object invoke(@Nullable String a, @Nullable String b, @Nullable String c);
 
+    @Nullable
     @Override
     default Object invoke(InternalContext context, Object[] args) {
         return invoke(string0(args), string1(args), string2(args));

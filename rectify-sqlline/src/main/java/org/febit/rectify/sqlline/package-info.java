@@ -13,24 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.engine;
+@NonNullApi
+package org.febit.rectify.sqlline;
 
-import jakarta.annotation.Nullable;
-
-/**
- * Special exception to impl exit().
- */
-public class ExitException extends RuntimeException {
-
-    private final String reason;
-
-    public ExitException(@Nullable String reason) {
-        // disable stack trace
-        super(reason != null ? reason : "", null, true, false);
-        this.reason = reason;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-}
+import org.febit.lang.annotation.NonNullApi;

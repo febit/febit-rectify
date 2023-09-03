@@ -23,7 +23,6 @@ import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.febit.rectify.Schema;
 
-import java.util.List;
 import java.util.Objects;
 
 @UtilityClass
@@ -34,11 +33,11 @@ public class TypeInfoUtils {
         if (!schema.isStructType()) {
             throw new IllegalArgumentException("Not a record: " + schema);
         }
-        List<Schema.Field> fields = schema.fields();
-        TypeInformation<?>[] fieldTypes = new TypeInformation[fields.size()];
-        String[] fieldNames = new String[fields.size()];
+        var fields = schema.fields();
+        var fieldTypes = new TypeInformation[fields.size()];
+        var fieldNames = new String[fields.size()];
         for (int i = 0; i < fields.size(); i++) {
-            Schema.Field field = fields.get(i);
+            var field = fields.get(i);
             fieldNames[i] = field.name();
             fieldTypes[i] = of(field.schema());
         }
@@ -74,10 +73,10 @@ public class TypeInfoUtils {
             case STRUCT:
                 return ofRowType(schema);
             case ARRAY:
-                TypeInformation<?> elementType = of(schema.valueType());
+                var elementType = of(schema.valueType());
                 return new ListTypeInfo<>(elementType);
             case MAP:
-                TypeInformation<?> valType = of(schema.valueType());
+                var valType = of(schema.valueType());
                 return new MapTypeInfo<>(Types.STRING, valType);
             case OPTIONAL:
                 return of(schema.valueType());

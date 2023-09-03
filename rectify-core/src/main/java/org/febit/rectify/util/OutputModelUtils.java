@@ -15,10 +15,11 @@
  */
 package org.febit.rectify.util;
 
+import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.collections4.IteratorUtils;
 import org.febit.lang.util.TimeUtils;
-import org.febit.rectify.ResultModel;
+import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
 
 import java.math.BigDecimal;
@@ -40,9 +41,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 @UtilityClass
-public class ResultModelUtils {
+public class OutputModelUtils {
 
-    public static Object convert(Schema schema, Object value, ResultModel<?> model) {
+    @Nullable
+    public static Object convert(Schema schema, @Nullable Object value, OutputModel<?> model) {
         if (value == null) {
             return getDefaultValue(schema, model);
         }
@@ -73,16 +75,16 @@ public class ResultModelUtils {
                 return toInstant(value);
             case MAP:
                 if (value instanceof Map) {
-                    return convertToMap(schema, (Map<?, ?>) value, model);
+                    return constructMap(schema, (Map<?, ?>) value, model);
                 }
                 throw new IllegalArgumentException("Unsupported map type: " + value.getClass());
             case STRUCT:
                 if (value instanceof Map) {
-                    return convertToStruct(schema, (Map<?, ?>) value, model);
+                    return constructStruct(schema, (Map<?, ?>) value, model);
                 }
                 throw new IllegalArgumentException("Unsupported record type: " + value.getClass());
             case ARRAY:
-                return convertToArray(schema, value, model);
+                return constructArray(schema, value, model);
             case BYTES:
                 // TODO need support bytes
             default:
@@ -90,6 +92,7 @@ public class ResultModelUtils {
         }
     }
 
+    @Nullable
     private static Instant toInstant(Object obj) {
         if (obj instanceof Temporal) {
             return TimeUtils.instant((Temporal) obj);
@@ -97,6 +100,7 @@ public class ResultModelUtils {
         return TimeUtils.parseInstant(obj.toString());
     }
 
+    @Nullable
     private static ZonedDateTime toZonedDateTime(Object obj) {
         if (obj instanceof Temporal) {
             return TimeUtils.zonedDateTime((Temporal) obj);
@@ -104,6 +108,7 @@ public class ResultModelUtils {
         return TimeUtils.parseZonedDateTime(obj.toString());
     }
 
+    @Nullable
     private static LocalDateTime toLocalDateTime(Object obj) {
         if (obj instanceof TemporalAccessor) {
             return TimeUtils.localDateTime((TemporalAccessor) obj);
@@ -111,6 +116,7 @@ public class ResultModelUtils {
         return TimeUtils.parseDateTime(obj.toString());
     }
 
+    @Nullable
     private static LocalDate toLocalDate(Object obj) {
         if (obj instanceof TemporalAccessor) {
             return TimeUtils.localDate((TemporalAccessor) obj);
@@ -118,6 +124,7 @@ public class ResultModelUtils {
         return TimeUtils.parseDate(obj.toString());
     }
 
+    @Nullable
     private static LocalTime toLocalTime(Object obj) {
         if (obj instanceof TemporalAccessor) {
             return TimeUtils.localTime((TemporalAccessor) obj);
@@ -125,7 +132,7 @@ public class ResultModelUtils {
         return TimeUtils.parseTime(obj.toString());
     }
 
-    private static Boolean toBoolean(Object raw) {
+    private static Boolean toBoolean(@Nullable Object raw) {
         if (raw instanceof Boolean) {
             return (Boolean) raw;
         }
@@ -135,11 +142,33 @@ public class ResultModelUtils {
         if (raw instanceof Number) {
             return raw.equals(1);
         }
-        String str = raw.toString().trim().toLowerCase();
-        return str.equals("true") || str.equals("on");
+        if (raw instanceof String && isTrue((String) raw)) {
+            return true;
+        }
+        var text = raw.toString().trim().toLowerCase();
+        return isTrue(text);
     }
 
-    private static <T extends Number> T toNumber(Object raw, Function<Number, T> converter, T defaultValue) {
+    private static Boolean isTrue(String text) {
+        switch (text) {
+            case "true":
+            case "True":
+            case "TRUE":
+            case "on":
+            case "ON":
+            case "1":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Nullable
+    private static <T extends Number> T toNumber(
+            @Nullable Object raw,
+            Function<Number, T> converter,
+            @Nullable T defaultValue
+    ) {
         if (raw instanceof Number) {
             return converter.apply((Number) raw);
         }
@@ -154,7 +183,8 @@ public class ResultModelUtils {
         return converter.apply(number);
     }
 
-    private static Object getDefaultValue(Schema schema, ResultModel<?> model) {
+    @Nullable
+    private static Object getDefaultValue(Schema schema, OutputModel<?> model) {
         switch (schema.getType()) {
             case BOOLEAN:
                 return Boolean.FALSE;
@@ -175,7 +205,7 @@ public class ResultModelUtils {
             case BYTES:
                 return ByteBuffer.wrap(new byte[0]);
             case STRUCT:
-                return convertToStruct(schema, Collections.emptyMap(), model);
+                return constructStruct(schema, Map.of(), model);
             case OPTIONAL:
                 return null;
             case INSTANT:
@@ -193,46 +223,46 @@ public class ResultModelUtils {
         }
     }
 
-    private static List<Object> convertToArray(Schema schema, Object value, ResultModel<?> model) {
-        Iterator<Object> iter = toIterator(value);
-        List<Object> list = new ArrayList<>();
-        Schema valueType = schema.valueType();
+    private static List<Object> constructArray(Schema schema, @Nullable Object value, OutputModel<?> model) {
+        var iter = toIterator(value);
+        var list = new ArrayList<>();
+        var valueType = schema.valueType();
         while (iter.hasNext()) {
             list.add(convert(valueType, iter.next(), model));
         }
         return list;
     }
 
-    private static Map<String, Object> convertToMap(Schema schema, Map<?, ?> value, ResultModel<?> model) {
-        if (value == null) {
-            return null;
-        }
-        Map<String, Object> distMap = new HashMap<>(value.size() * 4 / 3 + 1);
-        Schema valueType = schema.valueType();
-        for (Map.Entry<?, ?> entry : value.entrySet()) {
-            Object key = entry.getKey();
+    private static Map<String, Object> constructMap(Schema schema, Map<?, ?> value, OutputModel<?> model) {
+        var distMap = new HashMap<String, Object>(value.size() * 4 / 3 + 1);
+        var valueType = schema.valueType();
+        for (var entry : value.entrySet()) {
+            var key = entry.getKey();
             //Note: ignore null-key
             if (key == null) {
                 continue;
             }
-            Object val = convert(valueType, entry.getValue(), model);
-            distMap.put(key.toString(), val);
+            var v = convert(valueType, entry.getValue(), model);
+            distMap.put(key.toString(), v);
         }
         return distMap;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object convertToStruct(Schema schema, Map<?, ?> value, ResultModel model) {
-        Object struct = model.newStruct(schema);
-        for (Schema.Field field : schema.fields()) {
-            Object val = convert(field.schema(), value.get(field.name()), model);
-            model.setField(struct, field, val);
+    private static Object constructStruct(Schema schema, @Nullable Map<?, ?> value, OutputModel model) {
+        var struct = model.newStruct(schema);
+        if (value == null) {
+            value = Map.of();
+        }
+        for (var field : schema.fields()) {
+            var v = convert(field.schema(), value.get(field.name()), model);
+            model.setField(struct, field, v);
         }
         return struct;
     }
 
     @SuppressWarnings({"unchecked"})
-    private static Iterator<Object> toIterator(final Object o1) {
+    private static Iterator<Object> toIterator(@Nullable final Object o1) {
         if (o1 == null) {
             return Collections.emptyIterator();
         }

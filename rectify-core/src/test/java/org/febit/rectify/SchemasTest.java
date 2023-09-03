@@ -17,7 +17,18 @@ package org.febit.rectify;
 
 import org.junit.jupiter.api.Test;
 
-import static org.febit.rectify.Schema.Type.*;
+import static org.febit.rectify.Schema.Type.BOOLEAN;
+import static org.febit.rectify.Schema.Type.BYTES;
+import static org.febit.rectify.Schema.Type.DATE;
+import static org.febit.rectify.Schema.Type.DATETIME;
+import static org.febit.rectify.Schema.Type.DATETIME_WITH_TIMEZONE;
+import static org.febit.rectify.Schema.Type.DOUBLE;
+import static org.febit.rectify.Schema.Type.FLOAT;
+import static org.febit.rectify.Schema.Type.INSTANT;
+import static org.febit.rectify.Schema.Type.INT;
+import static org.febit.rectify.Schema.Type.INT64;
+import static org.febit.rectify.Schema.Type.STRING;
+import static org.febit.rectify.Schema.Type.TIME;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({
@@ -154,7 +165,7 @@ class SchemasTest {
         assertEquals("array<int>", Schemas.ofArray(Schemas.ofPrimitive(INT)).toString());
         assertEquals("map<string>", Schemas.ofMap(Schemas.ofPrimitive(STRING)).toString());
 
-        schema = Schemas.structSchemaBuilder()
+        schema = Schemas.newStruct()
                 .space("org.febit")
                 .name("demo")
                 .comment("this is a demo")
@@ -166,7 +177,7 @@ class SchemasTest {
                         Schemas.ofOptional(Schemas.ofMap(Schemas.ofPrimitive(STRING)))
                 )
                 .field("complex",
-                        Schemas.structSchemaBuilder()
+                        Schemas.newStruct()
                                 .space("febit.demo")
                                 .name("complex")
                                 .comment("Complex")
@@ -175,7 +186,7 @@ class SchemasTest {
                                 .build()
                 )
                 .field("times",
-                        Schemas.structSchemaBuilder()
+                        Schemas.newStruct()
                                 .space("febit.demo")
                                 .name("times")
                                 .comment("times")
@@ -194,7 +205,7 @@ class SchemasTest {
                         + "ints:array<int>,"
                         + "optionalStringMap:optional<map<string>>,"
                         + "complex:struct<intMap:map<int>,name:string>,"
-                        + "times:struct<t:time,d:date,dt:datetime,dtz:datetimez,i:instant>"
+                        + "times:struct<t:time,d:date,dt:datetime,dtz:datetimetz,i:instant>"
                         + ">",
                 schema.toString()
         );
@@ -204,7 +215,7 @@ class SchemasTest {
                         + "array<int> ints\n"
                         + "optional<map<string>> optionalStringMap\n"
                         + "struct<intMap:map<int>,name:string> complex\n"
-                        + "struct<t:time,d:date,dt:datetime,dtz:datetimez,i:instant> times\n",
+                        + "struct<t:time,d:date,dt:datetime,dtz:datetimetz,i:instant> times\n",
                 schema.toFieldLinesString()
         );
     }

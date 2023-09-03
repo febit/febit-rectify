@@ -15,9 +15,10 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.ScriptBuilder;
-import org.febit.rectify.util.ResultModelUtils;
+import org.febit.rectify.util.OutputModelUtils;
 import org.febit.wit.Context;
 import org.febit.wit.Template;
 import org.febit.wit.Vars;
@@ -37,7 +38,7 @@ import java.util.function.BiConsumer;
  */
 public class RectifierImpl<I, O> implements Rectifier<I, O> {
 
-    protected final ResultModel<O> resultModel;
+    protected final OutputModel<O> outputModel;
     protected final Schema schema;
     protected final Template script;
 
@@ -51,7 +52,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
 
         // vars
         hints.add(ScriptBuilder.VAR_INPUT);
-        hints.add(ScriptBuilder.VAR_CURR);
+        hints.add(ScriptBuilder.VAR_CURR_FIELD);
 
         // globals
         GlobalManager gm = script.getEngine().getGlobalManager();
@@ -61,15 +62,16 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         return hints;
     }
 
-    protected RectifierImpl(Template script, Schema schema, ResultModel<O> resultModel) {
+    protected RectifierImpl(Template script, Schema schema, OutputModel<O> outputModel) {
         Objects.requireNonNull(script);
         Objects.requireNonNull(schema);
-        Objects.requireNonNull(resultModel);
+        Objects.requireNonNull(outputModel);
         this.script = script;
         this.schema = schema;
-        this.resultModel = resultModel;
+        this.outputModel = outputModel;
     }
 
+    @Nullable
     private static ExitException searchExitException(Throwable exception) {
         int i = 0;
         do {
@@ -83,29 +85,30 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         return null;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     protected Context executeScript(Vars vars) {
         return script.merge(vars);
     }
 
-    public void process(I input, BiConsumer<O, ResultRaw> onSuccess, BiConsumer<String, ResultRaw> onFailed) {
-        final ResultRaw resultRaw = new ResultRaw();
+    public void process(@Nullable I input, BiConsumer<O, RawOutput> onSuccess, BiConsumer<String, RawOutput> onFailed) {
+        final RawOutput rawOutput = new RawOutput();
         try {
             executeScript(accepter -> {
                 accepter.set(ScriptBuilder.VAR_INPUT, input);
-                accepter.set(ScriptBuilder.VAR_RESULT, resultRaw);
+                accepter.set(ScriptBuilder.VAR_RESULT, rawOutput);
             });
         } catch (ScriptRuntimeException e) {
-            ExitException exitException = searchExitException(e);
+            var exitException = searchExitException(e);
             if (exitException != null) {
-                onFailed.accept(exitException.getReason(), resultRaw);
+                onFailed.accept(exitException.getReason(), rawOutput);
                 return;
             }
-            onFailed.accept("RUNTIME_ERROR: " + e.getMessage(), resultRaw);
+            onFailed.accept("RUNTIME_ERROR: " + e.getMessage(), rawOutput);
             return;
         }
         @SuppressWarnings("unchecked")
-        O record = (O) ResultModelUtils.convert(schema, resultRaw, resultModel);
-        onSuccess.accept(record, resultRaw);
+        O record = (O) OutputModelUtils.convert(schema, rawOutput, outputModel);
+        onSuccess.accept(record, rawOutput);
     }
 
     @Override

@@ -13,12 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@NonNullApi
 package org.febit.rectify;
 
-import java.util.HashMap;
-
-/**
- * Raw result outed by script engine.
- */
-public class ResultRaw extends HashMap<String, Object> {
-}
+import org.febit.lang.annotation.NonNullApi;

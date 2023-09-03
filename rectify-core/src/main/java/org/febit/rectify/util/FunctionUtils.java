@@ -16,7 +16,6 @@
 package org.febit.rectify.util;
 
 import lombok.experimental.UtilityClass;
-import lombok.val;
 import org.febit.rectify.function.IFunctions;
 import org.febit.wit.exceptions.UncheckedException;
 import org.febit.wit.util.ClassUtil;
@@ -42,8 +41,8 @@ public class FunctionUtils {
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new UncheckedException(e);
         }
-        val originName = field.getName();
-        val aliasAnno = field.getAnnotation(IFunctions.Alias.class);
+        var originName = field.getName();
+        var aliasAnno = field.getAnnotation(IFunctions.Alias.class);
         if (aliasAnno == null) {
             consumer.accept(originName, fieldValue);
             return;
@@ -51,7 +50,7 @@ public class FunctionUtils {
         if (aliasAnno.keepOriginName()) {
             consumer.accept(originName, fieldValue);
         }
-        for (val alias : aliasAnno.value()) {
+        for (var alias : aliasAnno.value()) {
             consumer.accept(alias, fieldValue);
         }
     }

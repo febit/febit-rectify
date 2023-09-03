@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.format;
 
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.SourceFormat;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 public class JsonSourceFormat implements SourceFormat<String, Object> {
 
     @Override
-    public void process(String input, Consumer<Object> collector) {
+    public void process(@Nullable String input, Consumer<Object> sink) {
         if (StringUtils.isEmpty(input)) {
             return;
         }
@@ -39,6 +40,6 @@ public class JsonSourceFormat implements SourceFormat<String, Object> {
         if (values == null || values.isEmpty()) {
             return;
         }
-        collector.accept(values);
+        sink.accept(values);
     }
 }

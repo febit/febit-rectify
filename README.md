@@ -6,15 +6,16 @@ Transform raw data (json, access log, csv, custom structured log, etc.) to struc
 
 + JS Style & Java Friendly expression, using [febit-wit](https://github.com/febit/wit) as script engine
 + Free input, by defining your own `SourceFormat`
-+ Free output, by defining your own `ResultModel`
-+ Clean and free runtime environment, all internal methods prefixed by `$$_`, you can register your own methods by `EnginePlugin` (SPI)
++ Free output, by defining your own `OutputModel`
++ Clean and free runtime environment, all internal methods prefixed by `$$_`, you can register your own methods
+  by `EnginePlugin` (SPI)
 
 ## Usage
 
 ```java
 // `$` is input, can be used in global-filter, global-code (except const statement), column expressions
 // `$$` is current column value, can be used in column check expression
-RectifierConf conf = RectifierConf.conf()
+var conf = RectifierConf.conf()
     // Named your schema
     .name("Demo")
     // Global code

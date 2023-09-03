@@ -21,10 +21,19 @@ import org.apache.flink.api.java.operators.FlatMapOperator;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
-import org.febit.rectify.*;
+import org.febit.rectify.LazyRectifier;
+import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierConsumer;
+import org.febit.rectify.RectifierProvider;
+import org.febit.rectify.Schema;
+import org.febit.rectify.SourceFormat;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -46,14 +55,14 @@ public class FlinkRectifier<I> implements Serializable {
 
     public static <I> FlinkRectifier<I> create(RectifierConf conf) {
         return new FlinkRectifier<>(
-                () -> conf.build(RowResultModel.get()),
+                () -> conf.build(RowOutputModel.get()),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         return new FlinkRectifier<>(
-                () -> conf.build(sourceFormat, RowResultModel.get()),
+                () -> conf.build(sourceFormat, RowOutputModel.get()),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
@@ -113,7 +122,7 @@ public class FlinkRectifier<I> implements Serializable {
     }
 
     public FlatMapOperator<I, Row> operator(DataSet<I> dataSet) {
-        FlatMapFunction<I, Row> flatMapper = this::process;
+        var flatMapper = (FlatMapFunction<I, Row>) this::process;
         return new FlatMapOperator<>(dataSet, getReturnType(),
                 dataSet.clean(flatMapper), "FlinkRectifier");
     }

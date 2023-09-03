@@ -15,94 +15,115 @@
  */
 package org.febit.rectify.util;
 
+import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Args {
 
+    @Nullable
     public static Integer int0(Object[] args) {
         return asInt(arg0(args));
     }
 
+    @Nullable
     public static Integer int1(Object[] args) {
         return asInt(arg1(args));
     }
 
+    @Nullable
     public static Integer int2(Object[] args) {
         return asInt(arg2(args));
     }
 
+    @Nullable
     public static Integer int3(Object[] args) {
         return asInt(arg3(args));
     }
 
+    @Nullable
     public static String string0(Object[] args) {
         return asString(arg0(args));
     }
 
+    @Nullable
     public static String string1(Object[] args) {
         return asString(arg1(args));
     }
 
+    @Nullable
     public static String string2(Object[] args) {
         return asString(arg2(args));
     }
 
+    @Nullable
     public static String string3(Object[] args) {
         return asString(arg3(args));
     }
 
+    @Nullable
     public static Object arg0(Object[] args) {
         return argX(args, 0, null);
     }
 
-    public static Object arg0(Object[] args, Object def) {
+    @Nullable
+    public static Object arg0(Object[] args, @Nullable Object def) {
         return argX(args, 0, def);
     }
 
+    @Nullable
     public static Object arg1(Object[] args) {
         return argX(args, 1, null);
     }
 
-    public static Object arg1(Object[] args, Object def) {
+    @Nullable
+    public static Object arg1(Object[] args, @Nullable Object def) {
         return argX(args, 1, def);
     }
 
+    @Nullable
     public static Object arg2(Object[] args) {
         return argX(args, 2, null);
     }
 
-    public static Object arg2(Object[] args, Object def) {
+    @Nullable
+    public static Object arg2(Object[] args, @Nullable Object def) {
         return argX(args, 2, def);
     }
 
+    @Nullable
     public static Object arg3(Object[] args) {
         return argX(args, 3, null);
     }
 
-    public static Object arg3(Object[] args, Object def) {
+    @Nullable
+    public static Object arg3(Object[] args, @Nullable Object def) {
         return argX(args, 3, def);
     }
 
+    @Nullable
     public static Object argX(Object[] args, int x) {
         return argX(args, x, null);
     }
 
-    public static Object argX(Object[] args, int x, Object def) {
+    @Nullable
+    public static Object argX(@Nullable Object[] args, int x, @Nullable Object def) {
         if (args != null && x >= 0 && x < args.length) {
             return args[x];
         }
         return def;
     }
 
-    public static String asString(Object value) {
+    @Nullable
+    public static String asString(@Nullable Object value) {
         if (value == null) {
             return null;
         }
         return value.toString();
     }
 
-    public static Integer asInt(Object value) {
+    @Nullable
+    public static Integer asInt(@Nullable Object value) {
         if (value == null) {
             return null;
         }

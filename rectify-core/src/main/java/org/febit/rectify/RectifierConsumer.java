@@ -15,16 +15,18 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
+
 @FunctionalInterface
 public interface RectifierConsumer<O> {
 
-    void onCompleted(O out, ResultRaw resultRaw, String reason);
+    void onCompleted(@Nullable O out, RawOutput raw, @Nullable String reason);
 
-    default void onSucceed(O out, ResultRaw resultRaw) {
-        this.onCompleted(out, resultRaw, null);
+    default void onSucceed(O out, RawOutput raw) {
+        this.onCompleted(out, raw, null);
     }
 
-    default void onFailed(String reason, ResultRaw resultRaw) {
-        this.onCompleted(null, resultRaw, reason);
+    default void onFailed(String reason, RawOutput raw) {
+        this.onCompleted(null, raw, reason);
     }
 }

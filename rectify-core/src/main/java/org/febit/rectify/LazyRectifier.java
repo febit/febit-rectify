@@ -17,10 +17,10 @@ package org.febit.rectify;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.febit.lang.Lazy;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -31,34 +31,18 @@ import java.util.function.BiConsumer;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class LazyRectifier<I, O> implements Rectifier<I, O>, Serializable {
 
-    private final Serializable lock = new Serializable() {
-    };
-
-    private final RectifierProvider<I, O> provider;
-
-    private transient Rectifier<I, O> delegated;
+    private final Lazy<Rectifier<I, O>> delegated;
 
     public static <I, O> LazyRectifier<I, O> of(RectifierProvider<I, O> provider) {
-        return new LazyRectifier<>(provider);
+        return new LazyRectifier<>(Lazy.of(provider));
     }
 
     protected Rectifier<I, O> delegated() {
-        Rectifier<I, O> rectifier = this.delegated;
-        if (rectifier != null) {
-            return rectifier;
-        }
-        synchronized (lock) {
-            rectifier = this.delegated;
-            if (rectifier == null) {
-                this.delegated = rectifier = provider.get();
-            }
-            Objects.requireNonNull(rectifier);
-            return rectifier;
-        }
+        return delegated.get();
     }
 
     @Override
-    public void process(I input, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
+    public void process(I input, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed) {
         delegated().process(input, onSucceed, onFailed);
     }
 

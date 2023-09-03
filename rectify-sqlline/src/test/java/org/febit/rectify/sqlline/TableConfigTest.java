@@ -15,14 +15,12 @@
  */
 package org.febit.rectify.sqlline;
 
-import lombok.val;
 import org.febit.rectify.RectifierConf;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TableConfigTest {
 
@@ -42,14 +40,14 @@ public class TableConfigTest {
                 "    expr: \n" +
                 "    checkExpr: $$ || \"enable is falsely\"\n";
 
-        val config = TableConfig.fromYaml(yaml);
+        var config = TableConfig.fromYaml(yaml);
         assertNotNull(config);
 
         assertEquals("Demo", config.getName());
         assertEquals("json", config.getSourceFormat());
 
-        val codes = config.getGlobalCodes();
-        val columns = config.getColumns();
+        var codes = config.getGlobalCodes();
+        var columns = config.getColumns();
 
         assertNotNull(codes);
         assertEquals(2, codes.size());

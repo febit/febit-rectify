@@ -38,9 +38,9 @@ public class RectifySchemaFactory implements SchemaFactory {
     @Override
     public Schema create(SchemaPlus parentSchema, String name,
                          Map<String, Object> operand) {
-        final File base =
-                (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
-        File dir = new File(base, (String) operand.get("directory"));
+        var base = (File) operand.get(
+                ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+        var dir = new File(base, (String) operand.get("directory"));
         return new RectifySchema(dir);
     }
 }

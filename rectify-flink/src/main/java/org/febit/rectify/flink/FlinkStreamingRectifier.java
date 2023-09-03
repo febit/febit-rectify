@@ -31,33 +31,33 @@ public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
         super(rectifierProvider, typeInfo);
     }
 
-
     public static <I> FlinkStreamingRectifier<I> create(RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                () -> conf.build(RowResultModel.get()),
+                () -> conf.build(RowOutputModel.get()),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                () -> conf.build(sourceFormat, RowResultModel.get()),
+                () -> conf.build(sourceFormat, RowOutputModel.get()),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierConf conf) {
-        FlinkStreamingRectifier<I> rectifier = create(conf);
+        var rectifier = FlinkStreamingRectifier.<I>create(conf);
         return rectifier.operator(dataStream);
     }
 
-    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        FlinkStreamingRectifier<I> rectifier = create(sourceFormat, conf);
+    public static <I> SingleOutputStreamOperator<Row> operator(
+            DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+        var rectifier = create(sourceFormat, conf);
         return rectifier.operator(dataStream);
     }
 
     public SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream) {
-        FlatMapFunction<I, Row> flatMapper = this::process;
+        var flatMapper = (FlatMapFunction<I, Row>) this::process;
         return dataStream.transform("FlinkRectifier", getReturnType(),
                 new StreamFlatMap<>(dataStream.getExecutionEnvironment().clean(flatMapper)));
     }

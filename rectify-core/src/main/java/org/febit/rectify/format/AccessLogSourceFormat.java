@@ -15,25 +15,25 @@
  */
 package org.febit.rectify.format;
 
+import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.util.IndexedArrayBag;
+import org.febit.rectify.util.Indexer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
-    private final IndexedArrayBag.Indexer indexer;
+    private final Indexer<String> indexer;
 
     public static AccessLogSourceFormat create(String... columns) {
         return create(Arrays.asList(columns));
@@ -41,11 +41,12 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
     public static AccessLogSourceFormat create(Collection<String> columns) {
         Objects.requireNonNull(columns, "Columns is required to create a AccessLogSourceFormat");
-        val indexer = IndexedArrayBag.buildIndexer(columns);
+        var indexer = Indexer.of(columns);
         return new AccessLogSourceFormat(indexer);
     }
 
-    private static String unescape(String value) {
+    @Nullable
+    private static String unescape(@Nullable String value) {
         if (value == null
                 || value.equals("-")) {
             return null;
@@ -58,8 +59,8 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
             return new String[0];
         }
 
-        List<String> values = new ArrayList<>();
-        StringWalker walker = new StringWalker(src);
+        var values = new ArrayList<String>();
+        var walker = new StringWalker(src);
         walker.skipSpaces();
 
         while (!walker.isEnd()) {
@@ -81,14 +82,14 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
     }
 
     @Override
-    public void process(String input, Consumer<Object> collector) {
+    public void process(@Nullable String input, Consumer<Object> sink) {
         if (StringUtils.isEmpty(input)) {
             return;
         }
-        String[] values = parse(input);
+        var values = parse(input);
         if (values.length == 0) {
             return;
         }
-        collector.accept(IndexedArrayBag.of(indexer, values));
+        sink.accept(IndexedArrayBag.of(indexer, values));
     }
 }

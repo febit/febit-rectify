@@ -15,6 +15,8 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.function.Consumer;
 
@@ -27,5 +29,5 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface SourceFormat<S, I> extends Serializable {
 
-    void process(S source, Consumer<I> sink);
+    void process(@Nullable S source, Consumer<I> sink);
 }

@@ -15,19 +15,20 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.febit.lang.util.Maps;
 import org.febit.lang.util.StringWalker;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -49,7 +50,8 @@ class Schemas {
         }
     }
 
-    private static String escapeForLineComment(String remark) {
+    @Nullable
+    private static String escapeForLineComment(@Nullable String remark) {
         if (remark == null) {
             return null;
         }
@@ -94,7 +96,7 @@ class Schemas {
 
     static Schema parseLinesAsStruct(String name, String... lines) {
 
-        val builder = structSchemaBuilder();
+        var builder = newStruct();
         builder.name(name);
 
         for (String line : lines) {
@@ -117,6 +119,7 @@ class Schemas {
         private final int pos;
         private final String name;
         private final Schema schema;
+        @Nullable
         private final String comment;
 
         public String name() {
@@ -127,6 +130,7 @@ class Schemas {
             return schema;
         }
 
+        @Nullable
         public String comment() {
             return comment;
         }
@@ -188,13 +192,16 @@ class Schemas {
         }
     }
 
-    public static StructSchemaBuilder structSchemaBuilder() {
+    public static StructSchemaBuilder newStruct() {
         return new StructSchemaBuilder();
     }
 
     public static class StructSchemaBuilder {
+        @Nullable
         private String name;
+        @Nullable
         private String space;
+        @Nullable
         private String comment;
 
         private final List<Schema.Field> fields = new ArrayList<>();
@@ -210,12 +217,12 @@ class Schemas {
             return this;
         }
 
-        public StructSchemaBuilder space(String space) {
+        public StructSchemaBuilder space(@Nullable String space) {
             this.space = "".equals(space) ? null : space;
             return this;
         }
 
-        public StructSchemaBuilder comment(String comment) {
+        public StructSchemaBuilder comment(@Nullable String comment) {
             this.comment = comment;
             return this;
         }
@@ -228,14 +235,14 @@ class Schemas {
             return field(name, schema, null);
         }
 
-        public StructSchemaBuilder field(String name, Schema schema, String comment) {
+        public StructSchemaBuilder field(String name, Schema schema, @Nullable String comment) {
             checkName(name);
             FieldImpl field = new FieldImpl(fields.size(), name, schema, escapeForLineComment(comment));
             fields.add(field);
             return this;
         }
 
-        public StructSchema build() {
+        public Schema build() {
             return new StructSchema(space, name, fields, comment);
         }
     }
@@ -243,15 +250,24 @@ class Schemas {
     private static class StructSchema extends BaseSchema {
 
         private static final long serialVersionUID = 1L;
+        @Nullable
         private final String name;
+        @Nullable
         private final String space;
+        @Nullable
         private final String fullname;
+        @Nullable
         private final String comment;
 
         private final List<Field> fields;
         private final Map<String, Field> fieldMap;
 
-        private StructSchema(String space, String name, List<Field> fields, String comment) {
+        private StructSchema(
+                @Nullable String space,
+                @Nullable String name,
+                List<Field> fields,
+                @Nullable String comment
+        ) {
             super(Type.STRUCT);
 
             if (name != null) {
@@ -263,36 +279,41 @@ class Schemas {
             this.fullname = (space == null) ? name : space + "." + name;
             this.comment = escapeForLineComment(comment);
 
-            this.fields = Collections.unmodifiableList(new ArrayList<>(fields));
-            this.fieldMap = new HashMap<>();
-            for (Schema.Field field : fields) {
-                fieldMap.put(field.name(), field);
-            }
+            this.fields = List.copyOf(fields);
+            this.fieldMap = Maps.mapping(fields, Field::name);
         }
 
+        @Nullable
         @Override
         public String name() {
             return name;
         }
 
+        @Nullable
         @Override
         public String comment() {
             return comment;
         }
 
+        @Nullable
         @Override
         public String namespace() {
             return space;
         }
 
+        @Nullable
         @Override
         public String fullname() {
             return fullname;
         }
 
         @Override
-        public Field field(String fieldName) {
-            return fieldMap.get(fieldName);
+        public Field field(String name) {
+            var field = fieldMap.get(name);
+            if (field == null) {
+                throw new NoSuchElementException("No such field: " + name);
+            }
+            return field;
         }
 
         @Override
@@ -307,9 +328,9 @@ class Schemas {
 
         @Override
         public String toFieldLinesString() {
-            StringBuilder buf = new StringBuilder();
+            var buf = new StringBuilder();
             for (Field field : fields) {
-                buf.append(field.schema().toString())
+                buf.append(field.schema())
                         .append(' ')
                         .append(field.name());
 
@@ -325,9 +346,9 @@ class Schemas {
 
         @Override
         public String toString() {
-            StringBuilder buf = new StringBuilder();
+            var buf = new StringBuilder();
             buf.append("struct<");
-            for (Field field : fields) {
+            for (var field : fields) {
                 if (field.pos() != 0) {
                     buf.append(',');
                 }
@@ -344,7 +365,8 @@ class Schemas {
         return TYPE_NAME_END_CHARS.indexOf(c) >= 0;
     }
 
-    private static String buildNamespace(String space, String name) {
+    @Nullable
+    private static String buildNamespace(@Nullable String space, @Nullable String name) {
         if (name == null || name.isEmpty()) {
             return null;
         }
@@ -360,22 +382,22 @@ class Schemas {
         }
         if (walker.peek() != c) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "Unexpected char '{0}' at {1}, but need `{2}` ", walker.peek(), walker.pos(), c));
+                    "Unexpected char ''{0}'' at {1}, but need `{2}` ", walker.peek(), walker.pos(), c));
         }
         walker.jump(1);
     }
 
-    static Schema parse(String space, String name, String str) {
-        StringWalker walker = new StringWalker(str);
+    static Schema parse(@Nullable String space, @Nullable String name, String str) {
+        var walker = new StringWalker(str);
         return readType(space, name, walker);
     }
 
     private static void parseField(String space, String line, StructSchemaBuilder builder) {
-        StringWalker walker = new StringWalker(line);
+        var walker = new StringWalker(line);
         walker.skipBlanks();
-        Schema schema = readType(space, "_col" + builder.fieldsSize(), walker);
+        var schema = readType(space, "_col" + builder.fieldsSize(), walker);
         walker.skipBlanks();
-        String name = walker.readUntilBlanks().trim();
+        var name = walker.readUntilBlanks().trim();
         walker.skipBlanks();
         String comment = null;
         if (!walker.isEnd() && walker.peek() == '#') {
@@ -391,9 +413,9 @@ class Schemas {
         builder.field(name, schema, comment);
     }
 
-    private static Schema readType(String space, String name, StringWalker walker) {
+    private static Schema readType(@Nullable String space, @Nullable String name, StringWalker walker) {
         walker.skipBlanks();
-        String typeName = walker.readToFlag(Schemas::isTypeNameEnding, true).toLowerCase();
+        var typeName = walker.readToFlag(Schemas::isTypeNameEnding, true).toLowerCase();
         switch (typeName) {
             case "int":
             case "int32":
@@ -425,6 +447,8 @@ class Schemas {
                 return ofPrimitive(Schema.Type.DATETIME);
             case "datetime_with_timezone":
             case "timestamp_with_timezone":
+            case "timestamptz":
+            case "datetimetz":
             case "timestampz":
             case "datetimez":
                 return ofPrimitive(Schema.Type.DATETIME_WITH_TIMEZONE);
@@ -442,7 +466,7 @@ class Schemas {
         }
     }
 
-    private static Schema readOptionalType(String space, String name, StringWalker walker) {
+    private static Schema readOptionalType(@Nullable String space, @Nullable String name, StringWalker walker) {
         walker.skipBlanks();
         requireAndJumpChar(walker, '<');
         walker.skipBlanks();
@@ -452,7 +476,7 @@ class Schemas {
         return ofOptional(elementType);
     }
 
-    private static Schema readArrayType(String space, String name, StringWalker walker) {
+    private static Schema readArrayType(@Nullable String space, @Nullable String name, StringWalker walker) {
         walker.skipBlanks();
         requireAndJumpChar(walker, '<');
         walker.skipBlanks();
@@ -462,7 +486,7 @@ class Schemas {
         return ofArray(elementType);
     }
 
-    private static Schema readMapType(String space, String name, StringWalker walker) {
+    private static Schema readMapType(@Nullable String space, @Nullable String name, StringWalker walker) {
         walker.skipBlanks();
         requireAndJumpChar(walker, '<');
         walker.skipBlanks();
@@ -472,16 +496,18 @@ class Schemas {
         return ofMap(valueType);
     }
 
-    private static Schema readStructType(String space, String name, StringWalker walker) {
+    private static Schema readStructType(@Nullable String space, @Nullable String name, StringWalker walker) {
+        Objects.requireNonNull(name);
+
         walker.skipBlanks();
         requireAndJumpChar(walker, '<');
         walker.skipBlanks();
 
-        val builder = structSchemaBuilder();
+        var builder = newStruct();
         builder.space(space);
         builder.name(name);
 
-        String childSpace = buildNamespace(space, name);
+        var childSpace = buildNamespace(space, name);
         while (!walker.isEnd() && walker.peek() != '>') {
             walker.skipBlanks();
             String fieldName = walker.readTo(':', false).trim();

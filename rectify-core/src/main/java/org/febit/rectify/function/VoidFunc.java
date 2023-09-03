@@ -15,14 +15,17 @@
  */
 package org.febit.rectify.function;
 
+import jakarta.annotation.Nullable;
 import org.febit.wit.InternalContext;
 import org.febit.wit.lang.MethodDeclare;
 
 @FunctionalInterface
 public interface VoidFunc extends MethodDeclare {
 
+    @Nullable
     Object invoke();
 
+    @Nullable
     @Override
     default Object invoke(InternalContext context, Object[] args) {
         return invoke();

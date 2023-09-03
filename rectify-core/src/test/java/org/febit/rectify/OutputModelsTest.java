@@ -17,10 +17,9 @@ package org.febit.rectify;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-class ResultModelsTest {
+class OutputModelsTest {
 
     final Schema schema = Schema.parseLinesAsStruct("demo",
             "long id",
@@ -31,7 +30,7 @@ class ResultModelsTest {
 
     @Test
     void asObjectArray() {
-        ResultModel<Object[]> model = ResultModels.asObjectArray();
+        OutputModel<Object[]> model = OutputModels.asObjectArray();
         Object[] struct = model.newStruct(schema);
 
         model.setField(struct, schema.field("id"), 12345L);

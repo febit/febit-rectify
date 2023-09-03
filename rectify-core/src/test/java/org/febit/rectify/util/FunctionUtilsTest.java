@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.util;
 
-import lombok.val;
 import org.febit.rectify.function.IFunctions;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ class FunctionUtilsTest {
 
     @Test
     void scanConstFields() {
-        val map = new HashMap<String, Object>();
+        var map = new HashMap<String, Object>();
         FunctionUtils.scanConstFields(map::put, Proto.class);
 
         assertThat(map)

@@ -15,60 +15,57 @@
  */
 package org.febit.rectify.util;
 
+import jakarta.annotation.Nullable;
+import org.febit.lang.util.ArraysUtils;
 import org.febit.wit.lang.Bag;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class IndexedArrayBag implements Bag, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Indexer indexer;
+    private final Indexer<String> indexer;
     private final Object[] values;
 
-    private IndexedArrayBag(Indexer indexer, Object[] values) {
+    private IndexedArrayBag(Indexer<String> indexer, @Nullable Object[] values) {
         this.indexer = indexer;
         this.values = values == null ? new Object[0] : values;
     }
 
-    public static IndexedArrayBag of(Indexer indexer, Object[] values) {
+    public static IndexedArrayBag of(Indexer<String> indexer, @Nullable Object[] values) {
         return new IndexedArrayBag(indexer, values);
     }
 
-    public static Indexer buildIndexer(Collection<String> keys) {
-        return new Indexer(new ArrayList<>(keys));
-    }
-
-    private int resolveIndex(Object key) {
+    private int resolveIndex(@Nullable Object key) {
         if (key instanceof Number) {
             return ((Number) key).intValue();
         }
         if (key instanceof String) {
-            Integer i = this.indexer.getIndex((String) key);
-            return i == null ? -1 : i.intValue();
+            var i = this.indexer.getIndex((String) key);
+            return i == null ? -1 : i;
         }
         return -1;
     }
 
+    @Nullable
     @Override
-    public Object get(Object key) {
-        int i = resolveIndex(key);
-        Object[] vals = this.values;
-        if (i < 0 || i >= vals.length) {
-            return null;
-        }
-        return vals[i];
+    public Object get(@Nullable Object key) {
+        return ArraysUtils.get(values,
+                resolveIndex(key)
+        );
     }
 
     @Override
-    public void set(Object key, Object value) {
+    public void set(@Nullable Object key, @Nullable Object value) {
         int i = resolveIndex(key);
-        Object[] vals = this.values;
-        if (i < 0 || i >= vals.length) {
+        var vars = this.values;
+        if (i < 0 || i >= vars.length) {
             throw new NoSuchElementException(String.valueOf(key));
         }
-        vals[i] = value;
+        vars[i] = value;
     }
 
     public Iterator<String> keys() {
@@ -79,30 +76,4 @@ public class IndexedArrayBag implements Bag, Serializable {
         return this.indexer.size();
     }
 
-    public static class Indexer implements Iterable<String>, Serializable {
-
-        private final List<String> keys;
-        private final HashMap<String, Integer> indexerMap;
-
-        private Indexer(List<String> keys) {
-            this.keys = keys;
-            this.indexerMap = new HashMap<>();
-            for (int i = 0; i < keys.size(); i++) {
-                this.indexerMap.put(keys.get(i), i);
-            }
-        }
-
-        public int size() {
-            return keys.size();
-        }
-
-        public Integer getIndex(String key) {
-            return indexerMap.get(key);
-        }
-
-        @Override
-        public Iterator<String> iterator() {
-            return keys.iterator();
-        }
-    }
 }

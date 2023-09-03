@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.sqlline;
 
-import lombok.val;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.format.AccessLogSourceFormat;
 import org.febit.rectify.format.JsonSourceFormat;
@@ -31,11 +30,11 @@ public class SourceFormatProvider {
                 return new JsonSourceFormat();
             case "access": {
                 @SuppressWarnings({"unchecked"})
-                val columns = (Collection<String>) props.get("columns");
+                var columns = (Collection<String>) props.get("columns");
                 return AccessLogSourceFormat.create(columns);
             }
             default:
-                throw new IllegalArgumentException("Unspported format: " + name);
+                throw new IllegalArgumentException("Unsupported format: " + name);
         }
     }
 

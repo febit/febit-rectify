@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.engine;
 
+import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -26,15 +27,15 @@ import java.util.List;
 public class ScriptBuilder {
 
     public static final String VAR_INPUT = "$";
-    public static final String VAR_CURR = "$$";
+    public static final String VAR_CURR_FIELD = "$$";
     public static final String VAR_EXIT = "$$_EXIT";
     public static final String VAR_RESULT = "$$_RESULT";
     public static final String VAR_SCHEMA_NAME = "$$_SCHEMA_NAME";
-    public static final String VAR_CURR_COLUMN = "$$_CURR_COLUMN";
+    public static final String VAR_CURR_FIELD_INDEX = "$$_CURR_FIELD_INDEX";
     public static final String VAR_CHECK_FILTER = "$$_CHECK_FILTER";
     public static final String VAR_NEW_FILTER_BREAKPOINT = "$$_NEW_FILTER_BREAKPOINT";
 
-    static String escapeForString(String str) {
+    static String escapeForString(@Nullable String str) {
         if (str == null) {
             return "null";
         }
@@ -91,11 +92,12 @@ public class ScriptBuilder {
                 .append(" = ")
                 .appendStringValue(conf.getName())
                 .append(";\n");
-        context.append(""
-                + "var " + VAR_INPUT + ";   // 日志解析后的内容\n"
-                + "var " + VAR_CURR + ";  // 当前字段值\n"
-                + "var " + VAR_RESULT + ";  // 结果集\n"
-                + "var " + VAR_CURR_COLUMN + " = -1;  // 当前字段索引\n"
+        context.append("\n"
+                + "// -- Internal Vars:\n"
+                + "var " + VAR_INPUT + ";   // formatted input\n"
+                + "var " + VAR_CURR_FIELD + ";  // value of current column/field\n"
+                + "var " + VAR_RESULT + ";  // raw result (output)\n"
+                + "var " + VAR_CURR_FIELD_INDEX + " = -1;  // index of current column/field\n"
         );
 
         // Global Segments
@@ -122,8 +124,10 @@ public class ScriptBuilder {
         appendFilter(context, filterExpr, context.getAndIncFilterCounter(), null);
     }
 
-    private static void appendFilter(Context context, String filterExpr,
-                                     int index, String column) {
+    private static void appendFilter(
+            Context context, String filterExpr,
+            int index,
+            @Nullable String column) {
         context.append(VAR_CHECK_FILTER + "(");
         if (context.isDebugEnabled()) {
             context.append("[? " + VAR_NEW_FILTER_BREAKPOINT + "(")
@@ -143,16 +147,15 @@ public class ScriptBuilder {
 
     public static void appendColumn(final Context context, final RectifierConf.Column column,
                                     final int index) {
-        final String escapedName = escapeForString(column.name());
-
-        String expr = column.expr();
+        var escapedName = escapeForString(column.name());
+        var expr = column.expr();
         if (StringUtils.isBlank(expr)) {
             expr = VAR_INPUT + '[' + escapedName + ']';
         }
 
         context.append("// -\n");
-        context.append(VAR_CURR_COLUMN + " = " + index + "; \n");
-        context.append(VAR_CURR + " = " + VAR_RESULT + '[')
+        context.append(VAR_CURR_FIELD_INDEX + " = " + index + "; \n");
+        context.append(VAR_CURR_FIELD + " = " + VAR_RESULT + '[')
                 .append(escapedName)
                 .append("] = ")
                 .append(expr)
@@ -195,7 +198,7 @@ public class ScriptBuilder {
             return this;
         }
 
-        public Context appendStringValue(String str) {
+        public Context appendStringValue(@Nullable String str) {
             return append(escapeForString(str));
         }
 

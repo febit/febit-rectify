@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.function;
 
+import jakarta.annotation.Nullable;
 import org.febit.wit.InternalContext;
 import org.febit.wit.lang.MethodDeclare;
 
@@ -23,8 +24,10 @@ import static org.febit.rectify.util.Args.string0;
 @FunctionalInterface
 public interface StrFunc extends MethodDeclare {
 
-    Object invoke(String text);
+    @Nullable
+    Object invoke(@Nullable String text);
 
+    @Nullable
     @Override
     default Object invoke(InternalContext context, Object[] args) {
         return invoke(string0(args));

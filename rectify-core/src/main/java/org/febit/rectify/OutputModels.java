@@ -15,29 +15,30 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Factories for ResultModel.
+ * Factories of OutputModel.
  */
 @UtilityClass
-public class ResultModels {
+public class OutputModels {
 
-    private static final ObjectArrayResultModel OBJECT_ARRAY_RESULT_MODEL = new ObjectArrayResultModel();
-    private static final MapResultModel MAP_RESULT_MODEL = new MapResultModel();
+    private static final ObjectArrayOutputModel OBJECT_ARRAY_OUTPUT_MODEL = new ObjectArrayOutputModel();
+    private static final MapOutputModel MAP_OUTPUT_MODEL = new MapOutputModel();
 
-    public static ResultModel<Object[]> asObjectArray() {
-        return OBJECT_ARRAY_RESULT_MODEL;
+    public static OutputModel<Object[]> asObjectArray() {
+        return OBJECT_ARRAY_OUTPUT_MODEL;
     }
 
-    public static ResultModel<Map<String, Object>> asMap() {
-        return MAP_RESULT_MODEL;
+    public static OutputModel<Map<String, Object>> asMap() {
+        return MAP_OUTPUT_MODEL;
     }
 
-    private static class MapResultModel implements ResultModel<Map<String, Object>> {
+    private static class MapOutputModel implements OutputModel<Map<String, Object>> {
 
         @Override
         public Map<String, Object> newStruct(Schema schema) {
@@ -49,17 +50,18 @@ public class ResultModels {
         }
 
         @Override
-        public void setField(Map<String, Object> record, Schema.Field field, Object val) {
-            record.put(field.name(), val);
+        public void setField(Map<String, Object> record, Schema.Field field, @Nullable Object value) {
+            record.put(field.name(), value);
         }
 
+        @Nullable
         @Override
         public Object getField(Map<String, Object> record, Schema.Field field) {
             return record.get(field.name());
         }
     }
 
-    private static class ObjectArrayResultModel implements ResultModel<Object[]> {
+    private static class ObjectArrayOutputModel implements OutputModel<Object[]> {
 
         @Override
         public Object[] newStruct(Schema schema) {
@@ -67,10 +69,11 @@ public class ResultModels {
         }
 
         @Override
-        public void setField(Object[] record, Schema.Field field, Object val) {
-            record[field.pos()] = val;
+        public void setField(Object[] record, Schema.Field field, @Nullable Object value) {
+            record[field.pos()] = value;
         }
 
+        @Nullable
         @Override
         public Object getField(Object[] record, Schema.Field field) {
             return record[field.pos()];

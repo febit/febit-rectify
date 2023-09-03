@@ -13,19 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+@NonNullApi
+package org.febit.rectify.flink;
 
-/**
- * Model for the result object.
- *
- * @param <R>
- * @see ResultModels
- */
-public interface ResultModel<R> {
-
-    R newStruct(Schema schema);
-
-    void setField(R record, Schema.Field field, Object val);
-
-    Object getField(R record, Schema.Field field);
-}
+import org.febit.lang.annotation.NonNullApi;

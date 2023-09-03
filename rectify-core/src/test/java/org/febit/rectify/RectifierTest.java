@@ -15,7 +15,7 @@
  */
 package org.febit.rectify;
 
-import lombok.val;
+import jakarta.annotation.Nullable;
 import org.febit.lang.Tuple2;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.engine.FilterBreakpoint;
@@ -39,7 +39,7 @@ public class RectifierTest {
             // Named your schema
             .name("Demo")
             // Global code
-            .frontSegment(""
+            .frontSegment("\n"
                     + "var isTruly = obj -> {\n"
                     + "   return obj == true \n"
                     + "              || obj == \"on\" || obj == \"true\"\n"
@@ -68,7 +68,7 @@ public class RectifierTest {
             Object enable,
             Object status,
             Object isTrulyArg,
-            Object content) {
+            @Nullable Object content) {
         Map<String, Object> bean = new HashMap<>();
         bean.put("id", id);
         bean.put("enable", enable);
@@ -80,7 +80,7 @@ public class RectifierTest {
 
     @Test
     public void getHints() {
-        val rectifier = conf.build();
+        var rectifier = conf.build();
         List<String> hints = rectifier.getHints();
 
         assertFalse(hints.isEmpty());
@@ -92,16 +92,16 @@ public class RectifierTest {
         assertTrue(hints.contains(ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT));
 
         assertTrue(hints.contains(ScriptBuilder.VAR_INPUT));
-        assertTrue(hints.contains(ScriptBuilder.VAR_CURR));
+        assertTrue(hints.contains(ScriptBuilder.VAR_CURR_FIELD));
 
         assertFalse(hints.contains(ScriptBuilder.VAR_RESULT));
         assertFalse(hints.contains(ScriptBuilder.VAR_SCHEMA_NAME));
-        assertFalse(hints.contains(ScriptBuilder.VAR_CURR_COLUMN));
+        assertFalse(hints.contains(ScriptBuilder.VAR_CURR_FIELD_INDEX));
     }
 
     @Test
     public void testBaseInfo() {
-        Rectifier<String, Map<String, Object>> rectifier = conf.build()
+        var rectifier = conf.build()
                 .with(new JsonSourceFormat());
 
         Schema schema = rectifier.schema();
@@ -114,11 +114,12 @@ public class RectifierTest {
 
     @Test
     public void process() {
-        Rectifier<String, Map<String, Object>> rectifier = conf.build()
+        var rectifier = conf.build()
                 .with(new JsonSourceFormat());
-        AssertSingleRectifierConsumer<Map<String, Object>> consumer;
 
-        consumer = new AssertSingleRectifierConsumer<>();
+        SingleElementRectifierConsumer<Map<String, Object>> consumer;
+
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 "123",
                 true,
@@ -128,7 +129,7 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.reason);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals(123L, consumer.out.get("id"));
         assertEquals(true, consumer.out.get("enable"));
         assertEquals(12, consumer.out.get("status"));
@@ -136,7 +137,7 @@ public class RectifierTest {
         assertEquals(true, consumer.out.get("call_isTruly"));
         assertEquals("prefix:tell something", consumer.out.get("content"));
 
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 456,
                 true,
@@ -146,7 +147,7 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.reason);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals(456L, consumer.out.get("id"));
         assertEquals(true, consumer.out.get("enable"));
         assertEquals(2, consumer.out.get("status"));
@@ -158,10 +159,10 @@ public class RectifierTest {
     @Test
     public void testFilter() {
 
-        Rectifier<String, Map<String, Object>> rectifier = conf.build()
+        var rectifier = conf.build()
                 .with(new JsonSourceFormat());
-        AssertSingleRectifierConsumer<Map<String, Object>> consumer;
-        consumer = new AssertSingleRectifierConsumer<>();
+        SingleElementRectifierConsumer<Map<String, Object>> consumer;
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 123,
                 true,
@@ -171,10 +172,10 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.out);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertNull(consumer.reason);
 
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 123,
                 true,
@@ -184,10 +185,10 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.out);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals("status should <100", consumer.reason);
 
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -197,10 +198,10 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.out);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals("status is not even", consumer.reason);
 
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -210,27 +211,32 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.out);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals("enable is falsely", consumer.reason);
     }
 
     @Test
     public void processInDebugMode() {
-        List<Tuple2<FilterBreakpoint, Object>> breakpoints = new ArrayList<>();
-        Rectifier<String, Map<String, Object>> rectifier = conf.build((label, context, statement, val) -> {
+
+        var breakpoints = new ArrayList<Tuple2<FilterBreakpoint, Object>>();
+        conf.breakpointListener((label, context, statement, val) -> {
             if (label instanceof FilterBreakpoint) {
-                FilterBreakpoint breakpoint = (FilterBreakpoint) label;
+                var breakpoint = (FilterBreakpoint) label;
                 breakpoints.add(Tuple2.of(breakpoint, val));
                 if ("enable".equals(breakpoint.getField())) {
-                    assertEquals(1, context.get(ScriptBuilder.VAR_CURR_COLUMN));
+                    assertEquals(1, context.get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
                 }
             }
-        }).with(new JsonSourceFormat());
-        AssertSingleRectifierConsumer<Map<String, Object>> consumer;
+        });
+
+        var rectifier = conf.build().with(new JsonSourceFormat());
+        conf.setBreakpointListener(null);
+
+        SingleElementRectifierConsumer<Map<String, Object>> consumer;
         Tuple2<FilterBreakpoint, Object> breakpoint;
 
         breakpoints.clear();
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 "123",
                 true,
@@ -240,7 +246,7 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.reason);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
 
         assertEquals(123L, consumer.out.get("id"));
         assertEquals(true, consumer.out.get("enable"));
@@ -272,7 +278,7 @@ public class RectifierTest {
         assertEquals(true, breakpoint.b);
 
         breakpoints.clear();
-        consumer = new AssertSingleRectifierConsumer<>();
+        consumer = new SingleElementRectifierConsumer<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -282,7 +288,7 @@ public class RectifierTest {
         ), consumer);
         assertTrue(consumer.flag);
         assertNull(consumer.out);
-        assertNotNull(consumer.resultRaw);
+        assertNotNull(consumer.rawOutput);
         assertEquals("status is not even", consumer.reason);
 
         assertEquals(3, breakpoints.size());
@@ -290,21 +296,21 @@ public class RectifierTest {
         assertEquals("status is not even", breakpoint.b);
     }
 
-    private static class AssertSingleRectifierConsumer<O> implements RectifierConsumer<O> {
+    private static class SingleElementRectifierConsumer<O> implements RectifierConsumer<O> {
 
         boolean flag = false;
         O out;
-        ResultRaw resultRaw;
+        RawOutput rawOutput;
         String reason;
 
         @Override
-        public void onCompleted(O out, ResultRaw resultRaw, String reason) {
+        public void onCompleted(@Nullable O out, RawOutput raw, @Nullable String reason) {
             if (flag) {
-                throw new AssertionError("Assert single item, but got more");
+                throw new AssertionError("Assert single element, but onCompleted called more than once.");
             }
             flag = true;
             this.out = out;
-            this.resultRaw = resultRaw;
+            this.rawOutput = raw;
             this.reason = reason;
         }
     }

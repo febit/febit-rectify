@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.function;
 
+import jakarta.annotation.Nullable;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
@@ -31,11 +32,12 @@ public class BasicFunctions implements IFunctions {
     @Alias(value = {ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT}, keepOriginName = false)
     public static final IntStrStrFunc NEW_FILTER_BREAKPOINT = FilterBreakpoint::of;
 
-    private static Object exit(String reason) {
+    private static Object exit(@Nullable String reason) {
         throw new ExitException(reason);
     }
 
-    private static Object checkFilter(Object isAccept) {
+    @Nullable
+    private static Object checkFilter(@Nullable Object isAccept) {
         // Pass, if expr returns NULL
         if (isAccept == null) {
             return null;

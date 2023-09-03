@@ -15,8 +15,8 @@
  */
 package org.febit.rectify;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -29,8 +29,8 @@ class RectifierFunctionWrapper<S, I, O> implements Rectifier<S, O> {
     private final Rectifier<I, O> delegated;
 
     @Override
-    public void process(S source, BiConsumer<O, ResultRaw> onSucceed, BiConsumer<String, ResultRaw> onFailed) {
-        val in = transfer.apply(source);
+    public void process(@Nullable S source, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed) {
+        var in = transfer.apply(source);
         delegated.process(in, onSucceed, onFailed);
     }
 
