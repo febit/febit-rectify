@@ -16,19 +16,19 @@
 package org.febit.rectify;
 
 import jakarta.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.ScriptBuilder;
 import org.febit.rectify.util.OutputModelUtils;
 import org.febit.wit.Context;
-import org.febit.wit.Template;
 import org.febit.wit.Vars;
 import org.febit.wit.exceptions.ScriptRuntimeException;
-import org.febit.wit.global.GlobalManager;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Rectifier impl.
@@ -36,40 +36,29 @@ import java.util.function.BiConsumer;
  * @param <I> input Type
  * @param <O> out type
  */
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class RectifierImpl<I, O> implements Rectifier<I, O> {
 
-    protected final OutputModel<O> outputModel;
     protected final Schema schema;
-    protected final Template script;
+    protected final OutputModel<O> outputModel;
+    protected final Supplier<List<String>> hints;
+    protected final Function<Vars, Context> script;
 
     /**
      * Get script hints.
      *
      * @return hints string list
      */
+    @Override
     public List<String> getHints() {
-        List<String> hints = new ArrayList<>();
-
-        // vars
-        hints.add(ScriptBuilder.VAR_INPUT);
-        hints.add(ScriptBuilder.VAR_CURR_FIELD);
-
-        // globals
-        GlobalManager gm = script.getEngine().getGlobalManager();
-        gm.forEachGlobal((k, v) -> hints.add(k));
-        gm.forEachConst((k, v) -> hints.add(k));
-
-        return hints;
+        return hints.get();
     }
 
-    protected RectifierImpl(Template script, Schema schema, OutputModel<O> outputModel) {
-        Objects.requireNonNull(script);
-        Objects.requireNonNull(schema);
-        Objects.requireNonNull(outputModel);
-        this.script = script;
-        this.schema = schema;
-        this.outputModel = outputModel;
+    @Override
+    public Schema schema() {
+        return schema;
     }
+
 
     @Nullable
     private static ExitException searchExitException(Throwable exception) {
@@ -85,15 +74,15 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         return null;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    protected Context executeScript(Vars vars) {
-        return script.merge(vars);
-    }
-
-    public void process(@Nullable I input, BiConsumer<O, RawOutput> onSuccess, BiConsumer<String, RawOutput> onFailed) {
-        final RawOutput rawOutput = new RawOutput();
+    @Override
+    public void process(
+            @Nullable I input,
+            BiConsumer<O, RawOutput> onSuccess,
+            BiConsumer<String, RawOutput> onFailed
+    ) {
+        var rawOutput = new RawOutput();
         try {
-            executeScript(accepter -> {
+            script.apply(accepter -> {
                 accepter.set(ScriptBuilder.VAR_INPUT, input);
                 accepter.set(ScriptBuilder.VAR_RESULT, rawOutput);
             });
@@ -107,13 +96,8 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
             return;
         }
         @SuppressWarnings("unchecked")
-        O record = (O) OutputModelUtils.convert(schema, rawOutput, outputModel);
-        onSuccess.accept(record, rawOutput);
-    }
-
-    @Override
-    public Schema schema() {
-        return schema;
+        var output = (O) OutputModelUtils.convert(schema, rawOutput, outputModel);
+        onSuccess.accept(output, rawOutput);
     }
 
 }

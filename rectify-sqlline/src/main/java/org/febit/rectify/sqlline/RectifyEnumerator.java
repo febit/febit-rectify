@@ -47,8 +47,8 @@ class RectifyEnumerator implements Enumerator<Object[]> {
     }
 
     static RectifyEnumerator create(RectifierConf conf, Source source, SourceFormat<String, Object> sourceFormat, AtomicBoolean cancelFlag) throws IOException {
-        BufferedReader reader = new BufferedReader(source.reader());
-        Rectifier<String, Object[]> rectifier = conf.build(OutputModels.asObjectArray())
+        var reader = new BufferedReader(source.reader());
+        var rectifier = conf.build(OutputModels.asObjectArray())
                 .with(sourceFormat);
         return new RectifyEnumerator(reader, rectifier, cancelFlag);
     }

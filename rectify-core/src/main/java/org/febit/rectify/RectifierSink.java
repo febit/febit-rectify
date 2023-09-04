@@ -18,7 +18,7 @@ package org.febit.rectify;
 import jakarta.annotation.Nullable;
 
 @FunctionalInterface
-public interface RectifierConsumer<O> {
+public interface RectifierSink<O> {
 
     void onCompleted(@Nullable O out, RawOutput raw, @Nullable String reason);
 

@@ -161,8 +161,9 @@ public class ScriptBuilder {
                 .append(expr)
                 .append(";\n");
 
-        if (StringUtils.isNotEmpty(column.checkExpr())) {
-            appendFilter(context, column.checkExpr(), index, column.name());
+        var checkExpr = column.checkExpr();
+        if (StringUtils.isNotEmpty(checkExpr)) {
+            appendFilter(context, checkExpr, index, column.name());
         }
     }
 

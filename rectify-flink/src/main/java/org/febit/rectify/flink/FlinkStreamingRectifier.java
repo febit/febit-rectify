@@ -22,25 +22,33 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.operators.StreamFlatMap;
 import org.apache.flink.types.Row;
 import org.febit.rectify.RectifierConf;
-import org.febit.rectify.RectifierProvider;
+import org.febit.rectify.Rectifiers;
+import org.febit.rectify.SerializableRectifier;
 import org.febit.rectify.SourceFormat;
 
 public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
 
-    protected FlinkStreamingRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
-        super(rectifierProvider, typeInfo);
+    protected FlinkStreamingRectifier(SerializableRectifier<I, Row> rectifier, RowTypeInfo typeInfo) {
+        super(rectifier, typeInfo);
+    }
+
+    public static <I> FlinkStreamingRectifier<I> create(
+            SerializableRectifier<I, Row> rectifier,
+            RowTypeInfo typeInfo
+    ) {
+        return new FlinkStreamingRectifier<>(rectifier, typeInfo);
     }
 
     public static <I> FlinkStreamingRectifier<I> create(RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                () -> conf.build(RowOutputModel.get()),
+                Rectifiers.lazy(() -> conf.build(RowOutputModel.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                () -> conf.build(sourceFormat, RowOutputModel.get()),
+                Rectifiers.lazy(() -> conf.build(sourceFormat, RowOutputModel.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
@@ -51,7 +59,10 @@ public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
     }
 
     public static <I> SingleOutputStreamOperator<Row> operator(
-            DataStream<I> dataStream, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+            DataStream<I> dataStream,
+            SourceFormat<I, Object> sourceFormat,
+            RectifierConf conf
+    ) {
         var rectifier = create(sourceFormat, conf);
         return rectifier.operator(dataStream);
     }

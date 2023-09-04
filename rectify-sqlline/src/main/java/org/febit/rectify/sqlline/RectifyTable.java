@@ -46,7 +46,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
 
     @Override
     public RelDataType getRowType(RelDataTypeFactory typeFactory) {
-        RelDataType type = rowTypeCaching;
+        var type = rowTypeCaching;
         if (type != null) {
             return rowTypeCaching;
         }
@@ -58,7 +58,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
     @Override
     public Enumerable<Object[]> scan(DataContext root) {
         final AtomicBoolean cancelFlag = DataContext.Variable.CANCEL_FLAG.get(root);
-        return new AbstractEnumerable<Object[]>() {
+        return new AbstractEnumerable<>() {
             public Enumerator<Object[]> enumerator() {
                 try {
                     return RectifyEnumerator.create(conf, source, sourceFormat, cancelFlag);

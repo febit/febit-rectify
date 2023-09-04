@@ -26,7 +26,7 @@ import org.febit.wit.plugin.EnginePlugin;
 public interface RectifierEnginePlugin extends EnginePlugin {
 
     default void initAndApply(Engine engine, Logger logger) {
-        String name = getClass().getName();
+        var name = getClass().getName();
         logger.info("Applying rectify engine spi plugin: {}.", name);
         engine.inject(name, this);
         apply(engine);

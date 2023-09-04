@@ -18,6 +18,7 @@ package org.febit.rectify;
 import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class OutputModels {
         return MAP_OUTPUT_MODEL;
     }
 
-    private static class MapOutputModel implements OutputModel<Map<String, Object>> {
+    private static class MapOutputModel implements OutputModel<Map<String, Object>>, Serializable {
 
         @Override
         public Map<String, Object> newStruct(Schema schema) {
@@ -61,7 +62,7 @@ public class OutputModels {
         }
     }
 
-    private static class ObjectArrayOutputModel implements OutputModel<Object[]> {
+    private static class ObjectArrayOutputModel implements OutputModel<Object[]>, Serializable {
 
         @Override
         public Object[] newStruct(Schema schema) {

@@ -15,17 +15,15 @@
  */
 package org.febit.rectify.sqlline;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.febit.rectify.Schema;
 
 import java.util.ArrayList;
-import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 class DataTypeUtils {
 
     static RelDataType toDataType(Schema schema, RelDataTypeFactory typeFactory) {
@@ -36,10 +34,10 @@ class DataTypeUtils {
                         true
                 );
             case STRUCT:
-                List<Schema.Field> fields = schema.fields();
-                List<String> fieldNames = new ArrayList<>(fields.size());
-                List<RelDataType> fieldTypes = new ArrayList<>(fields.size());
-                for (Schema.Field field : fields) {
+                var fields = schema.fields();
+                var fieldNames = new ArrayList<String>(fields.size());
+                var fieldTypes = new ArrayList<RelDataType>(fields.size());
+                for (var field : fields) {
                     fieldNames.add(field.name());
                     fieldTypes.add(toDataType(field.schema(), typeFactory));
                 }

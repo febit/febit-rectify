@@ -30,17 +30,13 @@ import org.febit.wit.exceptions.ResourceNotFoundException;
 
 import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Rectifier Config / Factory, Serializable.
+ * Rectifier config & factory, serializable.
  */
 @Getter
 @Setter
@@ -180,12 +176,13 @@ public class RectifierConf implements Serializable {
      */
     public <I, O> Rectifier<I, O> build(OutputModel<O> outputModel) {
         // init script
+        var breakpointListener = this.breakpointListener;
         var isDebugEnabled = breakpointListener != null;
         var schema = resolveSchema();
 
         final Template script;
         try {
-            String code = "code: " + ScriptBuilder.build(this, isDebugEnabled);
+            var code = "code: " + ScriptBuilder.build(this, isDebugEnabled);
             script = EngineLazyHolder.ENGINE.getTemplate(code);
             // fast-fail check
             script.reload();
@@ -193,11 +190,30 @@ public class RectifierConf implements Serializable {
             throw new UncheckedIOException("Failed to create script.", ex);
         }
 
-        if (breakpointListener == null) {
-            return new RectifierImpl<>(script, schema, outputModel);
-        }
-        return new RectifierDebugImpl<>(script, schema, outputModel, breakpointListener);
+        return new RectifierImpl<>(
+                schema, outputModel,
+                () -> collectHints(script),
+                isDebugEnabled
+                        ? vars -> script.debug(vars, breakpointListener)
+                        : script::merge
+        );
     }
+
+    private static List<String> collectHints(Template script) {
+        var hints = new ArrayList<String>();
+
+        // vars
+        hints.add(ScriptBuilder.VAR_INPUT);
+        hints.add(ScriptBuilder.VAR_CURR_FIELD);
+
+        // globals
+        var gm = script.getEngine().getGlobalManager();
+        gm.forEachGlobal((k, v) -> hints.add(k));
+        gm.forEachConst((k, v) -> hints.add(k));
+
+        return List.copyOf(hints);
+    }
+
 
     public <S, I> Rectifier<S, Map<String, Object>> build(SourceFormat<S, I> sourceFormat) {
         return build(sourceFormat, OutputModels.asMap());

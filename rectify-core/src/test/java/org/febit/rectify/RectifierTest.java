@@ -117,9 +117,9 @@ public class RectifierTest {
         var rectifier = conf.build()
                 .with(new JsonSourceFormat());
 
-        SingleElementRectifierConsumer<Map<String, Object>> consumer;
+        SingleElementRectifierSink<Map<String, Object>> consumer;
 
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 "123",
                 true,
@@ -137,7 +137,7 @@ public class RectifierTest {
         assertEquals(true, consumer.out.get("call_isTruly"));
         assertEquals("prefix:tell something", consumer.out.get("content"));
 
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 456,
                 true,
@@ -161,8 +161,8 @@ public class RectifierTest {
 
         var rectifier = conf.build()
                 .with(new JsonSourceFormat());
-        SingleElementRectifierConsumer<Map<String, Object>> consumer;
-        consumer = new SingleElementRectifierConsumer<>();
+        SingleElementRectifierSink<Map<String, Object>> consumer;
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 123,
                 true,
@@ -175,7 +175,7 @@ public class RectifierTest {
         assertNotNull(consumer.rawOutput);
         assertNull(consumer.reason);
 
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 123,
                 true,
@@ -188,7 +188,7 @@ public class RectifierTest {
         assertNotNull(consumer.rawOutput);
         assertEquals("status should <100", consumer.reason);
 
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -201,7 +201,7 @@ public class RectifierTest {
         assertNotNull(consumer.rawOutput);
         assertEquals("status is not even", consumer.reason);
 
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -232,11 +232,11 @@ public class RectifierTest {
         var rectifier = conf.build().with(new JsonSourceFormat());
         conf.setBreakpointListener(null);
 
-        SingleElementRectifierConsumer<Map<String, Object>> consumer;
+        SingleElementRectifierSink<Map<String, Object>> consumer;
         Tuple2<FilterBreakpoint, Object> breakpoint;
 
         breakpoints.clear();
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 "123",
                 true,
@@ -278,7 +278,7 @@ public class RectifierTest {
         assertEquals(true, breakpoint.b);
 
         breakpoints.clear();
-        consumer = new SingleElementRectifierConsumer<>();
+        consumer = new SingleElementRectifierSink<>();
         rectifier.process(buildInput(
                 123,
                 false,
@@ -296,7 +296,7 @@ public class RectifierTest {
         assertEquals("status is not even", breakpoint.b);
     }
 
-    private static class SingleElementRectifierConsumer<O> implements RectifierConsumer<O> {
+    private static class SingleElementRectifierSink<O> implements RectifierSink<O> {
 
         boolean flag = false;
         O out;
@@ -308,7 +308,7 @@ public class RectifierTest {
             if (flag) {
                 throw new AssertionError("Assert single element, but onCompleted called more than once.");
             }
-            flag = true;
+            this.flag = true;
             this.out = out;
             this.rawOutput = raw;
             this.reason = reason;

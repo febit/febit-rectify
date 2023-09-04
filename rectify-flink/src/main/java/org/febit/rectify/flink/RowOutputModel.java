@@ -20,7 +20,9 @@ import org.apache.flink.types.Row;
 import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
 
-public class RowOutputModel implements OutputModel<Row> {
+import java.io.Serializable;
+
+public class RowOutputModel implements OutputModel<Row>, Serializable {
 
     private static final RowOutputModel INSTANCE = new RowOutputModel();
 

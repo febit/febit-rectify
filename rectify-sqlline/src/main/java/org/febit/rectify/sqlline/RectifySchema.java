@@ -45,13 +45,13 @@ class RectifySchema extends AbstractSchema {
     }
 
     private Map<String, Table> createTableMap() {
-        File[] files = directoryFile.listFiles((dir, name) -> name.endsWith(".rectify.yml"));
+        var files = directoryFile.listFiles((dir, name) -> name.endsWith(".rectify.yml"));
         if (files == null) {
             log.warn("Directory not found: {}", directoryFile);
             files = new File[0];
         }
-        final Map<String, Table> map = new HashMap<>();
-        for (File file : files) {
+        var map = new HashMap<String, Table>();
+        for (var file : files) {
             TableConfig config;
             try {
                 config = TableConfig.fromYaml(Sources.of(file).reader());

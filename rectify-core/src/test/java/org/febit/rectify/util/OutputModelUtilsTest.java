@@ -22,14 +22,11 @@ import org.febit.rectify.Schema;
 import org.febit.rectify.TestSchemas;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OutputModelUtilsTest {
 
@@ -154,7 +151,7 @@ class OutputModelUtilsTest {
         ), record);
     }
 
-    private static class ListOutputModel implements OutputModel<List<Object>> {
+    private static class ListOutputModel implements OutputModel<List<Object>>, Serializable {
 
         @Override
         public List<Object> newStruct(Schema schema) {

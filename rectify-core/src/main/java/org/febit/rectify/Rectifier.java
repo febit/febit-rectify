@@ -36,8 +36,8 @@ public interface Rectifier<I, O> {
      *
      * @param input input
      */
-    default void process(@Nullable I input, RectifierConsumer<O> onCompleted) {
-        process(input, onCompleted::onSucceed, onCompleted::onFailed);
+    default void process(@Nullable I input, RectifierSink<O> sink) {
+        process(input, sink::onSucceed, sink::onFailed);
     }
 
     /**
@@ -54,10 +54,26 @@ public interface Rectifier<I, O> {
     List<String> getHints();
 
     default <S> Rectifier<S, O> with(SourceFormat<S, I> sourceFormat) {
-        return RectifierSourceFormatWrapper.wrap(sourceFormat, this);
+        return Rectifiers.formatted(this, sourceFormat);
     }
 
     default <S> Rectifier<S, O> with(Function<S, I> transfer) {
-        return RectifierFunctionWrapper.wrap(transfer, this);
+        return Rectifiers.transformed(this, transfer);
     }
+
+    interface Delegated<I, O, DI, DO> extends Rectifier<I, O> {
+
+        Rectifier<DI, DO> delegated();
+
+        @Override
+        default Schema schema() {
+            return delegated().schema();
+        }
+
+        @Override
+        default List<String> getHints() {
+            return delegated().getHints();
+        }
+    }
+
 }

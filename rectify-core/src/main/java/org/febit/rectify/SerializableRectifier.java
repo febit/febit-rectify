@@ -15,9 +15,7 @@
  */
 package org.febit.rectify;
 
-import org.febit.lang.SerializableSupplier;
+import java.io.Serializable;
 
-@FunctionalInterface
-public interface RectifierProvider<I, O> extends SerializableSupplier<Rectifier<I, O>> {
-
+public interface SerializableRectifier<I, O> extends Rectifier<I, O>, Serializable {
 }

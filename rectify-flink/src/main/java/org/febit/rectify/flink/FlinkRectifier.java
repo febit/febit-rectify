@@ -15,54 +15,50 @@
  */
 package org.febit.rectify.flink;
 
+import jakarta.annotation.Nonnull;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.operators.FlatMapOperator;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
-import org.febit.rectify.LazyRectifier;
-import org.febit.rectify.RectifierConf;
-import org.febit.rectify.RectifierConsumer;
-import org.febit.rectify.RectifierProvider;
-import org.febit.rectify.Schema;
-import org.febit.rectify.SourceFormat;
+import org.febit.rectify.*;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
  * @param <I>
  */
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class FlinkRectifier<I> implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
-    private final LazyRectifier<I, Row> rectifier;
+    @Nonnull
+    private final SerializableRectifier<I, Row> rectifier;
+    @Nonnull
     private final RowTypeInfo typeInfo;
 
-    protected FlinkRectifier(RectifierProvider<I, Row> rectifierProvider, RowTypeInfo typeInfo) {
-        Objects.requireNonNull(rectifierProvider);
-        Objects.requireNonNull(typeInfo);
-        this.rectifier = LazyRectifier.of(rectifierProvider);
-        this.typeInfo = typeInfo;
+    public static <I> FlinkRectifier<I> create(SerializableRectifier<I, Row> rectifier, RowTypeInfo typeInfo) {
+        Objects.requireNonNull(rectifier, "rectifier");
+        Objects.requireNonNull(typeInfo, "typeInfo");
+        return new FlinkRectifier<>(rectifier, typeInfo);
     }
 
     public static <I> FlinkRectifier<I> create(RectifierConf conf) {
-        return new FlinkRectifier<>(
-                () -> conf.build(RowOutputModel.get()),
+        return create(
+                Rectifiers.lazy(() -> conf.build(RowOutputModel.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        return new FlinkRectifier<>(
-                () -> conf.build(sourceFormat, RowOutputModel.get()),
+        return create(
+                Rectifiers.lazy(() -> conf.build(sourceFormat, RowOutputModel.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
@@ -81,8 +77,8 @@ public class FlinkRectifier<I> implements Serializable {
         process(raw, out::collect);
     }
 
-    protected void processRaw(I in, RectifierConsumer<Row> out) {
-        this.rectifier.process(in, out);
+    protected void processRaw(I in, RectifierSink<Row> sink) {
+        this.rectifier.process(in, sink);
     }
 
     public void process(I in, Consumer<Row> out) {
