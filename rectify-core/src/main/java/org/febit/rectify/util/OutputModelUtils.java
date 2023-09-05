@@ -17,28 +17,23 @@ package org.febit.rectify.util;
 
 import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.collections4.IteratorUtils;
 import org.febit.lang.util.TimeUtils;
 import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
 
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+
+import static org.febit.rectify.util.Convert.toBoolean;
+import static org.febit.rectify.util.Convert.toNumber;
+import static org.febit.rectify.util.TimeConvert.toDate;
+import static org.febit.rectify.util.TimeConvert.toDateTime;
+import static org.febit.rectify.util.TimeConvert.toInstant;
+import static org.febit.rectify.util.TimeConvert.toTime;
+import static org.febit.rectify.util.TimeConvert.toZonedDateTime;
 
 @UtilityClass
 public class OutputModelUtils {
@@ -64,11 +59,11 @@ public class OutputModelUtils {
             case STRING:
                 return value.toString();
             case DATE:
-                return toLocalDate(value);
+                return toDate(value);
             case TIME:
-                return toLocalTime(value);
+                return toTime(value);
             case DATETIME:
-                return toLocalDateTime(value);
+                return toDateTime(value);
             case DATETIME_WITH_TIMEZONE:
                 return toZonedDateTime(value);
             case INSTANT:
@@ -90,97 +85,6 @@ public class OutputModelUtils {
             default:
                 throw new IllegalArgumentException("Unsupported type: " + schema.getType());
         }
-    }
-
-    @Nullable
-    private static Instant toInstant(Object obj) {
-        if (obj instanceof Temporal) {
-            return TimeUtils.instant((Temporal) obj);
-        }
-        return TimeUtils.parseInstant(obj.toString());
-    }
-
-    @Nullable
-    private static ZonedDateTime toZonedDateTime(Object obj) {
-        if (obj instanceof Temporal) {
-            return TimeUtils.zonedDateTime((Temporal) obj);
-        }
-        return TimeUtils.parseZonedDateTime(obj.toString());
-    }
-
-    @Nullable
-    private static LocalDateTime toLocalDateTime(Object obj) {
-        if (obj instanceof TemporalAccessor) {
-            return TimeUtils.localDateTime((TemporalAccessor) obj);
-        }
-        return TimeUtils.parseDateTime(obj.toString());
-    }
-
-    @Nullable
-    private static LocalDate toLocalDate(Object obj) {
-        if (obj instanceof TemporalAccessor) {
-            return TimeUtils.localDate((TemporalAccessor) obj);
-        }
-        return TimeUtils.parseDate(obj.toString());
-    }
-
-    @Nullable
-    private static LocalTime toLocalTime(Object obj) {
-        if (obj instanceof TemporalAccessor) {
-            return TimeUtils.localTime((TemporalAccessor) obj);
-        }
-        return TimeUtils.parseTime(obj.toString());
-    }
-
-    private static Boolean toBoolean(@Nullable Object raw) {
-        if (raw instanceof Boolean) {
-            return (Boolean) raw;
-        }
-        if (raw == null) {
-            return false;
-        }
-        if (raw instanceof Number) {
-            return raw.equals(1);
-        }
-        if (raw instanceof String && isTrue((String) raw)) {
-            return true;
-        }
-        var text = raw.toString().trim().toLowerCase();
-        return isTrue(text);
-    }
-
-    private static Boolean isTrue(String text) {
-        switch (text) {
-            case "true":
-            case "True":
-            case "TRUE":
-            case "on":
-            case "ON":
-            case "1":
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Nullable
-    private static <T extends Number> T toNumber(
-            @Nullable Object raw,
-            Function<Number, T> converter,
-            @Nullable T defaultValue
-    ) {
-        if (raw instanceof Number) {
-            return converter.apply((Number) raw);
-        }
-        if (raw == null) {
-            return defaultValue;
-        }
-        String str = raw.toString().trim();
-        if (str.isEmpty()) {
-            return defaultValue;
-        }
-        BigDecimal number = new BigDecimal(str);
-        return converter.apply(number);
     }
 
     @Nullable
@@ -224,7 +128,7 @@ public class OutputModelUtils {
     }
 
     private static List<Object> constructArray(Schema schema, @Nullable Object value, OutputModel<?> model) {
-        var iter = toIterator(value);
+        var iter = Convert.toIterator(value);
         var list = new ArrayList<>();
         var valueType = schema.valueType();
         while (iter.hasNext()) {
@@ -259,29 +163,6 @@ public class OutputModelUtils {
             model.setField(struct, field, v);
         }
         return struct;
-    }
-
-    @SuppressWarnings({"unchecked"})
-    private static Iterator<Object> toIterator(@Nullable final Object o1) {
-        if (o1 == null) {
-            return Collections.emptyIterator();
-        }
-        if (o1 instanceof Iterator) {
-            return (Iterator<Object>) o1;
-        }
-        if (o1 instanceof Iterable) {
-            return ((Iterable<Object>) o1).iterator();
-        }
-        if (o1 instanceof Object[]) {
-            return IteratorUtils.arrayIterator((Object[]) o1);
-        }
-        if (o1 instanceof Enumeration) {
-            return IteratorUtils.asIterator((Enumeration<Object>) o1);
-        }
-        if (o1.getClass().isArray()) {
-            return IteratorUtils.arrayIterator(o1);
-        }
-        throw new RuntimeException("Can't convert to iter: " + o1.getClass());
     }
 
 }
