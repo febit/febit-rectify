@@ -1,8 +1,8 @@
 plugins {
   id 'com.github.hierynomus.license' version '0.16.1'
-  id 'org.febit.standard-java' version '1.1.0-SNAPSHOT'
-  id 'org.febit.standard-maven-publish' version '1.1.0-SNAPSHOT'
-  id 'org.febit.codegen-module' version '1.1.0-SNAPSHOT'
+  id 'org.febit.standard-java' version '1.1.0'
+  id 'org.febit.standard-maven-publish' version '1.1.0'
+  id 'org.febit.codegen-module' version '1.1.0'
 }
 
 group 'org.febit.rectify'
@@ -89,7 +89,7 @@ configure(subprojects.findAll {
     compileOnly 'org.febit:febit-annotations-optional'
     testCompileOnly 'org.febit:febit-annotations-optional'
 
-    testImplementation 'org.febit:febit-test-common'
+    testImplementation 'org.febit:febit-commons-test'
     testRuntimeOnly 'org.slf4j:slf4j-simple'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

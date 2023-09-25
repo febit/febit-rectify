@@ -28,7 +28,7 @@ import java.util.Map;
 public class Indexer<T extends Serializable> implements Iterable<T>, Serializable {
 
     private final List<T> keys;
-    private final Map<T, Integer> indexerMap;
+    private final Map<T, Integer> mapping;
 
     private Indexer(List<T> keys) {
         this.keys = keys;
@@ -36,7 +36,7 @@ public class Indexer<T extends Serializable> implements Iterable<T>, Serializabl
         for (int i = 0; i < keys.size(); i++) {
             pairs[i] = Pair.of(keys.get(i), i);
         }
-        this.indexerMap = Map.ofEntries(pairs);
+        this.mapping = Map.ofEntries(pairs);
     }
 
     public static <T extends Serializable> Indexer<T> of(Collection<T> keys) {
@@ -48,8 +48,11 @@ public class Indexer<T extends Serializable> implements Iterable<T>, Serializabl
     }
 
     @Nullable
-    public Integer getIndex(T key) {
-        return indexerMap.get(key);
+    public Integer getIndex(@Nullable T key) {
+        if (key == null) {
+            return null;
+        }
+        return mapping.get(key);
     }
 
     @Override

@@ -17,6 +17,7 @@ package org.febit.rectify.util;
 
 import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
+import org.febit.lang.util.Iterators;
 import org.febit.lang.util.TimeUtils;
 import org.febit.rectify.OutputModel;
 import org.febit.rectify.Schema;
@@ -27,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.febit.rectify.util.Convert.toBoolean;
-import static org.febit.rectify.util.Convert.toNumber;
+import static org.febit.lang.util.ConvertUtils.toBoolean;
+import static org.febit.lang.util.ConvertUtils.toNumber;
 import static org.febit.rectify.util.TimeConvert.toDate;
 import static org.febit.rectify.util.TimeConvert.toDateTime;
 import static org.febit.rectify.util.TimeConvert.toInstant;
@@ -128,7 +129,7 @@ public class OutputModelUtils {
     }
 
     private static List<Object> constructArray(Schema schema, @Nullable Object value, OutputModel<?> model) {
-        var iter = Convert.toIterator(value);
+        var iter = Iterators.forAny(value);
         var list = new ArrayList<>();
         var valueType = schema.valueType();
         while (iter.hasNext()) {

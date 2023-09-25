@@ -15,22 +15,22 @@
  */
 package org.febit.rectify.lib.func;
 
+import org.febit.lang.util.ConvertUtils;
 import org.febit.rectify.function.IFunctions;
 import org.febit.rectify.function.ObjFunc;
-import org.febit.rectify.util.Convert;
 
 @SuppressWarnings({"unused"})
 public class ConvertFunctions implements IFunctions {
 
-    public static final ObjFunc toNumber = Convert::toNumber;
-    public static final ObjFunc toByte = Convert::toByte;
-    public static final ObjFunc toShort = Convert::toShort;
-    public static final ObjFunc toInteger = Convert::toInteger;
-    public static final ObjFunc toLong = Convert::toLong;
-    public static final ObjFunc toFloat = Convert::toFloat;
-    public static final ObjFunc toDouble = Convert::toDouble;
-    public static final ObjFunc toBigDecimal = Convert::toBigDecimal;
+    public static final ObjFunc toNumber = ConvertUtils::toNumber;
+    public static final ObjFunc toByte = ConvertUtils::toByte;
+    public static final ObjFunc toShort = ConvertUtils::toShort;
+    public static final ObjFunc toInteger = ConvertUtils::toInteger;
+    public static final ObjFunc toLong = ConvertUtils::toLong;
+    public static final ObjFunc toFloat = ConvertUtils::toFloat;
+    public static final ObjFunc toDouble = ConvertUtils::toDouble;
+    public static final ObjFunc toBigDecimal = ConvertUtils::toBigDecimal;
 
-    public static final ObjFunc toBoolean = Convert::toBoolean;
-    public static final ObjFunc toString = Convert::toString;
+    public static final ObjFunc toBoolean = ConvertUtils::toBoolean;
+    public static final ObjFunc toString = ConvertUtils::toString;
 }

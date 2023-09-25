@@ -19,7 +19,7 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.febit.lang.Lazy;
-import org.febit.lang.SerializableSupplier;
+import org.febit.lang.func.SerializableSupplier;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;

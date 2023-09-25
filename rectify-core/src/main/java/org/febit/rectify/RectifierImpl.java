@@ -59,7 +59,6 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
         return schema;
     }
 
-
     @Nullable
     private static ExitException searchExitException(Throwable exception) {
         int i = 0;
