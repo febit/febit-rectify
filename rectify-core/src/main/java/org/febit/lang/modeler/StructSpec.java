@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.lang.modeler;
 
 import jakarta.annotation.Nullable;
 
-/**
- * Model for outputs.
- *
- * @param <R>
- * @see OutputModels
- */
-public interface OutputModel<R> {
+public interface StructSpec<R> {
 
-    R newStruct(Schema schema);
+    R create(Schema schema);
 
-    void setField(R record, Schema.Field field, @Nullable Object value);
+    void set(R struct, Schema.Field field, @Nullable Object value);
 
     @Nullable
-    Object getField(R record, Schema.Field field);
+    Object get(R struct, Schema.Field field);
 }

@@ -41,14 +41,14 @@ public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
 
     public static <I> FlinkStreamingRectifier<I> create(RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                Rectifiers.lazy(() -> conf.build(RowOutputModel.get())),
+                Rectifiers.lazy(() -> conf.build(RowStructSpec.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         return new FlinkStreamingRectifier<>(
-                Rectifiers.lazy(() -> conf.build(sourceFormat, RowOutputModel.get())),
+                Rectifiers.lazy(() -> conf.build(sourceFormat, RowStructSpec.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }

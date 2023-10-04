@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.lang.modeler;
 
-import jakarta.annotation.Nullable;
 import org.febit.lang.util.TimeUtils;
-import org.febit.rectify.OutputModel;
-import org.febit.rectify.Schema;
-import org.febit.rectify.TestSchemas;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class OutputModelUtilsTest {
+class ModelerTest {
 
     private static List<Object> asList(Object... items) {
         return Arrays.asList(items);
@@ -49,12 +48,11 @@ class OutputModelUtilsTest {
 
     @Test
     void testConvertComplex() {
-        Schema schema = TestSchemas.COMPLEX;
-
-        ZonedDateTime time = ZonedDateTime.parse("2022-01-23T02:03:56+07:00");
+        var schema = TestSchemas.COMPLEX;
+        var time = ZonedDateTime.parse("2022-01-23T02:03:56+07:00");
 
         @SuppressWarnings("unchecked")
-        List<Object> record = (List<Object>) OutputModelUtils.convert(schema, namedMap(
+        var record = (List<Object>) Modeler.process(schema, namedMap(
                 "id", 1234L,
                 "name", "Mr.R",
                 "float", 11111D,
@@ -79,7 +77,7 @@ class OutputModelUtilsTest {
                         )
                 ),
                 "unused", "unused field"
-        ), new ListOutputModel());
+        ), StructSpecs.asList());
 
         assertEquals(asArray(
                 // 0 id
@@ -151,21 +149,4 @@ class OutputModelUtilsTest {
         ), record);
     }
 
-    private static class ListOutputModel implements OutputModel<List<Object>>, Serializable {
-
-        @Override
-        public List<Object> newStruct(Schema schema) {
-            return new ArrayList<>(Arrays.asList(new Object[schema.fieldSize()]));
-        }
-
-        @Override
-        public void setField(List<Object> record, Schema.Field field, @Nullable Object val) {
-            record.set(field.pos(), val);
-        }
-
-        @Override
-        public Object getField(List<Object> record, Schema.Field field) {
-            return record.get(field.pos());
-        }
-    }
 }

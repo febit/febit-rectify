@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.lang.modeler;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OutputModelsTest {
+class StructSpecsTest {
 
-    final Schema schema = Schema.parseLinesAsStruct("demo",
+    final Schema schema = Schema.parseStruct("demo",
             "long id",
             "string name",
             "int level",
@@ -30,12 +30,12 @@ class OutputModelsTest {
 
     @Test
     void asObjectArray() {
-        OutputModel<Object[]> model = OutputModels.asObjectArray();
-        Object[] struct = model.newStruct(schema);
+        StructSpec<Object[]> model = StructSpecs.asArray();
+        Object[] struct = model.create(schema);
 
-        model.setField(struct, schema.field("id"), 12345L);
-        model.setField(struct, schema.field("name"), "Mr.R");
-        model.setField(struct, schema.field("color"), "blue");
+        model.set(struct, schema.field("id"), 12345L);
+        model.set(struct, schema.field("name"), "Mr.R");
+        model.set(struct, schema.field("color"), "blue");
 
         assertEquals(12345L, struct[0]);
         assertEquals("Mr.R", struct[1]);
@@ -43,16 +43,16 @@ class OutputModelsTest {
         assertEquals("blue", struct[3]);
 
         assertEquals(struct[0],
-                model.getField(struct, schema.field("id"))
+                model.get(struct, schema.field("id"))
         );
         assertEquals(struct[1],
-                model.getField(struct, schema.field("name"))
+                model.get(struct, schema.field("name"))
         );
         assertEquals(struct[2],
-                model.getField(struct, schema.field("level"))
+                model.get(struct, schema.field("level"))
         );
         assertEquals(struct[3],
-                model.getField(struct, schema.field("color"))
+                model.get(struct, schema.field("color"))
         );
     }
 }

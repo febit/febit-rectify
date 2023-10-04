@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.lang.modeler;
 
 import jakarta.annotation.Nullable;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 
-import static org.febit.rectify.Schemas.NOT_A_STRUCT;
+import static org.febit.lang.modeler.Schemas.NOT_A_STRUCT;
 
-/**
- * Schema.
- */
 public interface Schema extends Serializable {
 
     static Schema parse(String str) {
@@ -37,58 +32,62 @@ public interface Schema extends Serializable {
         return Schemas.parse(space, name, str);
     }
 
-    static Schema parseLinesAsStruct(String name, String... lines) {
-        return Schemas.parseLinesAsStruct(name, lines);
+    static Schema parseStruct(String name, String... declares) {
+        return Schemas.parseStruct(name, declares);
     }
 
-    Type getType();
+    SchemaType type();
 
-    default boolean isType(Type type) {
-        return getType().equals(type);
+    String toJavaTypeString();
+
+    String toTypeString();
+
+    default boolean isType(SchemaType type) {
+        return type().equals(type);
     }
 
     default boolean isBooleanType() {
-        return isType(Type.BOOLEAN);
+        return isType(SchemaType.BOOLEAN);
     }
 
     default boolean isBytesType() {
-        return isType(Type.BYTES);
+        return isType(SchemaType.BYTES);
     }
 
     default boolean isIntType() {
-        return isType(Type.INT);
+        return isType(SchemaType.INT);
     }
 
     default boolean isBigintType() {
-        return isType(Type.INT64);
+        return isType(SchemaType.LONG);
     }
 
     default boolean isFloatType() {
-        return isType(Type.FLOAT);
+        return isType(SchemaType.FLOAT);
     }
 
     default boolean isDoubleType() {
-        return isType(Type.DOUBLE);
+        return isType(SchemaType.DOUBLE);
     }
 
     default boolean isStringType() {
-        return isType(Type.STRING);
+        return isType(SchemaType.STRING);
     }
 
     default boolean isOptionalType() {
-        return isType(Type.OPTIONAL);
+        return isType(SchemaType.OPTIONAL);
     }
 
     default boolean isArrayType() {
-        return isType(Type.ARRAY);
+        return isType(SchemaType.ARRAY);
     }
 
     default boolean isMapType() {
-        return isType(Type.MAP);
+        return isType(SchemaType.MAP);
     }
 
     default boolean isStructType() {
-        return isType(Type.STRUCT);
+        return isType(SchemaType.STRUCT);
     }
 
     @Nullable
@@ -98,7 +97,7 @@ public interface Schema extends Serializable {
 
     @Nullable
     default String name() {
-        return getType().getName();
+        return type().getTypeString();
     }
 
     @Nullable
@@ -145,42 +144,15 @@ public interface Schema extends Serializable {
         throw new UnsupportedOperationException(NOT_A_STRUCT + this);
     }
 
+    default Schema keyType() {
+        throw new UnsupportedOperationException("Not map optional: " + this);
+    }
+
     /**
      * If this is an array, map or optional, returns its value type.
      */
     default Schema valueType() {
         throw new UnsupportedOperationException("Not an array, map or optional: " + this);
-    }
-
-    @RequiredArgsConstructor
-    enum Type {
-
-        OPTIONAL,
-        STRUCT,
-        ARRAY,
-        MAP,
-
-        STRING,
-        BYTES,
-        BOOLEAN,
-        INT,
-        INT64,
-        FLOAT,
-        DOUBLE,
-
-        INSTANT,
-        DATE,
-        TIME,
-        DATETIME,
-        DATETIME_WITH_TIMEZONE("datetimetz"),
-        ;
-
-        @Getter
-        private final String name;
-
-        Type() {
-            this.name = this.name().toLowerCase();
-        }
     }
 
     interface Field extends Serializable {

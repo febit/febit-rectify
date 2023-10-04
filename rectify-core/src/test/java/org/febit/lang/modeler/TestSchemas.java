@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.lang.modeler;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSchemas {
 
-    public static final Schema COMPLEX = Schema.parseLinesAsStruct("demo", "\n"
+    public static final Schema COMPLEX = Schema.parseStruct("demo", "\n"
             , "# comment\n"
             , "  \n"
             , " int id  \n"
@@ -30,12 +30,12 @@ public class TestSchemas {
             , " float float  # \n"
             , " double double  # \n"
             , " ArRAy < string >   strings  # comment test \n "
-            , " map<long> longMap\n"
+            , " map<string,long> longMap\n"
             , "    #  comment\n"
-            , " map < string> stringMap \n"
-            , " optional<map < string>> optionalStringMap \n"
+            , " map <string, string> stringMap \n"
+            , " optional<map <string, string>> optionalStringMap \n"
             , " struct<id:string,launch:int64,du:long,date:int> session\n"
-            , " array<struct< du: int64, name : string  ,  ts:optional<int64>, attrs:map<String> , struct:struct<xx:String>, flag:boolean>  >  events\n"
-            , " array<struct<time:time,date:date,dt:datetime,dtz:datetimez,instant:instant>> times"
+            , " array<struct< du: int64, name : string  ,  ts:optional<int64>, attrs:map<string,String> , struct:struct<xx:String>, flag:boolean>  >  events\n"
+            , " array<struct<time:time,date:date,dt:datetime,dtz:datetimetz,instant:instant>> times"
             , "");
 }

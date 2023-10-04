@@ -16,6 +16,7 @@
 package org.febit.rectify;
 
 import jakarta.annotation.Nullable;
+import org.febit.lang.modeler.Schema;
 
 import java.util.List;
 import java.util.function.BiConsumer;

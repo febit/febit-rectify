@@ -17,6 +17,7 @@ package org.febit.rectify;
 
 import jakarta.annotation.Nullable;
 import org.febit.lang.Tuple2;
+import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;

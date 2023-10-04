@@ -22,15 +22,25 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.febit.lang.modeler.Schema;
+import org.febit.lang.modeler.Schemas;
+import org.febit.lang.modeler.StructSpec;
+import org.febit.lang.modeler.StructSpecs;
 import org.febit.rectify.engine.ScriptBuilder;
+import org.febit.wit.Context;
 import org.febit.wit.Engine;
 import org.febit.wit.Template;
+import org.febit.wit.Vars;
 import org.febit.wit.debug.BreakpointListener;
 import org.febit.wit.exceptions.ResourceNotFoundException;
 
 import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -163,7 +173,7 @@ public class RectifierConf implements Serializable {
      * @return Rectifier
      */
     public <I> Rectifier<I, Map<String, Object>> build() {
-        return build(OutputModels.asMap());
+        return build(StructSpecs.asMap());
     }
 
     /**
@@ -174,7 +184,7 @@ public class RectifierConf implements Serializable {
      * @param <O>         out type
      * @return Rectifier
      */
-    public <I, O> Rectifier<I, O> build(OutputModel<O> outputModel) {
+    public <I, O> Rectifier<I, O> build(StructSpec<O> outputModel) {
         // init script
         var breakpointListener = this.breakpointListener;
         var isDebugEnabled = breakpointListener != null;
@@ -190,12 +200,14 @@ public class RectifierConf implements Serializable {
             throw new UncheckedIOException("Failed to create script.", ex);
         }
 
+        Function<Vars, Context> func = isDebugEnabled
+                ? vars -> script.debug(vars, breakpointListener)
+                : script::merge;
+
         return new RectifierImpl<>(
                 schema, outputModel,
                 () -> collectHints(script),
-                isDebugEnabled
-                        ? vars -> script.debug(vars, breakpointListener)
-                        : script::merge
+                func
         );
     }
 
@@ -216,19 +228,19 @@ public class RectifierConf implements Serializable {
 
 
     public <S, I> Rectifier<S, Map<String, Object>> build(SourceFormat<S, I> sourceFormat) {
-        return build(sourceFormat, OutputModels.asMap());
+        return build(sourceFormat, StructSpecs.asMap());
     }
 
-    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, OutputModel<O> outputModel) {
+    public <S, I, O> Rectifier<S, O> build(SourceFormat<S, I> sourceFormat, StructSpec<O> outputModel) {
         Rectifier<I, O> inner = build(outputModel);
         return inner.with(sourceFormat);
     }
 
     public <S, I> Rectifier<S, Map<String, Object>> build(Function<S, I> transfer) {
-        return build(transfer, OutputModels.asMap());
+        return build(transfer, StructSpecs.asMap());
     }
 
-    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, OutputModel<O> outputModel) {
+    public <S, I, O> Rectifier<S, O> build(Function<S, I> transfer, StructSpec<O> outputModel) {
         Rectifier<I, O> inner = build(outputModel);
         return inner.with(transfer);
     }

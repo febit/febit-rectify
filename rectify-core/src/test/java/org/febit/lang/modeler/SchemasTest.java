@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.lang.modeler;
 
 import org.junit.jupiter.api.Test;
 
-import static org.febit.rectify.Schema.Type.BOOLEAN;
-import static org.febit.rectify.Schema.Type.BYTES;
-import static org.febit.rectify.Schema.Type.DATE;
-import static org.febit.rectify.Schema.Type.DATETIME;
-import static org.febit.rectify.Schema.Type.DATETIME_WITH_TIMEZONE;
-import static org.febit.rectify.Schema.Type.DOUBLE;
-import static org.febit.rectify.Schema.Type.FLOAT;
-import static org.febit.rectify.Schema.Type.INSTANT;
-import static org.febit.rectify.Schema.Type.INT;
-import static org.febit.rectify.Schema.Type.INT64;
-import static org.febit.rectify.Schema.Type.STRING;
-import static org.febit.rectify.Schema.Type.TIME;
+import static org.febit.lang.modeler.SchemaType.BOOLEAN;
+import static org.febit.lang.modeler.SchemaType.BYTES;
+import static org.febit.lang.modeler.SchemaType.DATE;
+import static org.febit.lang.modeler.SchemaType.DATETIME;
+import static org.febit.lang.modeler.SchemaType.DATETIME_ZONED;
+import static org.febit.lang.modeler.SchemaType.DOUBLE;
+import static org.febit.lang.modeler.SchemaType.FLOAT;
+import static org.febit.lang.modeler.SchemaType.INSTANT;
+import static org.febit.lang.modeler.SchemaType.INT;
+import static org.febit.lang.modeler.SchemaType.LONG;
+import static org.febit.lang.modeler.SchemaType.STRING;
+import static org.febit.lang.modeler.SchemaType.TIME;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({
@@ -145,7 +145,7 @@ class SchemasTest {
         assertTrue(timeSchema.field("time").schema().isType(TIME));
         assertTrue(timeSchema.field("date").schema().isType(DATE));
         assertTrue(timeSchema.field("dt").schema().isType(DATETIME));
-        assertTrue(timeSchema.field("dtz").schema().isType(DATETIME_WITH_TIMEZONE));
+        assertTrue(timeSchema.field("dtz").schema().isType(DATETIME_ZONED));
         assertTrue(timeSchema.field("instant").schema().isType(INSTANT));
     }
 
@@ -154,7 +154,7 @@ class SchemasTest {
         Schema schema;
 
         assertEquals("int", Schemas.ofPrimitive(INT).toString());
-        assertEquals("int64", Schemas.ofPrimitive(INT64).toString());
+        assertEquals("long", Schemas.ofPrimitive(LONG).toString());
         assertEquals("boolean", Schemas.ofPrimitive(BOOLEAN).toString());
         assertEquals("bytes", Schemas.ofPrimitive(BYTES).toString());
         assertEquals("string", Schemas.ofPrimitive(STRING).toString());
@@ -163,10 +163,10 @@ class SchemasTest {
 
         assertEquals("optional<double>", Schemas.ofOptional(Schemas.ofPrimitive(DOUBLE)).toString());
         assertEquals("array<int>", Schemas.ofArray(Schemas.ofPrimitive(INT)).toString());
-        assertEquals("map<string>", Schemas.ofMap(Schemas.ofPrimitive(STRING)).toString());
+        assertEquals("map<string,string>", Schemas.ofMap(Schemas.ofPrimitive(STRING)).toString());
 
         schema = Schemas.newStruct()
-                .space("org.febit")
+                .namespace("org.febit")
                 .name("demo")
                 .comment("this is a demo")
                 .field("id", Schemas.ofPrimitive(STRING), "ID")
@@ -178,7 +178,7 @@ class SchemasTest {
                 )
                 .field("complex",
                         Schemas.newStruct()
-                                .space("febit.demo")
+                                .namespace("febit.demo")
                                 .name("complex")
                                 .comment("Complex")
                                 .field("intMap", Schemas.ofMap(Schemas.ofPrimitive(INT)))
@@ -187,13 +187,13 @@ class SchemasTest {
                 )
                 .field("times",
                         Schemas.newStruct()
-                                .space("febit.demo")
+                                .namespace("febit.demo")
                                 .name("times")
                                 .comment("times")
                                 .field("t", Schemas.ofPrimitive(TIME))
                                 .field("d", Schemas.ofPrimitive(DATE))
                                 .field("dt", Schemas.ofPrimitive(DATETIME))
-                                .field("dtz", Schemas.ofPrimitive(DATETIME_WITH_TIMEZONE))
+                                .field("dtz", Schemas.ofPrimitive(DATETIME_ZONED))
                                 .field("i", Schemas.ofPrimitive(INSTANT))
                                 .build()
                 )
@@ -203,8 +203,8 @@ class SchemasTest {
                 "struct<"
                         + "id:string,"
                         + "ints:array<int>,"
-                        + "optionalStringMap:optional<map<string>>,"
-                        + "complex:struct<intMap:map<int>,name:string>,"
+                        + "optionalStringMap:optional<map<string,string>>,"
+                        + "complex:struct<intMap:map<string,int>,name:string>,"
                         + "times:struct<t:time,d:date,dt:datetime,dtz:datetimetz,i:instant>"
                         + ">",
                 schema.toString()
@@ -213,8 +213,8 @@ class SchemasTest {
         assertEquals(
                 "string id #ID\n"
                         + "array<int> ints\n"
-                        + "optional<map<string>> optionalStringMap\n"
-                        + "struct<intMap:map<int>,name:string> complex\n"
+                        + "optional<map<string,string>> optionalStringMap\n"
+                        + "struct<intMap:map<string,int>,name:string> complex\n"
                         + "struct<t:time,d:date,dt:datetime,dtz:datetimetz,i:instant> times\n",
                 schema.toFieldLinesString()
         );

@@ -17,7 +17,7 @@ package org.febit.rectify.sqlline;
 
 import org.apache.calcite.linq4j.Enumerator;
 import org.apache.calcite.util.Source;
-import org.febit.rectify.OutputModels;
+import org.febit.lang.modeler.StructSpecs;
 import org.febit.rectify.Rectifier;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
@@ -48,7 +48,7 @@ class RectifyEnumerator implements Enumerator<Object[]> {
 
     static RectifyEnumerator create(RectifierConf conf, Source source, SourceFormat<String, Object> sourceFormat, AtomicBoolean cancelFlag) throws IOException {
         var reader = new BufferedReader(source.reader());
-        var rectifier = conf.build(OutputModels.asObjectArray())
+        var rectifier = conf.build(StructSpecs.asArray())
                 .with(sourceFormat);
         return new RectifyEnumerator(reader, rectifier, cancelFlag);
     }

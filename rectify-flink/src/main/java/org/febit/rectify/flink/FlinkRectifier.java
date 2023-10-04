@@ -24,10 +24,19 @@ import org.apache.flink.api.java.operators.FlatMapOperator;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
-import org.febit.rectify.*;
+import org.febit.lang.modeler.Schema;
+import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSink;
+import org.febit.rectify.Rectifiers;
+import org.febit.rectify.SerializableRectifier;
+import org.febit.rectify.SourceFormat;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -51,14 +60,14 @@ public class FlinkRectifier<I> implements Serializable {
 
     public static <I> FlinkRectifier<I> create(RectifierConf conf) {
         return create(
-                Rectifiers.lazy(() -> conf.build(RowOutputModel.get())),
+                Rectifiers.lazy(() -> conf.build(RowStructSpec.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
 
     public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
         return create(
-                Rectifiers.lazy(() -> conf.build(sourceFormat, RowOutputModel.get())),
+                Rectifiers.lazy(() -> conf.build(sourceFormat, RowStructSpec.get())),
                 TypeInfoUtils.ofRowType(conf.resolveSchema())
         );
     }
