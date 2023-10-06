@@ -17,33 +17,38 @@ package org.febit.rectify.flink;
 
 import jakarta.annotation.Nullable;
 import org.apache.flink.types.Row;
-import org.febit.rectify.OutputModel;
-import org.febit.rectify.Schema;
+import org.febit.lang.modeler.Schema;
+import org.febit.lang.modeler.StructSpec;
 
 import java.io.Serializable;
 
-public class RowOutputModel implements OutputModel<Row>, Serializable {
+public class RowStructSpec implements StructSpec<Row, Row>, Serializable {
 
-    private static final RowOutputModel INSTANCE = new RowOutputModel();
+    private static final RowStructSpec INSTANCE = new RowStructSpec();
 
-    public static RowOutputModel get() {
+    public static RowStructSpec get() {
         return INSTANCE;
     }
 
     @Override
-    public Row newStruct(Schema schema) {
-        return new Row(schema.fieldSize());
+    public Row builder(Schema schema) {
+        return new Row(schema.fieldsSize());
     }
 
     @Override
-    public void setField(Row record, Schema.Field field, @Nullable Object val) {
-        record.setField(field.pos(), val);
+    public Row build(Schema schema, Row row) {
+        return row;
+    }
+
+    @Override
+    public void set(Row row, Schema.Field field, @Nullable Object val) {
+        row.setField(field.pos(), val);
     }
 
     @Nullable
     @Override
-    public Object getField(Row record, Schema.Field field) {
-        return record.getField(field.pos());
+    public Object get(Row row, Schema.Field field) {
+        return row.getField(field.pos());
     }
 
 }

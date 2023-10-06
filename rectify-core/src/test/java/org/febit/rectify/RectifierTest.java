@@ -17,6 +17,7 @@ package org.febit.rectify;
 
 import jakarta.annotation.Nullable;
 import org.febit.lang.Tuple2;
+import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
@@ -106,7 +107,7 @@ public class RectifierTest {
 
         Schema schema = rectifier.schema();
         assertTrue(schema.isStructType());
-        assertEquals(6, schema.fieldSize());
+        assertEquals(6, schema.fieldsSize());
         assertEquals(0, schema.field("id").pos());
         assertEquals(1, schema.field("enable").pos());
         assertEquals(2, schema.field("status").pos());

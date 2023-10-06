@@ -20,9 +20,9 @@ import lombok.Getter;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
+import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.SingleElementConsumer;
 import org.febit.rectify.RectifierConf;
-import org.febit.rectify.Schema;
 import org.febit.rectify.SourceFormat;
 
 public class RectifierDeserializationSchema implements DeserializationSchema<Row> {

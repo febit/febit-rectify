@@ -21,7 +21,6 @@ ext {
 allprojects {
   apply plugin: 'com.github.hierynomus.license'
 
-
   group rootProject.group
   version rootProject.version
 
@@ -65,6 +64,9 @@ configure(subprojects.findAll {
   }
 
   dependencyManagement {
+    resolutionStrategy {
+      cacheChangingModulesFor 0, 'seconds'
+    }
     imports {
       mavenBom "org.febit:febit-commons-dependencies:${versions.febitCommons}"
     }

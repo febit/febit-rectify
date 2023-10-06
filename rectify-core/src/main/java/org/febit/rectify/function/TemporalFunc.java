@@ -21,8 +21,8 @@ import org.febit.wit.lang.MethodDeclare;
 
 import java.time.temporal.Temporal;
 
+import static org.febit.lang.util.ConvertUtils.toTemporal;
 import static org.febit.rectify.util.Args.arg0;
-import static org.febit.rectify.util.TimeConvert.toTemporal;
 
 @FunctionalInterface
 public interface TemporalFunc extends MethodDeclare {

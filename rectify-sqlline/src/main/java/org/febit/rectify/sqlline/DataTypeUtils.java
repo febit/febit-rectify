@@ -19,7 +19,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.type.SqlTypeName;
-import org.febit.rectify.Schema;
+import org.febit.lang.modeler.Schema;
 
 import java.util.ArrayList;
 
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 class DataTypeUtils {
 
     static RelDataType toDataType(Schema schema, RelDataTypeFactory typeFactory) {
-        switch (schema.getType()) {
+        switch (schema.type()) {
             case OPTIONAL:
                 return typeFactory.createTypeWithNullability(
                         toDataType(schema.valueType(), typeFactory),
@@ -60,7 +60,7 @@ class DataTypeUtils {
                 return typeFactory.createSqlType(SqlTypeName.BOOLEAN);
             case INT:
                 return typeFactory.createSqlType(SqlTypeName.INTEGER);
-            case INT64:
+            case LONG:
                 return typeFactory.createSqlType(SqlTypeName.BIGINT);
             case FLOAT:
                 return typeFactory.createSqlType(SqlTypeName.FLOAT);
@@ -73,10 +73,10 @@ class DataTypeUtils {
             case INSTANT:
             case DATETIME:
                 return typeFactory.createSqlType(SqlTypeName.TIMESTAMP);
-            case DATETIME_WITH_TIMEZONE:
+            case DATETIME_ZONED:
                 return typeFactory.createSqlType(SqlTypeName.TIMESTAMP_WITH_LOCAL_TIME_ZONE);
             default:
-                throw new IllegalArgumentException("Unsupported type: " + schema.getType());
+                throw new IllegalArgumentException("Unsupported type: " + schema.type());
         }
     }
 }

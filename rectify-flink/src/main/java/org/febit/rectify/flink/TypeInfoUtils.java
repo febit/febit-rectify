@@ -21,7 +21,7 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.febit.rectify.Schema;
+import org.febit.lang.modeler.Schema;
 
 import java.util.Objects;
 
@@ -49,12 +49,12 @@ public class TypeInfoUtils {
     })
     public static TypeInformation<?> of(Schema schema) {
         Objects.requireNonNull(schema);
-        switch (schema.getType()) {
+        switch (schema.type()) {
             case BOOLEAN:
                 return Types.BOOLEAN;
             case INT:
                 return Types.INT;
-            case INT64:
+            case LONG:
                 return Types.LONG;
             case FLOAT:
                 return Types.FLOAT;
@@ -80,9 +80,9 @@ public class TypeInfoUtils {
                 return new MapTypeInfo<>(Types.STRING, valType);
             case OPTIONAL:
                 return of(schema.valueType());
-            case DATETIME_WITH_TIMEZONE: // FIXME: should support ZONED_DATE_TIME
+            case DATETIME_ZONED: // FIXME: should support ZONED_DATE_TIME
             case BYTES:
-                throw new UnsupportedOperationException("type is not supported yet: " + schema.getType());
+                throw new UnsupportedOperationException("type is not supported yet: " + schema.type());
             default:
                 throw new IllegalArgumentException("Unknown type " + schema);
         }

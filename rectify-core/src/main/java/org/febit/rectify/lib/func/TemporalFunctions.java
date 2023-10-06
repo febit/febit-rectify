@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.lib.func;
 
+import org.febit.lang.util.ConvertUtils;
 import org.febit.rectify.function.IFunctions;
 import org.febit.rectify.function.ObjFunc;
 import org.febit.rectify.function.StrStrFunc;
@@ -22,10 +23,12 @@ import org.febit.rectify.function.TemporalFunc;
 import org.febit.rectify.function.TemporalIntFunc;
 import org.febit.rectify.function.TemporalStrFunc;
 import org.febit.rectify.function.VoidFunc;
-import org.febit.rectify.util.TimeConvert;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
@@ -41,27 +44,27 @@ public class TemporalFunctions implements IFunctions {
     public static class Proto {
 
         public final VoidFunc now = Instant::now;
-        public final ObjFunc zone = TimeConvert::toZone;
+        public final ObjFunc zone = ConvertUtils::toZone;
 
-        public final StrStrFunc parse = TimeConvert::parse;
-        public final TemporalStrFunc format = TimeConvert::format;
+        public final StrStrFunc parse = TemporalFunctions::parse;
+        public final TemporalStrFunc format = TemporalFunctions::format;
 
-        public final ObjFunc toMillis = TimeConvert::toMillis;
-        public final ObjFunc toInstant = TimeConvert::toInstant;
+        public final ObjFunc toMillis = ConvertUtils::toMillis;
+        public final ObjFunc toInstant = ConvertUtils::toInstant;
 
-        public final ObjFunc toHour = TimeConvert::toHour;
-        public final ObjFunc toTime = TimeConvert::toTime;
-        public final ObjFunc toDate = TimeConvert::toDate;
-        public final ObjFunc toDateTime = TimeConvert::toDateTime;
-        public final ObjFunc toDateNumber = TimeConvert::toDateNumber;
-        public final ObjFunc toZonedDateTime = TimeConvert::toZonedDateTime;
+        public final ObjFunc toHour = ConvertUtils::toHour;
+        public final ObjFunc toTime = ConvertUtils::toTime;
+        public final ObjFunc toDate = ConvertUtils::toDate;
+        public final ObjFunc toDateTime = ConvertUtils::toDateTime;
+        public final ObjFunc toDateNumber = ConvertUtils::toDateNumber;
+        public final ObjFunc toZonedDateTime = ConvertUtils::toZonedDateTime;
 
-        public final ObjFunc toUtcHour = TimeConvert::toUtcHour;
-        public final ObjFunc toUtcTime = TimeConvert::toUtcTime;
-        public final ObjFunc toUtcDate = TimeConvert::toUtcDate;
-        public final ObjFunc toUtcDateTime = TimeConvert::toUtcDateTime;
-        public final ObjFunc toUtcDateNumber = TimeConvert::toUtcDateNumber;
-        public final ObjFunc toUtcZonedDateTime = TimeConvert::toUtcZonedDateTime;
+        public final ObjFunc toUtcHour = ConvertUtils::toUtcHour;
+        public final ObjFunc toUtcTime = ConvertUtils::toUtcTime;
+        public final ObjFunc toUtcDate = ConvertUtils::toUtcDate;
+        public final ObjFunc toUtcDateTime = ConvertUtils::toUtcDateTime;
+        public final ObjFunc toUtcDateNumber = ConvertUtils::toUtcDateNumber;
+        public final ObjFunc toUtcZonedDateTime = ConvertUtils::toUtcZonedDateTime;
 
         public final TemporalIntFunc addMillis = plusFunc(ChronoUnit.MILLIS);
         public final TemporalIntFunc addSeconds = plusFunc(ChronoUnit.SECONDS);
@@ -99,5 +102,35 @@ public class TemporalFunctions implements IFunctions {
             }
             return temporal.with(adjuster);
         };
+    }
+
+    private static DateTimeFormatter fmt(String pattern) {
+        return DateTimeFormatter.ofPattern(pattern);
+    }
+
+    @Nullable
+    private static Temporal parse(@Nullable String obj, @Nullable String pattern) {
+        if (obj == null) {
+            return null;
+        }
+        if (pattern == null) {
+            return ConvertUtils.toZonedDateTime(obj);
+        }
+        var parsed = fmt(pattern)
+                .parse(obj);
+        return ConvertUtils.toZonedDateTime(parsed);
+    }
+
+    @Nullable
+    private static String format(@Nullable Object obj, @Nullable String pattern) {
+        if (pattern == null) {
+            return obj != null ? obj.toString() : null;
+        }
+        var time = ConvertUtils.toZonedDateTime(obj);
+        if (time == null) {
+            return null;
+        }
+        return fmt(pattern)
+                .format(time);
     }
 }

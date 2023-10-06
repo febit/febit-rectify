@@ -18,9 +18,10 @@ package org.febit.rectify;
 import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.febit.lang.modeler.Modeler;
+import org.febit.lang.modeler.Schema;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.ScriptBuilder;
-import org.febit.rectify.util.OutputModelUtils;
 import org.febit.wit.Context;
 import org.febit.wit.Vars;
 import org.febit.wit.exceptions.ScriptRuntimeException;
@@ -40,7 +41,7 @@ import java.util.function.Supplier;
 public class RectifierImpl<I, O> implements Rectifier<I, O> {
 
     protected final Schema schema;
-    protected final OutputModel<O> outputModel;
+    protected final Modeler outputModeler;
     protected final Supplier<List<String>> hints;
     protected final Function<Vars, Context> script;
 
@@ -95,7 +96,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
             return;
         }
         @SuppressWarnings("unchecked")
-        var output = (O) OutputModelUtils.convert(schema, rawOutput, outputModel);
+        var output = (O) outputModeler.process(schema, rawOutput);
         onSuccess.accept(output, rawOutput);
     }
 
