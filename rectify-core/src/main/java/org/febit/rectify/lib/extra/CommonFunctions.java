@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.lib.func;
+package org.febit.rectify.lib.extra;
 
 import lombok.extern.slf4j.Slf4j;
-import org.febit.rectify.function.IFunctions;
-import org.febit.rectify.function.ObjFunc;
-import org.febit.rectify.function.ObjObjFunc;
-import org.febit.rectify.function.VoidFunc;
+import org.febit.lang.func.Function0;
+import org.febit.lang.func.Function1;
+import org.febit.lang.func.Function2;
+import org.febit.rectify.lib.IFunctions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,17 +34,17 @@ public class CommonFunctions implements IFunctions {
 
     private static final AtomicLong NEXT_ID = new AtomicLong(1);
 
-    public static final VoidFunc noop = () -> null;
+    public static final Function0<Object> noop = () -> null;
 
-    public static final VoidFunc seq = NEXT_ID::getAndIncrement;
-    public static final VoidFunc uuid = UUID::randomUUID;
+    public static final Function0<Long> seq = NEXT_ID::getAndIncrement;
+    public static final Function0<UUID> uuid = UUID::randomUUID;
 
-    public static final VoidFunc newList = ArrayList::new;
-    public static final VoidFunc newSet = HashSet::new;
-    public static final VoidFunc newMap = LinkedHashMap::new;
-    public static final ObjFunc size = org.febit.wit.util.CollectionUtil::getSize;
+    public static final Function0<Object> newList = ArrayList::new;
+    public static final Function0<Object> newSet = HashSet::new;
+    public static final Function0<Object> newMap = LinkedHashMap::new;
+    public static final Function1<Object, Integer> size = org.febit.wit.util.CollectionUtil::getSize;
 
-    public static final ObjFunc isNull = Objects::isNull;
-    public static final ObjFunc nonNull = Objects::nonNull;
-    public static final ObjObjFunc isEquals = Objects::equals;
+    public static final Function1<Object, Boolean> isNull = Objects::isNull;
+    public static final Function1<Object, Boolean> nonNull = Objects::nonNull;
+    public static final Function2<Object, Object, Boolean> isEquals = Objects::equals;
 }

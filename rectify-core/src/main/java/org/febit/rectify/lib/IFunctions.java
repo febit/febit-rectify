@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.function;
+package org.febit.rectify.lib;
 
-import jakarta.annotation.Nullable;
-import org.febit.wit.InternalContext;
-import org.febit.wit.lang.MethodDeclare;
+import org.febit.rectify.RectifierEnginePlugin;
+import org.febit.rectify.util.FuncUtils;
+import org.febit.wit.Engine;
 
-import static org.febit.rectify.util.Args.int0;
-import static org.febit.rectify.util.Args.string1;
-import static org.febit.rectify.util.Args.string2;
+import java.lang.annotation.*;
 
-@FunctionalInterface
-public interface IntStrStrFunc extends MethodDeclare {
+public interface IFunctions extends RectifierEnginePlugin {
 
-    @Nullable
-    Object invoke(@Nullable Integer i, @Nullable String str1, @Nullable String str2);
+    @Inherited
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD, ElementType.FIELD})
+    @interface Alias {
+        String[] value();
 
-    @Nullable
+        boolean keepOriginName() default true;
+    }
+
     @Override
-    default Object invoke(InternalContext context, Object[] args) {
-        return invoke(int0(args), string1(args), string2(args));
+    default void apply(Engine engine) {
+        FuncUtils.scanConstFields(getClass(), engine.getGlobalManager()::setConst);
     }
 }

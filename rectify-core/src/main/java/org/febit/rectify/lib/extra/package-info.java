@@ -13,27 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.function;
+@Nonnull
+package org.febit.rectify.lib.extra;
 
-import org.febit.rectify.RectifierEnginePlugin;
-import org.febit.rectify.util.FunctionUtils;
-import org.febit.wit.Engine;
-
-import java.lang.annotation.*;
-
-public interface IFunctions extends RectifierEnginePlugin {
-
-    @Inherited
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD, ElementType.FIELD})
-    @interface Alias {
-        String[] value();
-
-        boolean keepOriginName() default true;
-    }
-
-    @Override
-    default void apply(Engine engine) {
-        FunctionUtils.scanConstFields(engine.getGlobalManager()::setConst, getClass());
-    }
-}
+import jakarta.annotation.Nonnull;

@@ -15,14 +15,14 @@
  */
 package org.febit.rectify.util;
 
-import org.febit.rectify.function.IFunctions;
+import org.febit.rectify.lib.IFunctions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class FunctionUtilsTest {
+class FuncUtilsTest {
 
     @SuppressWarnings({"unused"})
     public static class Proto {
@@ -43,7 +43,7 @@ class FunctionUtilsTest {
     @Test
     void scanConstFields() {
         var map = new HashMap<String, Object>();
-        FunctionUtils.scanConstFields(map::put, Proto.class);
+        FuncUtils.scanConstFields(Proto.class, map::put);
 
         assertThat(map)
                 .containsEntry("CONST", Proto.CONST)

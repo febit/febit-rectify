@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.function;
+package org.febit.rectify.lib;
 
 import jakarta.annotation.Nullable;
+import org.febit.lang.func.Function1;
+import org.febit.lang.func.Function3;
 import org.febit.rectify.engine.ExitException;
 import org.febit.rectify.engine.FilterBreakpoint;
 import org.febit.rectify.engine.ScriptBuilder;
@@ -24,13 +26,14 @@ import org.febit.rectify.engine.ScriptBuilder;
 public class BasicFunctions implements IFunctions {
 
     @Alias(value = {ScriptBuilder.VAR_EXIT}, keepOriginName = false)
-    public static final StrFunc EXIT = BasicFunctions::exit;
+    public static final Function1<String, Object> EXIT = BasicFunctions::exit;
 
     @Alias(value = {ScriptBuilder.VAR_CHECK_FILTER}, keepOriginName = false)
-    public static final ObjFunc CHECK_FILTER = BasicFunctions::checkFilter;
+    public static final Function1<Object, Object> CHECK_FILTER = BasicFunctions::checkFilter;
 
     @Alias(value = {ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT}, keepOriginName = false)
-    public static final IntStrStrFunc NEW_FILTER_BREAKPOINT = FilterBreakpoint::of;
+    public static final Function3<Integer, String, String, FilterBreakpoint>
+            NEW_FILTER_BREAKPOINT = FilterBreakpoint::of;
 
     private static Object exit(@Nullable String reason) {
         throw new ExitException(reason);
