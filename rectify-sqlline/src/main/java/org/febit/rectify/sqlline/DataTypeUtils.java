@@ -27,13 +27,12 @@ import java.util.ArrayList;
 class DataTypeUtils {
 
     static RelDataType toDataType(Schema schema, RelDataTypeFactory typeFactory) {
-        switch (schema.type()) {
-            case OPTIONAL:
-                return typeFactory.createTypeWithNullability(
-                        toDataType(schema.valueType(), typeFactory),
-                        true
-                );
-            case STRUCT:
+        return switch (schema.type()) {
+            case OPTIONAL -> typeFactory.createTypeWithNullability(
+                    toDataType(schema.valueType(), typeFactory),
+                    true
+            );
+            case STRUCT -> {
                 var fields = schema.fields();
                 var fieldNames = new ArrayList<String>(fields.size());
                 var fieldTypes = new ArrayList<RelDataType>(fields.size());
@@ -41,42 +40,28 @@ class DataTypeUtils {
                     fieldNames.add(field.name());
                     fieldTypes.add(toDataType(field.schema(), typeFactory));
                 }
-                return typeFactory.createStructType(fieldTypes, fieldNames);
-            case ARRAY:
-                return typeFactory.createArrayType(
-                        toDataType(schema.valueType(), typeFactory),
-                        -1
-                );
-            case MAP:
-                return typeFactory.createMapType(
-                        typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                        toDataType(schema.valueType(), typeFactory)
-                );
-            case STRING:
-                return typeFactory.createSqlType(SqlTypeName.VARCHAR);
-            case BYTES:
-                return typeFactory.createSqlType(SqlTypeName.BINARY);
-            case BOOLEAN:
-                return typeFactory.createSqlType(SqlTypeName.BOOLEAN);
-            case INT:
-                return typeFactory.createSqlType(SqlTypeName.INTEGER);
-            case LONG:
-                return typeFactory.createSqlType(SqlTypeName.BIGINT);
-            case FLOAT:
-                return typeFactory.createSqlType(SqlTypeName.FLOAT);
-            case DOUBLE:
-                return typeFactory.createSqlType(SqlTypeName.DOUBLE);
-            case DATE:
-                return typeFactory.createSqlType(SqlTypeName.DATE);
-            case TIME:
-                return typeFactory.createSqlType(SqlTypeName.TIME);
-            case INSTANT:
-            case DATETIME:
-                return typeFactory.createSqlType(SqlTypeName.TIMESTAMP);
-            case DATETIME_ZONED:
-                return typeFactory.createSqlType(SqlTypeName.TIMESTAMP_WITH_LOCAL_TIME_ZONE);
-            default:
-                throw new IllegalArgumentException("Unsupported type: " + schema.type());
-        }
+                yield typeFactory.createStructType(fieldTypes, fieldNames);
+            }
+            case ARRAY -> typeFactory.createArrayType(
+                    toDataType(schema.valueType(), typeFactory),
+                    -1
+            );
+            case MAP -> typeFactory.createMapType(
+                    typeFactory.createSqlType(SqlTypeName.VARCHAR),
+                    toDataType(schema.valueType(), typeFactory)
+            );
+            case STRING -> typeFactory.createSqlType(SqlTypeName.VARCHAR);
+            case BYTES -> typeFactory.createSqlType(SqlTypeName.BINARY);
+            case BOOLEAN -> typeFactory.createSqlType(SqlTypeName.BOOLEAN);
+            case INT -> typeFactory.createSqlType(SqlTypeName.INTEGER);
+            case LONG -> typeFactory.createSqlType(SqlTypeName.BIGINT);
+            case FLOAT -> typeFactory.createSqlType(SqlTypeName.FLOAT);
+            case DOUBLE -> typeFactory.createSqlType(SqlTypeName.DOUBLE);
+            case DATE -> typeFactory.createSqlType(SqlTypeName.DATE);
+            case TIME -> typeFactory.createSqlType(SqlTypeName.TIME);
+            case INSTANT, DATETIME -> typeFactory.createSqlType(SqlTypeName.TIMESTAMP);
+            case DATETIME_ZONED -> typeFactory.createSqlType(SqlTypeName.TIMESTAMP_WITH_LOCAL_TIME_ZONE);
+            default -> throw new IllegalArgumentException("Unsupported type: " + schema.type());
+        };
     }
 }

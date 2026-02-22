@@ -3,7 +3,6 @@ description = 'Rectify Flink'
 dependencies {
   api project(":febit-rectify-core")
 
-  compileOnly 'org.apache.flink:flink-java'
   compileOnly "org.apache.flink:flink-streaming-java"
 
   testImplementation "org.apache.flink:flink-streaming-java"

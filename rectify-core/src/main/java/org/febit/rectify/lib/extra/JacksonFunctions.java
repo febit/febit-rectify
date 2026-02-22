@@ -15,26 +15,30 @@
  */
 package org.febit.rectify.lib.extra;
 
-import com.fasterxml.jackson.databind.JavaType;
 import org.febit.lang.func.Function1;
 import org.febit.rectify.lib.IFunctions;
 import org.febit.rectify.lib.IProto;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.JavaType;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import static org.febit.lang.util.JacksonUtils.TYPE_FACTORY;
+import static org.febit.lang.util.JacksonUtils.TYPES;
 import static org.febit.lang.util.JacksonUtils.json;
 import static org.febit.lang.util.JacksonUtils.prettyJson;
 import static org.febit.lang.util.JacksonUtils.yaml;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings({
+        "java:S1118", // Utility classes should not have public constructors
+        "unused",
+})
 public class JacksonFunctions implements IFunctions {
 
-    private static final JavaType T_OBJECT = TYPE_FACTORY.constructType(Object.class);
-    private static final JavaType TYPE_LIST = TYPE_FACTORY
+    private static final JavaType T_OBJECT = TYPES.constructType(Object.class);
+    private static final JavaType TYPE_LIST = TYPES
             .constructCollectionLikeType(ArrayList.class, Object.class);
-    private static final JavaType TYPE_MAP = TYPE_FACTORY
+    private static final JavaType TYPE_MAP = TYPES
             .constructMapType(LinkedHashMap.class, Object.class, Object.class);
 
     /**
@@ -50,40 +54,38 @@ public class JacksonFunctions implements IFunctions {
 
     public static class JsonProto implements IProto {
 
-        public final Function1<Object, String> toString = json()::toString;
-        public final Function1<Object, String> toPrettyString = prettyJson()::toString;
+        public final Function1<@Nullable Object, String> stringify = json()::stringify;
+        public final Function1<@Nullable Object, String> prettyStringify = prettyJson()::stringify;
 
-        public final Function1<Object, Object> toMap = json()::toMap;
-        public final Function1<Object, Object> toList = json()::toList;
+        public final Function1<@Nullable Object, @Nullable Object> toMap = json()::toMap;
+        public final Function1<@Nullable Object, @Nullable Object> toList = json()::toList;
 
-        public final Function1<String, Object> parse = text -> parseIfPresent(text, T_OBJECT);
-        public final Function1<String, Object> parseAsMap = text -> parseIfPresent(text, TYPE_MAP);
-        public final Function1<String, Object> parseAsList = text -> parseIfPresent(text, TYPE_LIST);
+        public final Function1<@Nullable String, @Nullable Object> parse = text -> parseIfPresent(text, T_OBJECT);
+        public final Function1<@Nullable String, @Nullable Object> parseAsMap = text -> parseIfPresent(text, TYPE_MAP);
+        public final Function1<@Nullable String, @Nullable Object> parseAsList = text -> parseIfPresent(text, TYPE_LIST);
 
-        private static Object parseIfPresent(String text, JavaType type) {
+        @Nullable
+        private static Object parseIfPresent(@Nullable String text, JavaType type) {
             if (text == null || text.isEmpty()) {
                 return null;
             }
             return json().parse(text, type);
         }
-
-        private static String toPrettyJsonString(Object obj) {
-            return prettyJson().toString(obj);
-        }
     }
 
     public static class YamlProto implements IProto {
 
-        public final Function1<Object, String> toString = yaml()::toString;
+        public final Function1<@Nullable Object, String> stringify = yaml()::stringify;
 
-        public final Function1<Object, Object> toMap = yaml()::toMap;
-        public final Function1<Object, Object> toList = yaml()::toList;
+        public final Function1<@Nullable Object, @Nullable Object> toMap = yaml()::toMap;
+        public final Function1<@Nullable Object, @Nullable Object> toList = yaml()::toList;
 
-        public final Function1<String, Object> parse = text -> parseIfPresent(text, T_OBJECT);
-        public final Function1<String, Object> parseAsMap = text -> parseIfPresent(text, TYPE_MAP);
-        public final Function1<String, Object> parseAsList = text -> parseIfPresent(text, TYPE_LIST);
+        public final Function1<@Nullable String, @Nullable Object> parse = text -> parseIfPresent(text, T_OBJECT);
+        public final Function1<@Nullable String, @Nullable Object> parseAsMap = text -> parseIfPresent(text, TYPE_MAP);
+        public final Function1<@Nullable String, @Nullable Object> parseAsList = text -> parseIfPresent(text, TYPE_LIST);
 
-        private static Object parseIfPresent(String text, JavaType type) {
+        @Nullable
+        private static Object parseIfPresent(@Nullable String text, JavaType type) {
             if (text == null || text.isEmpty()) {
                 return null;
             }

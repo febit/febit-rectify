@@ -15,8 +15,8 @@
  */
 package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
 import org.febit.lang.modeler.Schema;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -62,18 +62,18 @@ public interface Rectifier<I, O> {
         return Rectifiers.transformed(this, transfer);
     }
 
-    interface Delegated<I, O, DI, DO> extends Rectifier<I, O> {
+    interface Decorator<I, O, DI, DO> extends Rectifier<I, O> {
 
-        Rectifier<DI, DO> delegated();
+        Rectifier<DI, DO> delegate();
 
         @Override
         default Schema schema() {
-            return delegated().schema();
+            return delegate().schema();
         }
 
         @Override
         default List<String> getHints() {
-            return delegated().getHints();
+            return delegate().getHints();
         }
     }
 

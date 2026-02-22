@@ -15,13 +15,13 @@
  */
 package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
 import org.febit.lang.Tuple2;
 import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.JacksonUtils;
-import org.febit.rectify.engine.FilterBreakpoint;
-import org.febit.rectify.engine.ScriptBuilder;
 import org.febit.rectify.format.JsonSourceFormat;
+import org.febit.rectify.wit.FilterBreakpoint;
+import org.febit.rectify.wit.ScriptBuilder;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,18 +34,19 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({
         "squid:S1192" // String literals should not be duplicated
 })
-public class RectifierTest {
+class RectifierTest {
 
     final RectifierConf conf = RectifierConf.create()
             // Named your schema
             .name("Demo")
             // Global code
-            .frontSegment("\n"
-                    + "var isTruly = obj -> {\n"
-                    + "   return obj == true \n"
-                    + "              || obj == \"on\" || obj == \"true\"\n"
-                    + "              || obj == 1;\n"
-                    + "};")
+            .frontSegment("""
+                    var isTruly = obj -> {
+                       return obj == true
+                                  || obj == "on" || obj == "true"
+                                  || obj == 1;
+                    };
+                    """)
             // Global filters:
             //    Notice: only a Boolean.FALSE or a non-null String (reason) can ban current row, others pass.
             .frontFilter("$.status > 0")
@@ -80,7 +81,7 @@ public class RectifierTest {
     }
 
     @Test
-    public void getHints() {
+    void getHints() {
         var rectifier = conf.build();
         List<String> hints = rectifier.getHints();
 
@@ -101,7 +102,7 @@ public class RectifierTest {
     }
 
     @Test
-    public void testBaseInfo() {
+    void testBaseInfo() {
         var rectifier = conf.build()
                 .with(new JsonSourceFormat());
 
@@ -114,7 +115,7 @@ public class RectifierTest {
     }
 
     @Test
-    public void process() {
+    void process() {
         var rectifier = conf.build()
                 .with(new JsonSourceFormat());
 
@@ -158,7 +159,7 @@ public class RectifierTest {
     }
 
     @Test
-    public void testFilter() {
+    void testFilter() {
 
         var rectifier = conf.build()
                 .with(new JsonSourceFormat());
@@ -217,21 +218,20 @@ public class RectifierTest {
     }
 
     @Test
-    public void processInDebugMode() {
+    void processInDebugMode() {
 
         var breakpoints = new ArrayList<Tuple2<FilterBreakpoint, Object>>();
-        conf.breakpointListener((label, context, statement, val) -> {
-            if (label instanceof FilterBreakpoint) {
-                var breakpoint = (FilterBreakpoint) label;
-                breakpoints.add(Tuple2.of(breakpoint, val));
-                if ("enable".equals(breakpoint.getField())) {
-                    assertEquals(1, context.get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
+        conf.breakpointHandler((label, context, statement, val) -> {
+            if (label instanceof FilterBreakpoint breakpoint) {
+                breakpoints.add(Tuple2.ofNullable(breakpoint, val));
+                if ("enable".equals(breakpoint.field())) {
+                    assertEquals(1, context.variables().get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
                 }
             }
         });
 
         var rectifier = conf.build().with(new JsonSourceFormat());
-        conf.setBreakpointListener(null);
+        conf.setBreakpointHandler(null);
 
         SingleElementRectifierSink<Map<String, Object>> consumer;
         Tuple2<FilterBreakpoint, Object> breakpoint;
@@ -258,25 +258,25 @@ public class RectifierTest {
 
         assertEquals(4, breakpoints.size());
         breakpoint = breakpoints.get(0);
-        assertEquals(0, breakpoint.v1.getIndex());
-        assertNull(breakpoint.v1.getField());
-        assertEquals("$.status > 0", breakpoint.v1.getExpr());
-        assertEquals(true, breakpoint.v2);
+        assertEquals(0, breakpoint.v1().index());
+        assertNull(breakpoint.v1().field());
+        assertEquals("$.status > 0", breakpoint.v1().expr());
+        assertEquals(true, breakpoint.v2());
         breakpoint = breakpoints.get(1);
-        assertEquals(1, breakpoint.v1.getIndex());
-        assertNull(breakpoint.v1.getField());
-        assertEquals("$.status < 100 || \"status should <100\"", breakpoint.v1.getExpr());
-        assertEquals(true, breakpoint.v2);
+        assertEquals(1, breakpoint.v1().index());
+        assertNull(breakpoint.v1().field());
+        assertEquals("$.status < 100 || \"status should <100\"", breakpoint.v1().expr());
+        assertEquals(true, breakpoint.v2());
         breakpoint = breakpoints.get(2);
-        assertEquals(2, breakpoint.v1.getIndex());
-        assertNull(breakpoint.v1.getField());
-        assertEquals("isEven || \"status is not even\"", breakpoint.v1.getExpr());
-        assertEquals(true, breakpoint.v2);
+        assertEquals(2, breakpoint.v1().index());
+        assertNull(breakpoint.v1().field());
+        assertEquals("isEven || \"status is not even\"", breakpoint.v1().expr());
+        assertEquals(true, breakpoint.v2());
         breakpoint = breakpoints.get(3);
-        assertEquals(1, breakpoint.v1.getIndex());
-        assertEquals("enable", breakpoint.v1.getField());
-        assertEquals("$$ || \"enable is falsely\"", breakpoint.v1.getExpr());
-        assertEquals(true, breakpoint.v2);
+        assertEquals(1, breakpoint.v1().index());
+        assertEquals("enable", breakpoint.v1().field());
+        assertEquals("$$ || \"enable is falsely\"", breakpoint.v1().expr());
+        assertEquals(true, breakpoint.v2());
 
         breakpoints.clear();
         consumer = new SingleElementRectifierSink<>();
@@ -294,7 +294,7 @@ public class RectifierTest {
 
         assertEquals(3, breakpoints.size());
         breakpoint = breakpoints.get(2);
-        assertEquals("status is not even", breakpoint.v2);
+        assertEquals("status is not even", breakpoint.v2());
     }
 
     private static class SingleElementRectifierSink<O> implements RectifierSink<O> {

@@ -18,21 +18,24 @@ package org.febit.rectify.lib.extra;
 import org.febit.lang.func.Function1;
 import org.febit.lang.util.ConvertUtils;
 import org.febit.rectify.lib.IFunctions;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings({
+        "java:S1118", // Utility classes should not have public constructors
+        "unused",
+})
 public class ConvertFunctions implements IFunctions {
 
-    public static final Function1<Object, Number> toNumber = ConvertUtils::toNumber;
-    public static final Function1<Object, Byte> toByte = ConvertUtils::toByte;
-    public static final Function1<Object, Short> toShort = ConvertUtils::toShort;
-    public static final Function1<Object, Integer> toInteger = ConvertUtils::toInteger;
-    public static final Function1<Object, Long> toLong = ConvertUtils::toLong;
-    public static final Function1<Object, Float> toFloat = ConvertUtils::toFloat;
-    public static final Function1<Object, Double> toDouble = ConvertUtils::toDouble;
-    public static final Function1<Object, BigDecimal> toBigDecimal = ConvertUtils::toBigDecimal;
-
-    public static final Function1<Object, Boolean> toBoolean = ConvertUtils::toBoolean;
-    public static final Function1<Object, String> toString = ConvertUtils::toString;
+    public static final Function1<@Nullable Object, @Nullable Number> toNumber = ConvertUtils::toNumber;
+    public static final Function1<@Nullable Object, @Nullable Byte> toByte = ConvertUtils::toByte;
+    public static final Function1<@Nullable Object, @Nullable Short> toShort = ConvertUtils::toShort;
+    public static final Function1<@Nullable Object, @Nullable Integer> toInteger = ConvertUtils::toInteger;
+    public static final Function1<@Nullable Object, @Nullable Long> toLong = ConvertUtils::toLong;
+    public static final Function1<@Nullable Object, @Nullable Float> toFloat = ConvertUtils::toFloat;
+    public static final Function1<@Nullable Object, @Nullable Double> toDouble = ConvertUtils::toDouble;
+    public static final Function1<@Nullable Object, @Nullable BigDecimal> toBigDecimal = ConvertUtils::toBigDecimal;
+    public static final Function1<@Nullable Object, @Nullable Boolean> toBoolean = ConvertUtils::toBoolean;
+    public static final Function1<@Nullable Object, @Nullable String> toString = ConvertUtils::toString;
 }

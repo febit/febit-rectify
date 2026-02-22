@@ -49,42 +49,31 @@ public class TypeInfoUtils {
     })
     public static TypeInformation<?> of(Schema schema) {
         Objects.requireNonNull(schema);
-        switch (schema.type()) {
-            case BOOLEAN:
-                return Types.BOOLEAN;
-            case INT:
-                return Types.INT;
-            case LONG:
-                return Types.LONG;
-            case FLOAT:
-                return Types.FLOAT;
-            case DOUBLE:
-                return Types.DOUBLE;
-            case STRING:
-                return Types.STRING;
-            case DATE:
-                return Types.LOCAL_DATE;
-            case TIME:
-                return Types.LOCAL_TIME;
-            case DATETIME:
-                return Types.LOCAL_DATE_TIME;
-            case INSTANT:
-                return Types.INSTANT;
-            case STRUCT:
-                return ofRowType(schema);
-            case ARRAY:
+        return switch (schema.type()) {
+            case BOOLEAN -> Types.BOOLEAN;
+            case INT -> Types.INT;
+            case LONG -> Types.LONG;
+            case FLOAT -> Types.FLOAT;
+            case DOUBLE -> Types.DOUBLE;
+            case STRING -> Types.STRING;
+            case DATE -> Types.LOCAL_DATE;
+            case TIME -> Types.LOCAL_TIME;
+            case DATETIME -> Types.LOCAL_DATE_TIME;
+            case INSTANT -> Types.INSTANT;
+            case STRUCT -> ofRowType(schema);
+            case ARRAY -> {
                 var elementType = of(schema.valueType());
-                return new ListTypeInfo<>(elementType);
-            case MAP:
+                yield new ListTypeInfo<>(elementType);
+            }
+            case MAP -> {
                 var valType = of(schema.valueType());
-                return new MapTypeInfo<>(Types.STRING, valType);
-            case OPTIONAL:
-                return of(schema.valueType());
-            case DATETIME_ZONED: // FIXME: should support ZONED_DATE_TIME
-            case BYTES:
-                throw new UnsupportedOperationException("type is not supported yet: " + schema.type());
-            default:
-                throw new IllegalArgumentException("Unknown type " + schema);
-        }
+                yield new MapTypeInfo<>(Types.STRING, valType);
+            }
+            case OPTIONAL -> of(schema.valueType());
+            case DATETIME_ZONED, BYTES ->
+                //  FIXME: should support DATETIME_ZONED
+                    throw new UnsupportedOperationException("type is not supported yet: " + schema.type());
+            default -> throw new IllegalArgumentException("Unknown type " + schema);
+        };
     }
 }

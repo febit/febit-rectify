@@ -18,14 +18,14 @@ package org.febit.rectify.sqlline;
 import org.febit.rectify.RectifierConf;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TableConfigTest {
+class TableConfigTest {
 
     @Test
-    public void fromYaml() {
+    void fromYaml() {
         String yaml = "name: Demo\n" +
                 "sourceFormat: json\n" +
                 "globalCodes: \n" +
@@ -54,9 +54,11 @@ public class TableConfigTest {
         assertEquals("var isEven = $.status % 2 == 0", codes.get(0));
         assertEquals("var statusCopy = $.status", codes.get(1));
 
-        assertEquals(Arrays.asList(
-                RectifierConf.Column.create("long", "id", "$.id", null, null),
-                RectifierConf.Column.create("boolean", "enable", null, "$$ || \"enable is falsely\"", null)
+        assertEquals(List.of(
+                RectifierConf.Column.builder()
+                        .name("id").type("long").expr("$.id").build(),
+                RectifierConf.Column.builder()
+                        .name("enable").type("boolean").checkExpr("$$ || \"enable is falsely\"").build()
         ), columns);
 
     }

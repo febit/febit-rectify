@@ -15,14 +15,14 @@
  */
 package org.febit.rectify.format;
 
-import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.util.IndexedArrayBag;
+import org.febit.rectify.util.IndexedArray;
 import org.febit.rectify.util.Indexer;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,12 +54,12 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
         return value;
     }
 
-    public static String[] parse(String src) {
+    public static @Nullable String[] parse(String src) {
         if (StringUtils.isEmpty(src)) {
             return new String[0];
         }
 
-        var values = new ArrayList<String>();
+        var values = new ArrayList<@Nullable String>();
         var walker = new StringWalker(src);
         walker.skipSpaces();
 
@@ -90,6 +90,6 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
         if (values.length == 0) {
             return;
         }
-        sink.accept(IndexedArrayBag.of(indexer, values));
+        sink.accept(IndexedArray.of(indexer, values));
     }
 }

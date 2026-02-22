@@ -19,6 +19,7 @@ import lombok.Data;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Reader;
 import java.util.List;
@@ -32,7 +33,10 @@ public class TableConfig {
     private String source;
     private String sourceFormat;
     private Map<String, Object> sourceFormatProps;
+
+    @Nullable
     private List<String> globalCodes;
+    @Nullable
     private List<RectifierConf.Column> columns;
 
     public static TableConfig fromYaml(Reader reader) {

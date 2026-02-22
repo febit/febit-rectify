@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AccessLogSourceFormatTest {
+class AccessLogSourceFormatTest {
 
     @Test
-    public void test() {
+    void test() {
         String log = "100.001.002.003 - - [2/Aug/2018:01:02:03 +0800] \"PUT /path/to/action HTTP/1.1\" 200 111 \"-\" \"HttpClient\" 0.011"
                 + " \"test.febit.org\" [-some thing very bad \"\" {{}{}}\"\"]";
         String[] values = AccessLogSourceFormat.parse(log);

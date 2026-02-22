@@ -15,16 +15,16 @@
  */
 package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.febit.lang.modeler.Modeler;
 import org.febit.lang.modeler.Schema;
-import org.febit.rectify.engine.ExitException;
-import org.febit.rectify.engine.ScriptBuilder;
+import org.febit.rectify.wit.ExitException;
+import org.febit.rectify.wit.ScriptBuilder;
 import org.febit.wit.Context;
 import org.febit.wit.Vars;
-import org.febit.wit.exceptions.ScriptRuntimeException;
+import org.febit.wit.exception.ScriptEvaluateException;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -77,16 +77,16 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
     @Override
     public void process(
             @Nullable I input,
-            BiConsumer<O, RawOutput> onSuccess,
-            BiConsumer<String, RawOutput> onFailed
+            BiConsumer<@Nullable O, RawOutput> onSuccess,
+            BiConsumer<@Nullable String, RawOutput> onFailed
     ) {
         var rawOutput = new RawOutput();
         try {
-            script.apply(accepter -> {
-                accepter.set(ScriptBuilder.VAR_INPUT, input);
-                accepter.set(ScriptBuilder.VAR_RESULT, rawOutput);
+            script.apply(acceptor -> {
+                acceptor.set(ScriptBuilder.VAR_INPUT, input);
+                acceptor.set(ScriptBuilder.VAR_RESULT, rawOutput);
             });
-        } catch (ScriptRuntimeException e) {
+        } catch (ScriptEvaluateException e) {
             var exitException = searchExitException(e);
             if (exitException != null) {
                 onFailed.accept(exitException.getReason(), rawOutput);
@@ -96,7 +96,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
             return;
         }
         @SuppressWarnings("unchecked")
-        var output = (O) outputModeler.process(schema, rawOutput);
+        O output = (O) outputModeler.process(schema, rawOutput);
         onSuccess.accept(output, rawOutput);
     }
 

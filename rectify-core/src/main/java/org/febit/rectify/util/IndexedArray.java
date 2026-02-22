@@ -15,53 +15,52 @@
  */
 package org.febit.rectify.util;
 
-import jakarta.annotation.Nullable;
 import org.febit.lang.util.ArraysUtils;
-import org.febit.wit.lang.Bag;
+import org.jspecify.annotations.Nullable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class IndexedArrayBag implements Bag, Serializable {
+public class IndexedArray implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Indexer<String> indexer;
-    private final Object[] values;
+    private final Object[] table;
 
-    private IndexedArrayBag(Indexer<String> indexer, @Nullable Object[] values) {
+    private IndexedArray(Indexer<String> indexer, @Nullable Object @Nullable [] table) {
         this.indexer = indexer;
-        this.values = values == null ? new Object[0] : values;
+        this.table = table == null ? new Object[0] : table;
     }
 
-    public static IndexedArrayBag of(Indexer<String> indexer, @Nullable Object[] values) {
-        return new IndexedArrayBag(indexer, values);
+    public static IndexedArray of(Indexer<String> indexer, @Nullable Object @Nullable [] values) {
+        return new IndexedArray(indexer, values);
     }
 
     private int resolveIndex(@Nullable Object key) {
-        if (key instanceof Number) {
-            return ((Number) key).intValue();
+        if (key instanceof Number number) {
+            return number.intValue();
         }
-        if (key instanceof String) {
-            var i = this.indexer.getIndex((String) key);
+        if (key instanceof String str) {
+            var i = this.indexer.getIndex(str);
             return i == null ? -1 : i;
         }
         return -1;
     }
 
     @Nullable
-    @Override
     public Object get(@Nullable Object key) {
-        return ArraysUtils.get(values,
+        return ArraysUtils.get(table,
                 resolveIndex(key)
         );
     }
 
-    @Override
     public void set(@Nullable Object key, @Nullable Object value) {
         int i = resolveIndex(key);
-        var vars = this.values;
+        var vars = this.table;
         if (i < 0 || i >= vars.length) {
             throw new NoSuchElementException(String.valueOf(key));
         }

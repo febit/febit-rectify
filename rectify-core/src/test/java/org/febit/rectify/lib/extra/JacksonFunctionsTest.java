@@ -1,6 +1,21 @@
+/*
+ * Copyright 2018-present febit.org (support@febit.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.febit.rectify.lib.extra;
 
-import org.febit.rectify.util.FuncMethodDeclare;
+import org.febit.rectify.util.FuncFunctionDeclare;
 import org.febit.rectify.util.FuncUtils;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +35,8 @@ class JacksonFunctionsTest {
         var map = new HashMap<String, Object>();
         FuncUtils.scanConstFields(JacksonFunctions.class, map::put);
 
-        assertTrue(map.get("JSON") instanceof Map);
-        assertTrue(map.get("YAML") instanceof Map);
+        assertInstanceOf(Map.class, map.get("JSON"));
+        assertInstanceOf(Map.class, map.get("YAML"));
 
         json = (Map<Object, Object>) map.get("JSON");
         yaml = (Map<Object, Object>) map.get("YAML");
@@ -29,25 +44,25 @@ class JacksonFunctionsTest {
 
     @Test
     void basic() {
-        assertTrue(json.get("toString") instanceof FuncMethodDeclare);
-        assertTrue(json.get("toPrettyString") instanceof FuncMethodDeclare);
-        assertTrue(json.get("toMap") instanceof FuncMethodDeclare);
-        assertTrue(json.get("toList") instanceof FuncMethodDeclare);
-        assertTrue(json.get("parse") instanceof FuncMethodDeclare);
-        assertTrue(json.get("parseAsMap") instanceof FuncMethodDeclare);
-        assertTrue(json.get("parseAsList") instanceof FuncMethodDeclare);
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("stringify"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("prettyStringify"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("toMap"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("toList"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("parse"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("parseAsMap"));
+        assertInstanceOf(FuncFunctionDeclare.class, json.get("parseAsList"));
 
-        assertTrue(yaml.get("toString") instanceof FuncMethodDeclare);
-        assertTrue(yaml.get("toMap") instanceof FuncMethodDeclare);
-        assertTrue(yaml.get("toList") instanceof FuncMethodDeclare);
-        assertTrue(yaml.get("parse") instanceof FuncMethodDeclare);
-        assertTrue(yaml.get("parseAsMap") instanceof FuncMethodDeclare);
-        assertTrue(yaml.get("parseAsList") instanceof FuncMethodDeclare);
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("stringify"));
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("toMap"));
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("toList"));
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parse"));
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parseAsMap"));
+        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parseAsList"));
     }
 
     @Test
     void json() {
-        FuncMethodDeclare method;
+        FuncFunctionDeclare method;
 
         var map = Map.of("id", 123);
         var mapString = "{\"id\":123}";
@@ -57,33 +72,33 @@ class JacksonFunctionsTest {
         var listString = "[\"id\",123]";
         var listPrettyString = "[\n  \"id\",\n  123\n]";
 
-        method = (FuncMethodDeclare) json.get("toString");
+        method = (FuncFunctionDeclare) json.get("stringify");
         assertEquals(mapString, method.apply(map));
 
-        method = (FuncMethodDeclare) json.get("toPrettyString");
+        method = (FuncFunctionDeclare) json.get("prettyStringify");
         assertEquals(mapPrettyString, method.apply(map));
         assertEquals(listPrettyString, method.apply(list));
 
-        method = (FuncMethodDeclare) json.get("toMap");
+        method = (FuncFunctionDeclare) json.get("toMap");
         assertEquals(map, method.apply(map));
 
-        method = (FuncMethodDeclare) json.get("toList");
+        method = (FuncFunctionDeclare) json.get("toList");
         assertEquals(list, method.apply(list));
 
-        method = (FuncMethodDeclare) json.get("parse");
+        method = (FuncFunctionDeclare) json.get("parse");
         assertEquals(map, method.apply(mapString));
         assertEquals(list, method.apply(listString));
 
-        method = (FuncMethodDeclare) json.get("parseAsMap");
+        method = (FuncFunctionDeclare) json.get("parseAsMap");
         assertEquals(map, method.apply(mapString));
 
-        method = (FuncMethodDeclare) json.get("parseAsList");
+        method = (FuncFunctionDeclare) json.get("parseAsList");
         assertEquals(list, method.apply(listString));
     }
 
     @Test
     void yaml() {
-        FuncMethodDeclare method;
+        FuncFunctionDeclare method;
 
         var map = Map.of("id", 123);
         var mapString = "---\nid: 123\n";
@@ -91,23 +106,23 @@ class JacksonFunctionsTest {
         var list = List.of("id", 123);
         var listString = "- id\n- 123\n";
 
-        method = (FuncMethodDeclare) yaml.get("toString");
+        method = (FuncFunctionDeclare) yaml.get("stringify");
         assertEquals(mapString, method.apply(map));
 
-        method = (FuncMethodDeclare) yaml.get("toMap");
+        method = (FuncFunctionDeclare) yaml.get("toMap");
         assertEquals(map, method.apply(map));
 
-        method = (FuncMethodDeclare) yaml.get("toList");
+        method = (FuncFunctionDeclare) yaml.get("toList");
         assertEquals(list, method.apply(list));
 
-        method = (FuncMethodDeclare) yaml.get("parse");
+        method = (FuncFunctionDeclare) yaml.get("parse");
         assertEquals(map, method.apply(mapString));
         assertEquals(list, method.apply(listString));
 
-        method = (FuncMethodDeclare) yaml.get("parseAsMap");
+        method = (FuncFunctionDeclare) yaml.get("parseAsMap");
         assertEquals(map, method.apply(mapString));
 
-        method = (FuncMethodDeclare) yaml.get("parseAsList");
+        method = (FuncFunctionDeclare) yaml.get("parseAsList");
         assertEquals(list, method.apply(listString));
     }
 

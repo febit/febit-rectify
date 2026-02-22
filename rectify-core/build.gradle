@@ -3,4 +3,6 @@ description = 'Rectify Core'
 dependencies {
   api 'org.febit:febit-lang'
   api 'org.febit.wit:wit-core'
+
+  api 'com.lmax:disruptor:4.0.0'
 }

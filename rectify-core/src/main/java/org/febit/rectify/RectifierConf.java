@@ -15,11 +15,7 @@
  */
 package org.febit.rectify;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import jakarta.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.febit.lang.modeler.Modeler;
@@ -27,14 +23,21 @@ import org.febit.lang.modeler.Schema;
 import org.febit.lang.modeler.Schemas;
 import org.febit.lang.modeler.StructSpec;
 import org.febit.lang.modeler.StructSpecs;
-import org.febit.rectify.engine.ScriptBuilder;
-import org.febit.wit.Context;
-import org.febit.wit.Engine;
-import org.febit.wit.Template;
-import org.febit.wit.Vars;
-import org.febit.wit.debug.BreakpointListener;
-import org.febit.wit.exceptions.ResourceNotFoundException;
+import org.febit.rectify.util.IndexedArray;
+import org.febit.rectify.util.IndexedArrayAccessor;
+import org.febit.rectify.wit.ScriptBuilder;
+import org.febit.rectify.wit.SerializableBreakpointHandler;
+import org.febit.wit.Script;
+import org.febit.wit.Wit;
+import org.febit.wit.exception.SourceNotFoundException;
+import org.febit.wit.io.DiscardOut;
+import org.febit.wit.loader.Loaders;
+import org.febit.wit.loader.impl.StringLoader;
+import org.febit.wit.runtime.Source;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.annotation.JsonPOJOBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -51,29 +55,49 @@ import java.util.function.Supplier;
  */
 @Getter
 @Setter
-@SuppressWarnings({"unused"})
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class RectifierConf implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    private static class EngineLazyHolder {
-        static final Engine ENGINE = Engine.create("febit-rectifier-engine.wim");
+    private static class WitLazyHolder {
+        static final Wit WIT;
+
+        static {
+            var builder = Wit.builder();
+            builder.accessor(IndexedArray.class, new IndexedArrayAccessor());
+            builder.loader(Loaders.dispatcher()
+                    .rule("code:", StringLoader.builder()
+                            .beginWith(Source.BeginWith.SCRIPT)
+                            .build())
+                    .fallback(Loaders.noop())
+                    .build());
+
+            ServiceLoader.load(RectifierWitModule.class)
+                    .forEach(builder::module);
+
+            ServiceLoader.load(RectifierWitCustomizer.class)
+                    .forEach(customizer -> customizer.customize(builder));
+
+            WIT = builder.build();
+        }
     }
 
     private String name = "Unnamed";
     private List<Column> columns = new ArrayList<>();
     private List<Segment> frontSegments = new ArrayList<>();
-    private EngineProvider engineProvider = RectifierConf::defaultEngine;
+    private WitProvider witProvider = RectifierConf::defaultWit;
 
     @Nullable
-    private BreakpointListener breakpointListener;
+    private SerializableBreakpointHandler breakpointHandler;
 
     public static RectifierConf create() {
         return new RectifierConf();
     }
 
-    private static Engine defaultEngine() {
-        return EngineLazyHolder.ENGINE;
+    private static Wit defaultWit() {
+        return WitLazyHolder.WIT;
     }
 
     public Schema resolveSchema() {
@@ -91,8 +115,8 @@ public class RectifierConf implements Serializable {
         return builder.build();
     }
 
-    public RectifierConf engineSupplier(EngineProvider provider) {
-        this.engineProvider = provider;
+    public RectifierConf engineSupplier(WitProvider provider) {
+        this.witProvider = provider;
         return this;
     }
 
@@ -101,8 +125,8 @@ public class RectifierConf implements Serializable {
         return this;
     }
 
-    public RectifierConf breakpointListener(@Nullable BreakpointListener listener) {
-        setBreakpointListener(listener);
+    public RectifierConf breakpointHandler(@Nullable SerializableBreakpointHandler handler) {
+        setBreakpointHandler(handler);
         return this;
     }
 
@@ -180,39 +204,38 @@ public class RectifierConf implements Serializable {
     /**
      * Create a {@code Rectifier} by conf.
      *
-     * @param outputSpec  output StructSpec
-     * @param <I>         input Type
-     * @param <O>         out type
+     * @param outputSpec output StructSpec
+     * @param <I>        input Type
+     * @param <O>        out type
      * @return Rectifier
      */
     public <I, O> Rectifier<I, O> build(StructSpec<O, ?> outputSpec) {
         // init script
-        var breakpointListener = this.breakpointListener;
-        var isDebugEnabled = breakpointListener != null;
         var schema = resolveSchema();
+        var myBreakpointHandler = this.breakpointHandler;
 
-        final Template script;
+        final Script script;
         try {
-            var code = "code: " + ScriptBuilder.build(this, isDebugEnabled);
-            script = EngineLazyHolder.ENGINE.getTemplate(code);
+            var code = "code: " + ScriptBuilder.build(this, myBreakpointHandler != null);
+            script = WitLazyHolder.WIT.script(code);
             // fast-fail check
             script.reload();
-        } catch (ResourceNotFoundException ex) {
+        } catch (SourceNotFoundException ex) {
             throw new UncheckedIOException("Failed to create script.", ex);
         }
-
-        Function<Vars, Context> func = isDebugEnabled
-                ? vars -> script.debug(vars, breakpointListener)
-                : script::merge;
 
         return new RectifierImpl<>(
                 schema, Modeler.builder().structSpec(outputSpec).emptyIfAbsent().build(),
                 () -> collectHints(script),
-                func
+                vars -> script.eval(
+                        vars,
+                        new DiscardOut(),
+                        myBreakpointHandler
+                )
         );
     }
 
-    private static List<String> collectHints(Template script) {
+    private static List<String> collectHints(Script script) {
         var hints = new ArrayList<String>();
 
         // vars
@@ -220,13 +243,12 @@ public class RectifierConf implements Serializable {
         hints.add(ScriptBuilder.VAR_CURR_FIELD);
 
         // globals
-        var gm = script.getEngine().getGlobalManager();
-        gm.forEachGlobal((k, v) -> hints.add(k));
-        gm.forEachConst((k, v) -> hints.add(k));
+        var staticHeaps = script.wit().staticHeaps();
+        staticHeaps.constants().each((k, v) -> hints.add(k));
+        staticHeaps.variables().each((k, v) -> hints.add(k));
 
         return List.copyOf(hints);
     }
-
 
     public <S, I> Rectifier<S, Map<String, Object>> build(SourceFormat<S, I> sourceFormat) {
         return build(sourceFormat, StructSpecs.asMap());
@@ -254,7 +276,7 @@ public class RectifierConf implements Serializable {
     }
 
     @FunctionalInterface
-    public interface EngineProvider extends Supplier<Engine>, Serializable {
+    public interface WitProvider extends Supplier<Wit>, Serializable {
     }
 
     @FunctionalInterface
@@ -262,46 +284,22 @@ public class RectifierConf implements Serializable {
         void appendTo(ScriptBuilder.Context context);
     }
 
-    @Getter
-    @EqualsAndHashCode
-    @AllArgsConstructor(staticName = "create")
-    @JsonDeserialize(builder = Column.Builder.class)
-    @lombok.Builder(builderClassName = "Builder")
-    public static class Column implements Serializable {
+    @Builder(builderClassName = "Builder")
+    public record Column(
+            @lombok.NonNull
+            @SuppressWarnings("NullableProblems")
+            String type,
+            @lombok.NonNull
+            @SuppressWarnings("NullableProblems")
+            String name,
 
+            @Nullable String expr,
+            @Nullable String checkExpr,
+            @Nullable String comment
+    ) implements Serializable {
+
+        @Serial
         private static final long serialVersionUID = 1L;
-
-        private final String type;
-        private final String name;
-        private final String expr;
-
-        @Nullable
-        private final String checkExpr;
-
-        @Nullable
-        private final String comment;
-
-        public String type() {
-            return type;
-        }
-
-        public String name() {
-            return name;
-        }
-
-        public String expr() {
-            return expr;
-        }
-
-        @Nullable
-        public String checkExpr() {
-            return checkExpr;
-        }
-
-        @Nullable
-        public String comment() {
-            return comment;
-        }
 
         @JsonPOJOBuilder(withPrefix = "")
         public static class Builder {

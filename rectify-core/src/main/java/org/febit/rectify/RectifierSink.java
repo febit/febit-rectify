@@ -15,7 +15,7 @@
  */
 package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @FunctionalInterface
 public interface RectifierSink<O> {

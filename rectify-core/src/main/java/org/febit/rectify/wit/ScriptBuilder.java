@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.engine;
+package org.febit.rectify.wit;
 
-import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.rectify.RectifierConf;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -48,31 +49,21 @@ public class ScriptBuilder {
             ch = str.charAt(i);
             char replace;
             switch (ch) {
-                case '\b':
-                case '\f':
+                case '\b', '\f' -> {
                     // Ignore ctrl chars
                     continue;
-                case '\n':
-                    replace = 'n';
-                    break;
-                case '\r':
-                    replace = 'r';
-                    break;
-                case '\t':
-                    replace = 't';
-                    break;
-                case '"':
-                    replace = '"';
-                    break;
-                case '/':
-                    replace = '/';
-                    break;
-                case '\\':
-                    replace = '\\';
-                    break;
-                default:
+                    // Ignore ctrl chars
+                }
+                case '\n' -> replace = 'n';
+                case '\r' -> replace = 'r';
+                case '\t' -> replace = 't';
+                case '"' -> replace = '"';
+                case '/' -> replace = '/';
+                case '\\' -> replace = '\\';
+                default -> {
                     buf.append(ch);
                     continue;
+                }
             }
             buf.append('\\').append(replace);
         }
@@ -171,6 +162,7 @@ public class ScriptBuilder {
 
         private final boolean debug;
         private final StringBuilder buf;
+        @Getter
         private final RectifierConf conf;
         private int filterCounter;
 
@@ -205,10 +197,6 @@ public class ScriptBuilder {
 
         public boolean isDebugEnabled() {
             return debug;
-        }
-
-        public RectifierConf getConf() {
-            return conf;
         }
 
         @Override

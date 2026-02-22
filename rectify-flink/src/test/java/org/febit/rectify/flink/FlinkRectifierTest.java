@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.flink;
 
-import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.lang.util.JacksonUtils;
@@ -32,7 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FlinkRectifierTest {
+class FlinkRectifierTest {
 
     static final RectifierConf conf = RectifierConf.create()
             .name("Demo")
@@ -68,11 +67,11 @@ public class FlinkRectifierTest {
     }
 
     @Test
-    public void processDataSet() throws Exception {
-        ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+    void processDataSet() throws Exception {
+        var env = ExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
-        DataSet<String> rawSet = env.fromCollection(source);
-        DataSet<Row> rowSet = FlinkRectifier.operator(rawSet, new JsonSourceFormat(), conf);
+        var rawSet = env.fromCollection(source);
+        var rowSet = FlinkRectifier.operator(rawSet, new JsonSourceFormat(), conf);
 
         List<Row> rows = new ArrayList<>(rowSet.collect());
         rows.sort(Comparator.comparingLong(r -> (Long) r.getField(0)));

@@ -15,14 +15,17 @@
  */
 package org.febit.rectify.lib;
 
-import jakarta.annotation.Nullable;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function3;
-import org.febit.rectify.engine.ExitException;
-import org.febit.rectify.engine.FilterBreakpoint;
-import org.febit.rectify.engine.ScriptBuilder;
+import org.febit.rectify.wit.ExitException;
+import org.febit.rectify.wit.FilterBreakpoint;
+import org.febit.rectify.wit.ScriptBuilder;
+import org.jspecify.annotations.Nullable;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings({
+        "java:S1118", // Utility classes should not have public constructors
+        "unused",
+})
 public class BasicFunctions implements IFunctions {
 
     @Alias(value = {ScriptBuilder.VAR_EXIT}, keepOriginName = false)
@@ -45,17 +48,17 @@ public class BasicFunctions implements IFunctions {
         if (isAccept == null) {
             return null;
         }
-        if (isAccept instanceof Boolean) {
+        if (isAccept instanceof Boolean bool) {
             // Pass, if expr is TRUE
-            if ((Boolean) isAccept) {
+            if (bool) {
                 return null;
             }
             // Exit, if expr is FALSE
             return exit(null);
         }
         // Exit, if expr is STRING, as reason.
-        if (isAccept instanceof String) {
-            return exit((String) isAccept);
+        if (isAccept instanceof String str) {
+            return exit(str);
         }
         // Pass, by default
         return null;

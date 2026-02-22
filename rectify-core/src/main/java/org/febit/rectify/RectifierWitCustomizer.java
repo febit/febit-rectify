@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NonNullApi
-package org.febit.rectify.engine;
+package org.febit.rectify;
 
-import org.febit.lang.annotation.NonNullApi;
+import org.febit.wit.WitBuilder;
+
+/**
+ * Plugin interface to customize wit builder for Rectifier.
+ */
+@FunctionalInterface
+public interface RectifierWitCustomizer {
+
+    void customize(WitBuilder builder);
+}
+

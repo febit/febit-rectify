@@ -26,6 +26,7 @@ import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.util.Source;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -36,6 +37,8 @@ class RectifyTable extends AbstractTable implements ScannableTable {
     protected final Source source;
     protected final RectifierConf conf;
     protected final SourceFormat<String, Object> sourceFormat;
+
+    @Nullable
     protected RelDataType rowTypeCaching;
 
     RectifyTable(Source source, RectifierConf rectifierConf, SourceFormat<String, Object> sourceFormat) {

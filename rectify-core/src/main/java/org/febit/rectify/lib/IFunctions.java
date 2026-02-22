@@ -15,13 +15,13 @@
  */
 package org.febit.rectify.lib;
 
-import org.febit.rectify.RectifierEnginePlugin;
+import org.febit.rectify.RectifierWitModule;
 import org.febit.rectify.util.FuncUtils;
-import org.febit.wit.Engine;
+import org.febit.wit.Wit;
 
 import java.lang.annotation.*;
 
-public interface IFunctions extends RectifierEnginePlugin {
+public interface IFunctions extends RectifierWitModule {
 
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
@@ -33,7 +33,7 @@ public interface IFunctions extends RectifierEnginePlugin {
     }
 
     @Override
-    default void apply(Engine engine) {
-        FuncUtils.scanConstFields(getClass(), engine.getGlobalManager()::setConst);
+    default void apply(Wit engine) {
+        FuncUtils.scanConstFields(getClass(), engine.staticHeaps().constants()::set);
     }
 }

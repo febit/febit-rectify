@@ -25,17 +25,15 @@ import java.util.Map;
 public class SourceFormatProvider {
 
     public static SourceFormat<String, Object> create(String name, Map<String, Object> props) {
-        switch (name) {
-            case "json":
-                return new JsonSourceFormat();
-            case "access": {
+        return switch (name) {
+            case "json" -> new JsonSourceFormat();
+            case "access" -> {
                 @SuppressWarnings({"unchecked"})
                 var columns = (Collection<String>) props.get("columns");
-                return AccessLogSourceFormat.create(columns);
+                yield AccessLogSourceFormat.create(columns);
             }
-            default:
-                throw new IllegalArgumentException("Unsupported format: " + name);
-        }
+            default -> throw new IllegalArgumentException("Unsupported format: " + name);
+        };
     }
 
 }

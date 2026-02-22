@@ -1,7 +1,20 @@
+/*
+ * Copyright 2018-present febit.org (support@febit.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.febit.rectify.util;
 
-import com.fasterxml.jackson.databind.JavaType;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.febit.lang.func.Consumer1;
 import org.febit.lang.func.Consumer2;
@@ -14,8 +27,10 @@ import org.febit.lang.func.Function3;
 import org.febit.lang.func.Function4;
 import org.febit.lang.func.Function5;
 import org.febit.lang.util.ConvertUtils;
-import org.febit.wit.InternalContext;
-import org.febit.wit.lang.MethodDeclare;
+import org.febit.wit.runtime.InternalContext;
+import org.febit.wit.runtime.function.FunctionDeclare;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.JavaType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,9 +46,9 @@ import java.util.function.Function;
 import static java.util.Map.entry;
 
 @RequiredArgsConstructor(staticName = "create")
-public class FuncMethodDeclare implements MethodDeclare {
+public class FuncFunctionDeclare implements FunctionDeclare {
 
-    private static final Map<Class<?>, Function<Object, Object>> CONVERTERS = Map.ofEntries(
+    private static final Map<Class<?>, Function<@Nullable Object, @Nullable Object>> CONVERTERS = Map.ofEntries(
             entry(Boolean.class, ConvertUtils::toBoolean),
             entry(String.class, ConvertUtils::toString),
             entry(Byte.class, ConvertUtils::toByte),
@@ -53,11 +68,11 @@ public class FuncMethodDeclare implements MethodDeclare {
             entry(Object.class, Function.identity())
     );
 
-    private final Function<Object, Object>[] paramConverters;
-    private final Function<Object[], Object> func;
+    private final Function<@Nullable Object, @Nullable Object>[] paramConverters;
+    private final Function<@Nullable Object[], @Nullable Object> func;
 
     @SuppressWarnings({"unchecked", "SameParameterValue"})
-    static Function<Object, Object>[] resolveParamConverters(JavaType[] types, int start, int end) {
+    static Function<@Nullable Object, @Nullable Object>[] resolveParamConverters(JavaType[] types, int start, int end) {
         if (start < 0) {
             throw new IllegalArgumentException("start < 0");
         }
@@ -75,7 +90,7 @@ public class FuncMethodDeclare implements MethodDeclare {
         return converters;
     }
 
-    static Function<Object, Object> converter(JavaType type) {
+    static Function<@Nullable Object, @Nullable Object> converter(JavaType type) {
         var cls = type.getRawClass();
         var converter = CONVERTERS.get(cls == null ? Object.class : cls);
         if (converter == null) {
@@ -84,7 +99,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         return converter;
     }
 
-    static FuncMethodDeclare of(Function1<Object, ?> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Function1<@Nullable Object, ?> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Function1.class),
                 0, 1
@@ -92,7 +110,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         return create(paramTypes, args -> func.apply(args[0]));
     }
 
-    static FuncMethodDeclare of(Function2<Object, Object, ?> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Function2<@Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Function2.class),
                 0, 2
@@ -100,7 +121,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         return create(paramTypes, args -> func.apply(args[0], args[1]));
     }
 
-    static FuncMethodDeclare of(Function3<Object, Object, Object, ?> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Function3<@Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Function3.class),
                 0, 3
@@ -108,7 +132,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         return create(paramTypes, args -> func.apply(args[0], args[1], args[2]));
     }
 
-    static FuncMethodDeclare of(Function4<Object, Object, Object, Object, ?> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Function4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Function4.class),
                 0, 4
@@ -116,7 +143,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         return create(paramTypes, args -> func.apply(args[0], args[1], args[2], args[3]));
     }
 
-    static FuncMethodDeclare of(Function5<Object, Object, Object, Object, Object, ?> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Function5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Function5.class),
                 0, 5
@@ -124,7 +154,7 @@ public class FuncMethodDeclare implements MethodDeclare {
         return create(paramTypes, args -> func.apply(args[0], args[1], args[2], args[3], args[4]));
     }
 
-    static FuncMethodDeclare of(Consumer1<Object> func, JavaType javaType) {
+    static FuncFunctionDeclare of(Consumer1<@Nullable Object> func, JavaType javaType) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Consumer1.class),
                 0, 1
@@ -135,7 +165,7 @@ public class FuncMethodDeclare implements MethodDeclare {
         });
     }
 
-    static FuncMethodDeclare of(Consumer2<Object, Object> func, JavaType javaType) {
+    static FuncFunctionDeclare of(Consumer2<@Nullable Object, @Nullable Object> func, JavaType javaType) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Consumer2.class),
                 0, 2
@@ -146,7 +176,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         });
     }
 
-    static FuncMethodDeclare of(Consumer3<Object, Object, Object> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Consumer3<@Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Consumer3.class),
                 0, 3
@@ -157,7 +190,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         });
     }
 
-    static FuncMethodDeclare of(Consumer4<Object, Object, Object, Object> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Consumer4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Consumer4.class),
                 0, 4
@@ -168,7 +204,10 @@ public class FuncMethodDeclare implements MethodDeclare {
         });
     }
 
-    static FuncMethodDeclare of(Consumer5<Object, Object, Object, Object, Object> func, JavaType javaType) {
+    static FuncFunctionDeclare of(
+            Consumer5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
         var paramTypes = resolveParamConverters(
                 javaType.findTypeParameters(Consumer5.class),
                 0, 5
@@ -181,12 +220,12 @@ public class FuncMethodDeclare implements MethodDeclare {
 
     @Nullable
     @Override
-    public Object invoke(InternalContext context, Object[] rawArgs) {
+    public Object apply(InternalContext context, @Nullable Object @Nullable [] rawArgs) {
         return apply(rawArgs);
     }
 
     @Nullable
-    public Object apply(Object... rawArgs) {
+    public Object apply(@Nullable Object @Nullable ... rawArgs) {
         var converters = this.paramConverters;
         var argsSize = converters.length;
         var args = new Object[argsSize];

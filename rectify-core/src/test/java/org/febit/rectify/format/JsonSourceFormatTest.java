@@ -17,10 +17,10 @@ package org.febit.rectify.format;
 
 import org.junit.jupiter.api.Test;
 
-public class JsonSourceFormatTest {
+class JsonSourceFormatTest {
 
     @Test
-    public void test() {
+    void test() {
         // TODO
     }
 }

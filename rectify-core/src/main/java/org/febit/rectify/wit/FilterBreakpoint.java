@@ -13,20 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.engine;
+package org.febit.rectify.wit;
 
-import org.febit.rectify.RectifierEnginePlugin;
-import org.febit.wit.Engine;
-import org.febit.wit.Init;
-import org.febit.wit.loggers.Logger;
+import org.jspecify.annotations.Nullable;
 
-import java.util.ServiceLoader;
+import java.util.Objects;
 
-public class SpiPluginCollector {
+public record FilterBreakpoint(
+        int index,
+        @Nullable String field,
+        String expr
+) {
 
-    @Init
-    public void init(Engine engine, Logger logger) {
-        ServiceLoader.load(RectifierEnginePlugin.class)
-                .forEach(p -> p.initAndApply(engine, logger));
+    public static FilterBreakpoint of(@Nullable Integer index, String expr) {
+        return of(index, null, expr);
+    }
+
+    public static FilterBreakpoint of(@Nullable Integer index, @Nullable String field, @Nullable String expr) {
+        if (index == null) {
+            index = 0;
+        }
+        Objects.requireNonNull(expr);
+        return new FilterBreakpoint(index, field, expr);
     }
 }

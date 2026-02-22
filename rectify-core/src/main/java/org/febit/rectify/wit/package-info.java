@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+@NullMarked
+package org.febit.rectify.wit;
 
-import org.febit.wit.Engine;
-import org.febit.wit.loggers.Logger;
-import org.febit.wit.plugin.EnginePlugin;
-
-/**
- * Plugin interface to extend engine for Rectifier.
- */
-@FunctionalInterface
-public interface RectifierEnginePlugin extends EnginePlugin {
-
-    default void initAndApply(Engine engine, Logger logger) {
-        var name = getClass().getName();
-        logger.info("Applying rectify engine spi plugin: {}.", name);
-        engine.inject(name, this);
-        apply(engine);
-    }
-}
-
+import org.jspecify.annotations.NullMarked;

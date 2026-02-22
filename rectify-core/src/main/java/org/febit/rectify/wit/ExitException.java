@@ -13,7 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package org.febit.rectify.sqlline;
+package org.febit.rectify.wit;
 
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * Special exception to impl exit().
+ */
+public class ExitException extends RuntimeException {
+
+    @Nullable
+    private final String reason;
+
+    public ExitException(@Nullable String reason) {
+        // disable stack trace
+        super(reason != null ? reason : "", null, true, false);
+        this.reason = reason;
+    }
+
+    @Nullable
+    public String getReason() {
+        return reason;
+    }
+}

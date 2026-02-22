@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.flink;
 
-import jakarta.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -31,6 +30,7 @@ import org.febit.rectify.Rectifiers;
 import org.febit.rectify.SerializableRectifier;
 import org.febit.rectify.SourceFormat;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,11 +45,10 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class FlinkRectifier<I> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2L;
 
-    @Nonnull
     private final SerializableRectifier<I, Row> rectifier;
-    @Nonnull
     private final RowTypeInfo typeInfo;
 
     public static <I> FlinkRectifier<I> create(SerializableRectifier<I, Row> rectifier, RowTypeInfo typeInfo) {

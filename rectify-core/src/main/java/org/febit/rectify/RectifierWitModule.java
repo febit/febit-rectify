@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package org.febit.rectify.sqlline;
+package org.febit.rectify;
 
-import org.jspecify.annotations.NullMarked;
+import org.febit.wit.WitModule;
+
+/**
+ * Plugin interface to extend wit engine for Rectifier.
+ */
+@FunctionalInterface
+public interface RectifierWitModule extends WitModule {
+
+}
+

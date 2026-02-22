@@ -18,7 +18,7 @@ package org.febit.rectify;
 import java.util.HashMap;
 
 /**
- * Raw result outed by script engine.
+ * Raw result outed by script wit.
  */
 public class RawOutput extends HashMap<String, Object> {
 }

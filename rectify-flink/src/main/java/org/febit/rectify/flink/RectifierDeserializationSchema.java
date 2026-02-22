@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.flink;
 
-import jakarta.annotation.Nullable;
 import lombok.Getter;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
@@ -24,9 +23,13 @@ import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.SingleElementConsumer;
 import org.febit.rectify.RectifierConf;
 import org.febit.rectify.SourceFormat;
+import org.jspecify.annotations.Nullable;
+
+import java.io.Serial;
 
 public class RectifierDeserializationSchema implements DeserializationSchema<Row> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Getter

@@ -13,7 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package org.febit.rectify.sqlline;
+package org.febit.rectify.util;
 
-import org.jspecify.annotations.NullMarked;
+import org.febit.wit.runtime.accessor.Getter;
+import org.febit.wit.runtime.accessor.Setter;
+import org.jspecify.annotations.Nullable;
+
+import java.io.Serializable;
+
+public class IndexedArrayAccessor
+        implements Getter<IndexedArray>, Setter<IndexedArray>, Serializable {
+
+    @Override
+    public @Nullable Object get(IndexedArray obj, @Nullable Object property) {
+        return obj.get(property);
+    }
+
+    @Override
+    public void set(IndexedArray obj, @Nullable Object property, @Nullable Object value) {
+        obj.set(property, value);
+    }
+}

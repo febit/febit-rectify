@@ -15,11 +15,6 @@
  */
 package org.febit.rectify.util;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.databind.util.LRUMap;
-import com.fasterxml.jackson.databind.util.LookupCache;
-import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 import org.febit.lang.Unchecked;
 import org.febit.lang.func.Consumer0;
@@ -52,11 +47,17 @@ import org.febit.lang.func.ThrowingRunnable;
 import org.febit.lang.func.ThrowingSupplier;
 import org.febit.rectify.lib.IFunctions;
 import org.febit.rectify.lib.IProto;
-import org.febit.wit.exceptions.UncheckedException;
-import org.febit.wit.lang.MethodDeclare;
-import org.febit.wit.util.ClassUtil;
+import org.febit.wit.exception.UncheckedException;
+import org.febit.wit.runtime.function.FunctionDeclare;
+import org.febit.wit.util.ClassUtils;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.type.TypeFactory;
+import tools.jackson.databind.util.LookupCache;
+import tools.jackson.databind.util.SimpleLookupCache;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -64,29 +65,33 @@ import java.util.stream.Stream;
 
 @UtilityClass
 public class FuncUtils {
-    private static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance().withCache(createCache());
+    private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance().withCache(createCache());
 
     private static LookupCache<Object, JavaType> createCache() {
-        return new LRUMap<>(16, 128);
+        return new SimpleLookupCache<>(16, 128);
     }
 
     public static void scanConstFields(Class<?> cls, BiConsumer<String, Object> consumer) {
         Stream.of(cls.getFields())
-                .filter(ClassUtil::isStatic)
-                .filter(ClassUtil::isFinal)
+                .filter(ClassUtils::isStatic)
+                .filter(ClassUtils::isFinal)
                 .forEach(field -> sinkConst(consumer, field, null));
     }
 
     public static Map<Object, Object> scanProto(IProto proto) {
         var map = new HashMap<>();
         Stream.of(proto.getClass().getFields())
-                .filter(f -> !ClassUtil.isStatic(f))
-                .filter(ClassUtil::isFinal)
+                .filter(f -> !ClassUtils.isStatic(f))
+                .filter(ClassUtils::isFinal)
                 .forEach(field -> sinkConst(map::put, field, proto));
-        return Map.copyOf(map);
+        return Collections.unmodifiableMap(new HashMap<>(map));
     }
 
-    private static void sinkConst(BiConsumer<String, Object> consumer, Field field, @Nullable Object owner) {
+    private static void sinkConst(
+            BiConsumer<String, @Nullable Object> consumer,
+            Field field,
+            @Nullable Object owner
+    ) {
         var fieldValue = resolveConstFrom(field, owner);
         var originName = field.getName();
         var aliasAnno = field.getAnnotation(IFunctions.Alias.class);
@@ -113,108 +118,112 @@ public class FuncUtils {
         if (original == null) {
             return null;
         }
-        if (original instanceof IFunction) {
-            return resolveMethodDeclare((IFunction) original, field);
+        if (original instanceof IFunction f) {
+            return toFunctionDeclare(f, field);
         }
-        if (original instanceof IProto) {
-            return scanProto((IProto) original);
+        if (original instanceof IProto proto) {
+            return scanProto(proto);
         }
         return original;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static MethodDeclare resolveMethodDeclare(IFunction func, Field field) {
-        if (func instanceof Function0) {
-            return (c, args) -> ((Function0) func).apply();
+    @SuppressWarnings({
+            "java:S3776", // Cognitive Complexity of methods should not be too high
+            "rawtypes",
+            "unchecked"
+    })
+    private static FunctionDeclare toFunctionDeclare(IFunction func, Field field) {
+        if (func instanceof Function0 f) {
+            return (c, args) -> f.apply();
         }
-        if (func instanceof Consumer0) {
+        if (func instanceof Consumer0 f) {
             return (c, args) -> {
-                ((Consumer0) func).accept();
+                f.accept();
                 return null;
             };
         }
-        if (func instanceof ThrowingFunction0) {
-            return (c, args) -> Unchecked.func0((ThrowingFunction0) func).apply();
+        if (func instanceof ThrowingFunction0 f) {
+            return (c, args) -> Unchecked.func0(f).apply();
         }
-        if (func instanceof ThrowingConsumer0) {
+        if (func instanceof ThrowingConsumer0 f) {
             return (c, args) -> {
-                Unchecked.consumer0((ThrowingConsumer0) func).accept();
+                Unchecked.consumer0(f).accept();
                 return null;
             };
         }
-        if (func instanceof ThrowingCallable) {
-            return (c, args) -> Unchecked.callable((ThrowingCallable) func).call();
+        if (func instanceof ThrowingCallable f) {
+            return (c, args) -> Unchecked.callable(f).call();
         }
-        if (func instanceof ThrowingSupplier) {
-            return (c, args) -> Unchecked.supplier((ThrowingSupplier) func).get();
+        if (func instanceof ThrowingSupplier f) {
+            return (c, args) -> Unchecked.supplier(f).get();
         }
-        if (func instanceof ThrowingRunnable) {
+        if (func instanceof ThrowingRunnable f) {
             return (c, args) -> {
-                Unchecked.runnable((ThrowingRunnable) func).run();
+                Unchecked.runnable(f).run();
                 return null;
             };
         }
 
         var javaType = TYPE_FACTORY.constructType(field.getGenericType());
-        if (func instanceof Function1) {
-            return FuncMethodDeclare.of((Function1) func, javaType);
+        if (func instanceof Function1 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Function2) {
-            return FuncMethodDeclare.of((Function2) func, javaType);
+        if (func instanceof Function2 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Function3) {
-            return FuncMethodDeclare.of((Function3) func, javaType);
+        if (func instanceof Function3 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Function4) {
-            return FuncMethodDeclare.of((Function4) func, javaType);
+        if (func instanceof Function4 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Function5) {
-            return FuncMethodDeclare.of((Function5) func, javaType);
+        if (func instanceof Function5 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Consumer1) {
-            return FuncMethodDeclare.of((Consumer1) func, javaType);
+        if (func instanceof Consumer1 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Consumer2) {
-            return FuncMethodDeclare.of((Consumer2) func, javaType);
+        if (func instanceof Consumer2 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Consumer3) {
-            return FuncMethodDeclare.of((Consumer3) func, javaType);
+        if (func instanceof Consumer3 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Consumer4) {
-            return FuncMethodDeclare.of((Consumer4) func, javaType);
+        if (func instanceof Consumer4 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof Consumer5) {
-            return FuncMethodDeclare.of((Consumer5) func, javaType);
+        if (func instanceof Consumer5 f) {
+            return FuncFunctionDeclare.of(f, javaType);
         }
-        if (func instanceof ThrowingConsumer1) {
-            return FuncMethodDeclare.of(Unchecked.consumer1((ThrowingConsumer1) func), javaType);
+        if (func instanceof ThrowingConsumer1 f) {
+            return FuncFunctionDeclare.of(Unchecked.consumer1(f), javaType);
         }
-        if (func instanceof ThrowingConsumer2) {
-            return FuncMethodDeclare.of(Unchecked.consumer2((ThrowingConsumer2) func), javaType);
+        if (func instanceof ThrowingConsumer2 f) {
+            return FuncFunctionDeclare.of(Unchecked.consumer2(f), javaType);
         }
-        if (func instanceof ThrowingConsumer3) {
-            return FuncMethodDeclare.of(Unchecked.consumer3((ThrowingConsumer3) func), javaType);
+        if (func instanceof ThrowingConsumer3 f) {
+            return FuncFunctionDeclare.of(Unchecked.consumer3(f), javaType);
         }
-        if (func instanceof ThrowingConsumer4) {
-            return FuncMethodDeclare.of(Unchecked.consumer4((ThrowingConsumer4) func), javaType);
+        if (func instanceof ThrowingConsumer4 f) {
+            return FuncFunctionDeclare.of(Unchecked.consumer4(f), javaType);
         }
-        if (func instanceof ThrowingConsumer5) {
-            return FuncMethodDeclare.of(Unchecked.consumer5((ThrowingConsumer5) func), javaType);
+        if (func instanceof ThrowingConsumer5 f) {
+            return FuncFunctionDeclare.of(Unchecked.consumer5(f), javaType);
         }
-        if (func instanceof ThrowingFunction1) {
-            return FuncMethodDeclare.of(Unchecked.func1((ThrowingFunction1) func), javaType);
+        if (func instanceof ThrowingFunction1 f) {
+            return FuncFunctionDeclare.of(Unchecked.func1(f), javaType);
         }
-        if (func instanceof ThrowingFunction2) {
-            return FuncMethodDeclare.of(Unchecked.func2((ThrowingFunction2) func), javaType);
+        if (func instanceof ThrowingFunction2 f) {
+            return FuncFunctionDeclare.of(Unchecked.func2(f), javaType);
         }
-        if (func instanceof ThrowingFunction3) {
-            return FuncMethodDeclare.of(Unchecked.func3((ThrowingFunction3) func), javaType);
+        if (func instanceof ThrowingFunction3 f) {
+            return FuncFunctionDeclare.of(Unchecked.func3(f), javaType);
         }
-        if (func instanceof ThrowingFunction4) {
-            return FuncMethodDeclare.of(Unchecked.func4((ThrowingFunction4) func), javaType);
+        if (func instanceof ThrowingFunction4 f) {
+            return FuncFunctionDeclare.of(Unchecked.func4(f), javaType);
         }
-        if (func instanceof ThrowingFunction5) {
-            return FuncMethodDeclare.of(Unchecked.func5((ThrowingFunction5) func), javaType);
+        if (func instanceof ThrowingFunction5 f) {
+            return FuncFunctionDeclare.of(Unchecked.func5(f), javaType);
         }
         throw new IllegalArgumentException("Unsupported function: " + func.getClass());
     }

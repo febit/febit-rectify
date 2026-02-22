@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Nonnull
+@NullMarked
 package org.febit.rectify.lib;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NullMarked;

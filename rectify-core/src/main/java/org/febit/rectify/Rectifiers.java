@@ -15,11 +15,10 @@
  */
 package org.febit.rectify;
 
-import jakarta.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.febit.lang.Lazy;
 import org.febit.lang.func.SerializableSupplier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -39,14 +38,12 @@ public class Rectifiers {
         return new SourceFormattedRectifier<>(rectifier, sourceFormat);
     }
 
-    @RequiredArgsConstructor
-    private static class LazyRectifier<I, O>
-            implements Rectifier.Delegated<I, O, I, O>, SerializableRectifier<I, O> {
+    private record LazyRectifier<I, O>(
+            Lazy<Rectifier<I, O>> lazy
+    ) implements Rectifier.Decorator<I, O, I, O>, SerializableRectifier<I, O> {
 
-        private final Lazy<Rectifier<I, O>> delegated;
-
-        public Rectifier<I, O> delegated() {
-            return delegated.get();
+        public Rectifier<I, O> delegate() {
+            return lazy.get();
         }
 
         @Override
@@ -55,19 +52,14 @@ public class Rectifiers {
                 BiConsumer<O, RawOutput> onSucceed,
                 BiConsumer<String, RawOutput> onFailed
         ) {
-            delegated().process(input, onSucceed, onFailed);
+            delegate().process(input, onSucceed, onFailed);
         }
     }
 
-    @RequiredArgsConstructor
-    private static class TransformedRectifier<S, I, O> implements Rectifier.Delegated<S, O, I, O> {
-
-        private final Rectifier<I, O> delegated;
-        private final Function<S, I> transfer;
-
-        public Rectifier<I, O> delegated() {
-            return delegated;
-        }
+    private record TransformedRectifier<S, I, O>(
+            Rectifier<I, O> delegate,
+            Function<@Nullable S, I> transfer
+    ) implements Rectifier.Decorator<S, O, I, O> {
 
         @Override
         public void process(
@@ -76,22 +68,21 @@ public class Rectifiers {
                 BiConsumer<String, RawOutput> onFailed
         ) {
             var in = transfer.apply(source);
-            delegated.process(in, onSucceed, onFailed);
+            delegate.process(in, onSucceed, onFailed);
         }
     }
 
-    @RequiredArgsConstructor(staticName = "wrap")
-    private static class SourceFormattedRectifier<S, I, O> implements Rectifier.Delegated<S, O, I, O> {
+    private record SourceFormattedRectifier<S, I, O>(
+            Rectifier<I, O> delegate,
+            SourceFormat<S, I> sourceFormat
+    ) implements Rectifier.Decorator<S, O, I, O> {
 
-        private final Rectifier<I, O> delegated;
-        private final SourceFormat<S, I> sourceFormat;
-
-        public Rectifier<I, O> delegated() {
-            return delegated;
-        }
-
-        public void process(@Nullable S source, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed) {
-            sourceFormat.process(source, in -> delegated.process(in, onSucceed, onFailed));
+        public void process(
+                @Nullable S source,
+                BiConsumer<O, RawOutput> onSucceed,
+                BiConsumer<String, RawOutput> onFailed
+        ) {
+            sourceFormat.process(source, in -> delegate.process(in, onSucceed, onFailed));
         }
     }
 }

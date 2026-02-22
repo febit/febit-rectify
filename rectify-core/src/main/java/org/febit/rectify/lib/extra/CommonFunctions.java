@@ -20,6 +20,7 @@ import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
 import org.febit.rectify.lib.IFunctions;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,12 +30,15 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
-@SuppressWarnings({"unused"})
+@SuppressWarnings({
+        "java:S1118", // Utility classes should not have public constructors
+        "unused",
+})
 public class CommonFunctions implements IFunctions {
 
     private static final AtomicLong NEXT_ID = new AtomicLong(1);
 
-    public static final Function0<Object> noop = () -> null;
+    public static final Function0<@Nullable Object> noop = () -> null;
 
     public static final Function0<Long> seq = NEXT_ID::getAndIncrement;
     public static final Function0<UUID> uuid = UUID::randomUUID;
@@ -42,9 +46,9 @@ public class CommonFunctions implements IFunctions {
     public static final Function0<Object> newList = ArrayList::new;
     public static final Function0<Object> newSet = HashSet::new;
     public static final Function0<Object> newMap = LinkedHashMap::new;
-    public static final Function1<Object, Integer> size = org.febit.wit.util.CollectionUtil::getSize;
+    public static final Function1<@Nullable Object, Integer> size = org.febit.wit.util.CollectionUtils::size;
 
-    public static final Function1<Object, Boolean> isNull = Objects::isNull;
-    public static final Function1<Object, Boolean> nonNull = Objects::nonNull;
-    public static final Function2<Object, Object, Boolean> isEquals = Objects::equals;
+    public static final Function1<@Nullable Object, Boolean> isNull = Objects::isNull;
+    public static final Function1<@Nullable Object, Boolean> nonNull = Objects::nonNull;
+    public static final Function2<@Nullable Object, @Nullable Object, Boolean> isEquals = Objects::equals;
 }

@@ -15,10 +15,10 @@
  */
 package org.febit.rectify.flink;
 
-import jakarta.annotation.Nullable;
 import org.apache.flink.types.Row;
 import org.febit.lang.modeler.Schema;
 import org.febit.lang.modeler.StructSpec;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
 

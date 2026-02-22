@@ -15,9 +15,9 @@
  */
 package org.febit.rectify.util;
 
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.febit.lang.util.Pairs;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.Collection;

@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.calcite.util.Sources;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,8 @@ import java.util.Map;
 @Slf4j
 class RectifySchema extends AbstractSchema {
     private final File directoryFile;
+
+    @Nullable
     private Map<String, Table> tableMap;
 
     RectifySchema(File directoryFile) {

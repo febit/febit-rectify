@@ -15,10 +15,10 @@
  */
 package org.febit.rectify.format;
 
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.SourceFormat;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.function.Consumer;

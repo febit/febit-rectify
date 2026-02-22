@@ -1,22 +1,15 @@
+//buildscript {
+//  configurations.all { resolutionStrategy.cacheChangingModulesFor 0, 'seconds' }
+//}
 plugins {
-  id 'com.github.hierynomus.license' version '0.16.1'
-  id 'org.febit.standard-java' version '1.1.0'
-  id 'org.febit.standard-maven-publish' version '1.1.0'
-  id 'org.febit.codegen-module' version '1.1.0'
+  alias libs.plugins.febit.java
+  alias libs.plugins.febit.maven.publish
+  alias libs.plugins.febit.codegen.module
+  alias libs.plugins.license
 }
 
 group 'org.febit.rectify'
-version '1.8.0-SNAPSHOT'
-
-ext {
-  versions = [
-      febitCommons: '3.0.0-SNAPSHOT',
-      wit         : '2.7.0-beta',
-      calcite     : '1.34.0',
-      sqlline     : '1.12.0',
-      flink       : '1.17.0',
-  ]
-}
+version '2.0.0-SNAPSHOT'
 
 allprojects {
   apply plugin: 'com.github.hierynomus.license'
@@ -25,7 +18,7 @@ allprojects {
   version rootProject.version
 
   repositories {
-    maven { url "https://maven.aliyun.com/repository/central" }
+    mavenCentral()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   }
 
@@ -38,6 +31,7 @@ allprojects {
   codegenModule {
     defaultTemplate = fromFile("$rootDir/etc/module.java.tmpl")
   }
+
 
   license {
     mapping {
@@ -57,10 +51,14 @@ configure(subprojects.findAll {
   apply plugin: 'java-library'
 
   java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     withSourcesJar()
+  }
+
+  tasks.named("licenseMain").configure {
+    mustRunAfter tasks.named("generateModule")
   }
 
   dependencyManagement {
@@ -68,18 +66,20 @@ configure(subprojects.findAll {
       cacheChangingModulesFor 0, 'seconds'
     }
     imports {
-      mavenBom "org.febit:febit-commons-dependencies:${versions.febitCommons}"
+      mavenBom "${libs.febit.commons.deps.get()}"
     }
     dependencies {
-      dependencySet(group: 'org.apache.flink', version: "${versions.flink}") {
+      dependencySet(group: 'org.apache.flink', version: "${libs.versions.flink.get()}") {
         entry "flink-table-common"
         entry "flink-streaming-java"
         entry "flink-clients"
+        entry "flink-table"
+        entry "flink-table-api-java"
       }
-      dependency "org.febit.wit:wit-core:${versions.wit}"
-      dependency "org.apache.avro:avro:${versions.avro}"
-      dependency "org.apache.calcite:calcite-core:${versions.calcite}"
-      dependency "sqlline:sqlline:${versions.sqlline}"
+      dependency "${libs.wit.core.get()}"
+      dependency "${libs.calcite.core.get()}"
+      dependency "${libs.avro.get()}"
+      dependency "${libs.sqlline.get()}"
     }
   }
 
@@ -88,8 +88,10 @@ configure(subprojects.findAll {
   }
 
   dependencies {
-    compileOnly 'org.febit:febit-annotations-optional'
-    testCompileOnly 'org.febit:febit-annotations-optional'
+    compileOnly 'org.jspecify:jspecify'
+    compileOnly 'com.github.spotbugs:spotbugs-annotations'
+    testCompileOnly 'org.jspecify:jspecify'
+    testCompileOnly 'com.github.spotbugs:spotbugs-annotations'
 
     testImplementation 'org.febit:febit-commons-test'
     testRuntimeOnly 'org.slf4j:slf4j-simple'
@@ -123,8 +125,8 @@ def customPom(MavenPom pom) {
     }
     developers {
       developer {
-        id = 'zqq'
-        name = 'Zhu Qingqing'
+        id = 'kurt'
+        name = 'Kurt Zhu'
         email = 'zqq@febit.org'
         timezone = '+8'
       }

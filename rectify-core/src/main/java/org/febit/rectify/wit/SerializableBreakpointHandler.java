@@ -13,24 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.engine;
+package org.febit.rectify.wit;
 
-import jakarta.annotation.Nullable;
+import org.febit.wit.runtime.BreakpointHandler;
 
-/**
- * Special exception to impl exit().
- */
-public class ExitException extends RuntimeException {
+import java.io.Serializable;
 
-    private final String reason;
-
-    public ExitException(@Nullable String reason) {
-        // disable stack trace
-        super(reason != null ? reason : "", null, true, false);
-        this.reason = reason;
-    }
-
-    public String getReason() {
-        return reason;
-    }
+public interface SerializableBreakpointHandler extends BreakpointHandler, Serializable {
 }
