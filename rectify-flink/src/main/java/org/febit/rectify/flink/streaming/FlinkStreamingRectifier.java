@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify.flink.streaming;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
@@ -25,6 +25,9 @@ import org.febit.rectify.RectifierConf;
 import org.febit.rectify.Rectifiers;
 import org.febit.rectify.SerializableRectifier;
 import org.febit.rectify.SourceFormat;
+import org.febit.rectify.flink.FlinkRectifier;
+import org.febit.rectify.flink.RowStructSpec;
+import org.febit.rectify.flink.TypeInfoUtils;
 
 public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
 

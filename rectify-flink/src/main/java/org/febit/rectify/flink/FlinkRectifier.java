@@ -17,9 +17,6 @@ package org.febit.rectify.flink;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.operators.FlatMapOperator;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
@@ -71,16 +68,6 @@ public class FlinkRectifier<I> implements Serializable {
         );
     }
 
-    public static <I> FlatMapOperator<I, Row> operator(DataSet<I> dataSet, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(conf);
-        return rectifier.operator(dataSet);
-    }
-
-    public static <I> FlatMapOperator<I, Row> operator(DataSet<I> dataSet, SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
-        FlinkRectifier<I> rectifier = create(sourceFormat, conf);
-        return rectifier.operator(dataSet);
-    }
-
     protected void process(I raw, Collector<Row> out) {
         process(raw, out::collect);
     }
@@ -108,7 +95,8 @@ public class FlinkRectifier<I> implements Serializable {
     public int requireFieldIndex(String fieldName) {
         int index = this.typeInfo.getFieldIndex(fieldName);
         if (index < 0) {
-            throw new NoSuchElementException("Not found field in schema '" + rectifier.schema().fullname() + "' : " + fieldName);
+            throw new NoSuchElementException(
+                    "Not found field in schema '" + rectifier.schema().fullname() + "' : " + fieldName);
         }
         return index;
     }
@@ -123,12 +111,6 @@ public class FlinkRectifier<I> implements Serializable {
 
     public String explainSource() {
         return toString();
-    }
-
-    public FlatMapOperator<I, Row> operator(DataSet<I> dataSet) {
-        var flatMapper = (FlatMapFunction<I, Row>) this::process;
-        return new FlatMapOperator<>(dataSet, getReturnType(),
-                dataSet.clean(flatMapper), "FlinkRectifier");
     }
 
     @Override

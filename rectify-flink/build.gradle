@@ -4,6 +4,8 @@ dependencies {
   api project(":febit-rectify-core")
 
   compileOnly "org.apache.flink:flink-streaming-java"
+  compileOnly "org.apache.flink:flink-format-common"
+  compileOnly "org.apache.flink:flink-table-common"
 
   testImplementation "org.apache.flink:flink-streaming-java"
   testImplementation "org.apache.flink:flink-clients"

@@ -70,11 +70,12 @@ configure(subprojects.findAll {
     }
     dependencies {
       dependencySet(group: 'org.apache.flink', version: "${libs.versions.flink.get()}") {
-        entry "flink-table-common"
-        entry "flink-streaming-java"
         entry "flink-clients"
+        entry "flink-format-common"
+        entry "flink-streaming-java"
         entry "flink-table"
         entry "flink-table-api-java"
+        entry "flink-table-common"
       }
       dependency "${libs.wit.core.get()}"
       dependency "${libs.calcite.core.get()}"
