@@ -15,7 +15,7 @@
  */
 package org.febit.rectify.lib.extra;
 
-import org.febit.rectify.util.FuncFunctionDeclare;
+import org.febit.rectify.util.AdaptFunction;
 import org.febit.rectify.util.FuncUtils;
 import org.junit.jupiter.api.Test;
 
@@ -41,48 +41,48 @@ class StringFunctionsTest {
 
     @Test
     void basic() {
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isEmpty")).apply(""));
-        assertFalse((boolean) ((FuncFunctionDeclare) proto.get("isNotEmpty")).apply(""));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isBlank")).apply(""));
-        assertFalse((boolean) ((FuncFunctionDeclare) proto.get("isNotBlank")).apply(""));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isNumeric")).apply("123"));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isAlpha")).apply("abc"));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isAlphaSpace")).apply("abc "));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isAlphaNumeric")).apply("abc1"));
-        assertTrue((boolean) ((FuncFunctionDeclare) proto.get("isAlphaNumericSpace")).apply("abc1 "));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isEmpty")).apply(""));
+        assertFalse((boolean) ((AdaptFunction) proto.get("isNotEmpty")).apply(""));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isBlank")).apply(""));
+        assertFalse((boolean) ((AdaptFunction) proto.get("isNotBlank")).apply(""));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isNumeric")).apply("123"));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isAlpha")).apply("abc"));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isAlphaSpace")).apply("abc "));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isAlphaNumeric")).apply("abc1"));
+        assertTrue((boolean) ((AdaptFunction) proto.get("isAlphaNumericSpace")).apply("abc1 "));
 
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("trim")).apply(" abc "));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("lower")).apply("ABC"));
-        assertEquals("ABC", ((FuncFunctionDeclare) proto.get("upper")).apply("abc"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("toLowerCase")).apply("ABC"));
-        assertEquals("ABC", ((FuncFunctionDeclare) proto.get("toUpperCase")).apply("abc"));
+        assertEquals("abc", ((AdaptFunction) proto.get("trim")).apply(" abc "));
+        assertEquals("abc", ((AdaptFunction) proto.get("lower")).apply("ABC"));
+        assertEquals("ABC", ((AdaptFunction) proto.get("upper")).apply("abc"));
+        assertEquals("abc", ((AdaptFunction) proto.get("toLowerCase")).apply("ABC"));
+        assertEquals("ABC", ((AdaptFunction) proto.get("toUpperCase")).apply("abc"));
 
-        assertEquals("bc", ((FuncFunctionDeclare) proto.get("sub")).apply("abc", 1, 3));
-        assertEquals("bc", ((FuncFunctionDeclare) proto.get("sub")).apply("abc", 1, null));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("sub")).apply("abc", null, null));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("sub")).apply("abc", null, 3));
+        assertEquals("bc", ((AdaptFunction) proto.get("sub")).apply("abc", 1, 3));
+        assertEquals("bc", ((AdaptFunction) proto.get("sub")).apply("abc", 1, null));
+        assertEquals("abc", ((AdaptFunction) proto.get("sub")).apply("abc", null, null));
+        assertEquals("abc", ((AdaptFunction) proto.get("sub")).apply("abc", null, 3));
 
-        assertEquals("bc", ((FuncFunctionDeclare) proto.get("removeStart")).apply("abc", "a"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeStart")).apply("abc", "b"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeStart")).apply("abc", "c"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeStart")).apply("abc", "d"));
+        assertEquals("bc", ((AdaptFunction) proto.get("removeStart")).apply("abc", "a"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeStart")).apply("abc", "b"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeStart")).apply("abc", "c"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeStart")).apply("abc", "d"));
 
-        assertEquals("ab", ((FuncFunctionDeclare) proto.get("removeEnd")).apply("abc", "c"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeEnd")).apply("abc", "b"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeEnd")).apply("abc", "a"));
-        assertEquals("abc", ((FuncFunctionDeclare) proto.get("removeEnd")).apply("abc", "d"));
+        assertEquals("ab", ((AdaptFunction) proto.get("removeEnd")).apply("abc", "c"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeEnd")).apply("abc", "b"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeEnd")).apply("abc", "a"));
+        assertEquals("abc", ((AdaptFunction) proto.get("removeEnd")).apply("abc", "d"));
 
-        assertEquals("a", ((FuncFunctionDeclare) proto.get("before")).apply("abc", "b"));
-        assertEquals("ab", ((FuncFunctionDeclare) proto.get("before")).apply("abc", "c"));
+        assertEquals("a", ((AdaptFunction) proto.get("before")).apply("abc", "b"));
+        assertEquals("ab", ((AdaptFunction) proto.get("before")).apply("abc", "c"));
 
-        assertEquals("bc", ((FuncFunctionDeclare) proto.get("after")).apply("abc", "a"));
-        assertEquals("c", ((FuncFunctionDeclare) proto.get("after")).apply("abc", "b"));
+        assertEquals("bc", ((AdaptFunction) proto.get("after")).apply("abc", "a"));
+        assertEquals("c", ((AdaptFunction) proto.get("after")).apply("abc", "b"));
 
         assertArrayEquals(
                 new String[]{"a", "b", "c"},
-                (String[]) ((FuncFunctionDeclare) proto.get("split")).apply("a,b,c", ",")
+                (String[]) ((AdaptFunction) proto.get("split")).apply("a,b,c", ",")
         );
-        assertEquals("adc", ((FuncFunctionDeclare) proto.get("replace")).apply("abc", "b", "d"));
+        assertEquals("adc", ((AdaptFunction) proto.get("replace")).apply("abc", "b", "d"));
     }
 
 }

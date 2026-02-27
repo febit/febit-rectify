@@ -45,31 +45,60 @@ import org.febit.lang.func.ThrowingFunction4;
 import org.febit.lang.func.ThrowingFunction5;
 import org.febit.lang.func.ThrowingRunnable;
 import org.febit.lang.func.ThrowingSupplier;
+import org.febit.lang.util.ConvertUtils;
 import org.febit.rectify.lib.IFunctions;
 import org.febit.rectify.lib.IProto;
 import org.febit.wit.exception.UncheckedException;
-import org.febit.wit.runtime.function.FunctionDeclare;
+import org.febit.wit.runtime.WitFunction;
 import org.febit.wit.util.ClassUtils;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.type.TypeFactory;
-import tools.jackson.databind.util.LookupCache;
 import tools.jackson.databind.util.SimpleLookupCache;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static java.util.Map.entry;
 
 @UtilityClass
 public class FuncUtils {
-    private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance().withCache(createCache());
 
-    private static LookupCache<Object, JavaType> createCache() {
-        return new SimpleLookupCache<>(16, 128);
-    }
+    private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance()
+            .withCache(new SimpleLookupCache<>(16, 128));
+
+    private static final Map<Class<?>, Function<@Nullable Object, @Nullable Object>> CONVERTERS = Map.ofEntries(
+            entry(Boolean.class, ConvertUtils::toBoolean),
+            entry(String.class, ConvertUtils::toString),
+            entry(Byte.class, ConvertUtils::toByte),
+            entry(Short.class, ConvertUtils::toShort),
+            entry(Integer.class, Args::asInt),
+            entry(Long.class, ConvertUtils::toLong),
+            entry(Float.class, ConvertUtils::toFloat),
+            entry(Double.class, ConvertUtils::toDouble),
+            entry(BigDecimal.class, ConvertUtils::toBigDecimal),
+            entry(Temporal.class, ConvertUtils::toTemporal),
+            entry(LocalDate.class, ConvertUtils::toDate),
+            entry(LocalTime.class, ConvertUtils::toTime),
+            entry(LocalDateTime.class, ConvertUtils::toDateTime),
+            entry(Instant.class, ConvertUtils::toInstant),
+            entry(ZonedDateTime.class, ConvertUtils::toZonedDateTime),
+            entry(ZoneOffset.class, ConvertUtils::toZone),
+            entry(Object.class, Function.identity())
+    );
 
     public static void scanConstFields(Class<?> cls, BiConsumer<String, Object> consumer) {
         Stream.of(cls.getFields())
@@ -119,7 +148,7 @@ public class FuncUtils {
             return null;
         }
         if (original instanceof IFunction f) {
-            return toFunctionDeclare(f, field);
+            return toWitFunction(f, field);
         }
         if (original instanceof IProto proto) {
             return scanProto(proto);
@@ -132,33 +161,33 @@ public class FuncUtils {
             "rawtypes",
             "unchecked"
     })
-    private static FunctionDeclare toFunctionDeclare(IFunction func, Field field) {
+    private static WitFunction.Constable toWitFunction(IFunction func, Field field) {
         if (func instanceof Function0 f) {
-            return (c, args) -> f.apply();
+            return args -> f.apply();
         }
         if (func instanceof Consumer0 f) {
-            return (c, args) -> {
+            return args -> {
                 f.accept();
                 return null;
             };
         }
         if (func instanceof ThrowingFunction0 f) {
-            return (c, args) -> Unchecked.func0(f).apply();
+            return args -> Unchecked.func0(f).apply();
         }
         if (func instanceof ThrowingConsumer0 f) {
-            return (c, args) -> {
+            return args -> {
                 Unchecked.consumer0(f).accept();
                 return null;
             };
         }
         if (func instanceof ThrowingCallable f) {
-            return (c, args) -> Unchecked.callable(f).call();
+            return args -> Unchecked.callable(f).call();
         }
         if (func instanceof ThrowingSupplier f) {
-            return (c, args) -> Unchecked.supplier(f).get();
+            return args -> Unchecked.supplier(f).get();
         }
         if (func instanceof ThrowingRunnable f) {
-            return (c, args) -> {
+            return args -> {
                 Unchecked.runnable(f).run();
                 return null;
             };
@@ -166,66 +195,212 @@ public class FuncUtils {
 
         var javaType = TYPE_FACTORY.constructType(field.getGenericType());
         if (func instanceof Function1 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Function2 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Function3 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Function4 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Function5 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Consumer1 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Consumer2 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Consumer3 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Consumer4 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof Consumer5 f) {
-            return FuncFunctionDeclare.of(f, javaType);
+            return adapt(f, javaType);
         }
         if (func instanceof ThrowingConsumer1 f) {
-            return FuncFunctionDeclare.of(Unchecked.consumer1(f), javaType);
+            return adapt(Unchecked.consumer1(f), javaType);
         }
         if (func instanceof ThrowingConsumer2 f) {
-            return FuncFunctionDeclare.of(Unchecked.consumer2(f), javaType);
+            return adapt(Unchecked.consumer2(f), javaType);
         }
         if (func instanceof ThrowingConsumer3 f) {
-            return FuncFunctionDeclare.of(Unchecked.consumer3(f), javaType);
+            return adapt(Unchecked.consumer3(f), javaType);
         }
         if (func instanceof ThrowingConsumer4 f) {
-            return FuncFunctionDeclare.of(Unchecked.consumer4(f), javaType);
+            return adapt(Unchecked.consumer4(f), javaType);
         }
         if (func instanceof ThrowingConsumer5 f) {
-            return FuncFunctionDeclare.of(Unchecked.consumer5(f), javaType);
+            return adapt(Unchecked.consumer5(f), javaType);
         }
         if (func instanceof ThrowingFunction1 f) {
-            return FuncFunctionDeclare.of(Unchecked.func1(f), javaType);
+            return adapt(Unchecked.func1(f), javaType);
         }
         if (func instanceof ThrowingFunction2 f) {
-            return FuncFunctionDeclare.of(Unchecked.func2(f), javaType);
+            return adapt(Unchecked.func2(f), javaType);
         }
         if (func instanceof ThrowingFunction3 f) {
-            return FuncFunctionDeclare.of(Unchecked.func3(f), javaType);
+            return adapt(Unchecked.func3(f), javaType);
         }
         if (func instanceof ThrowingFunction4 f) {
-            return FuncFunctionDeclare.of(Unchecked.func4(f), javaType);
+            return adapt(Unchecked.func4(f), javaType);
         }
         if (func instanceof ThrowingFunction5 f) {
-            return FuncFunctionDeclare.of(Unchecked.func5(f), javaType);
+            return adapt(Unchecked.func5(f), javaType);
         }
         throw new IllegalArgumentException("Unsupported function: " + func.getClass());
     }
 
+    @SuppressWarnings({"unchecked", "SameParameterValue"})
+    private static Function<@Nullable Object, @Nullable Object>[] resolveParamConverters(JavaType[] types, int start, int end) {
+        if (start < 0) {
+            throw new IllegalArgumentException("start < 0");
+        }
+        if (end > types.length) {
+            throw new IllegalArgumentException("end > types.length");
+        }
+        if (end < start) {
+            throw new IllegalArgumentException("end < start");
+        }
+        var size = end - start;
+        var converters = new Function[size];
+        for (int i = start; i < end; i++) {
+            converters[i] = converter(types[i]);
+        }
+        return converters;
+    }
+
+    private static Function<@Nullable Object, @Nullable Object> converter(JavaType type) {
+        var cls = type.getRawClass();
+        var converter = CONVERTERS.get(cls == null ? Object.class : cls);
+        if (converter == null) {
+            throw new IllegalArgumentException("Unsupported type: " + type);
+        }
+        return converter;
+    }
+
+    private static AdaptFunction adapt(
+            Function1<@Nullable Object, ?> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Function1.class),
+                0, 1
+        );
+        return AdaptFunction.create(paramTypes, args -> func.apply(args[0]));
+    }
+
+    private static AdaptFunction adapt(
+            Function2<@Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Function2.class),
+                0, 2
+        );
+        return AdaptFunction.create(paramTypes, args -> func.apply(args[0], args[1]));
+    }
+
+    private static AdaptFunction adapt(
+            Function3<@Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Function3.class),
+                0, 3
+        );
+        return AdaptFunction.create(paramTypes, args -> func.apply(args[0], args[1], args[2]));
+    }
+
+    private static AdaptFunction adapt(
+            Function4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Function4.class),
+                0, 4
+        );
+        return AdaptFunction.create(paramTypes, args -> func.apply(args[0], args[1], args[2], args[3]));
+    }
+
+    private static AdaptFunction adapt(
+            Function5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Function5.class),
+                0, 5
+        );
+        return AdaptFunction.create(paramTypes, args -> func.apply(args[0], args[1], args[2], args[3], args[4]));
+    }
+
+    private static AdaptFunction adapt(Consumer1<@Nullable Object> func, JavaType javaType) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Consumer1.class),
+                0, 1
+        );
+        return AdaptFunction.create(paramTypes, args -> {
+            func.accept(args[0]);
+            return null;
+        });
+    }
+
+    private static AdaptFunction adapt(Consumer2<@Nullable Object, @Nullable Object> func, JavaType javaType) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Consumer2.class),
+                0, 2
+        );
+        return AdaptFunction.create(paramTypes, args -> {
+            func.accept(args[0], args[1]);
+            return null;
+        });
+    }
+
+    private static AdaptFunction adapt(
+            Consumer3<@Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Consumer3.class),
+                0, 3
+        );
+        return AdaptFunction.create(paramTypes, args -> {
+            func.accept(args[0], args[1], args[2]);
+            return null;
+        });
+    }
+
+    private static AdaptFunction adapt(
+            Consumer4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Consumer4.class),
+                0, 4
+        );
+        return AdaptFunction.create(paramTypes, args -> {
+            func.accept(args[0], args[1], args[2], args[3]);
+            return null;
+        });
+    }
+
+    private static AdaptFunction adapt(
+            Consumer5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
+            JavaType javaType
+    ) {
+        var paramTypes = resolveParamConverters(
+                javaType.findTypeParameters(Consumer5.class),
+                0, 5
+        );
+        return AdaptFunction.create(paramTypes, args -> {
+            func.accept(args[0], args[1], args[2], args[3], args[4]);
+            return null;
+        });
+    }
 }

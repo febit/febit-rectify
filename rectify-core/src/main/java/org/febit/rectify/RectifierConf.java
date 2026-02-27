@@ -29,7 +29,7 @@ import org.febit.rectify.wit.ScriptBuilder;
 import org.febit.rectify.wit.SerializableBreakpointHandler;
 import org.febit.wit.Script;
 import org.febit.wit.Wit;
-import org.febit.wit.exception.SourceNotFoundException;
+import org.febit.wit.exception.NoSuchSourceException;
 import org.febit.wit.io.DiscardOut;
 import org.febit.wit.loader.Loaders;
 import org.febit.wit.loader.impl.StringLoader;
@@ -220,7 +220,7 @@ public class RectifierConf implements Serializable {
             script = WitLazyHolder.WIT.script(code);
             // fast-fail check
             script.reload();
-        } catch (SourceNotFoundException ex) {
+        } catch (NoSuchSourceException ex) {
             throw new UncheckedIOException("Failed to create script.", ex);
         }
 
@@ -243,7 +243,7 @@ public class RectifierConf implements Serializable {
         hints.add(ScriptBuilder.VAR_CURR_FIELD);
 
         // globals
-        var staticHeaps = script.wit().staticHeaps();
+        var staticHeaps = script.engine().staticHeaps();
         staticHeaps.constants().each((k, v) -> hints.add(k));
         staticHeaps.variables().each((k, v) -> hints.add(k));
 

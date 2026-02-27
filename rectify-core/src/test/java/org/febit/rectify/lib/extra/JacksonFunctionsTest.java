@@ -15,7 +15,7 @@
  */
 package org.febit.rectify.lib.extra;
 
-import org.febit.rectify.util.FuncFunctionDeclare;
+import org.febit.rectify.util.AdaptFunction;
 import org.febit.rectify.util.FuncUtils;
 import org.junit.jupiter.api.Test;
 
@@ -44,25 +44,25 @@ class JacksonFunctionsTest {
 
     @Test
     void basic() {
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("stringify"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("prettyStringify"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("toMap"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("toList"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("parse"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("parseAsMap"));
-        assertInstanceOf(FuncFunctionDeclare.class, json.get("parseAsList"));
+        assertInstanceOf(AdaptFunction.class, json.get("stringify"));
+        assertInstanceOf(AdaptFunction.class, json.get("prettyStringify"));
+        assertInstanceOf(AdaptFunction.class, json.get("toMap"));
+        assertInstanceOf(AdaptFunction.class, json.get("toList"));
+        assertInstanceOf(AdaptFunction.class, json.get("parse"));
+        assertInstanceOf(AdaptFunction.class, json.get("parseAsMap"));
+        assertInstanceOf(AdaptFunction.class, json.get("parseAsList"));
 
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("stringify"));
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("toMap"));
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("toList"));
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parse"));
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parseAsMap"));
-        assertInstanceOf(FuncFunctionDeclare.class, yaml.get("parseAsList"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("stringify"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("toMap"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("toList"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("parse"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("parseAsMap"));
+        assertInstanceOf(AdaptFunction.class, yaml.get("parseAsList"));
     }
 
     @Test
     void json() {
-        FuncFunctionDeclare method;
+        AdaptFunction method;
 
         var map = Map.of("id", 123);
         var mapString = "{\"id\":123}";
@@ -72,33 +72,33 @@ class JacksonFunctionsTest {
         var listString = "[\"id\",123]";
         var listPrettyString = "[\n  \"id\",\n  123\n]";
 
-        method = (FuncFunctionDeclare) json.get("stringify");
+        method = (AdaptFunction) json.get("stringify");
         assertEquals(mapString, method.apply(map));
 
-        method = (FuncFunctionDeclare) json.get("prettyStringify");
+        method = (AdaptFunction) json.get("prettyStringify");
         assertEquals(mapPrettyString, method.apply(map));
         assertEquals(listPrettyString, method.apply(list));
 
-        method = (FuncFunctionDeclare) json.get("toMap");
+        method = (AdaptFunction) json.get("toMap");
         assertEquals(map, method.apply(map));
 
-        method = (FuncFunctionDeclare) json.get("toList");
+        method = (AdaptFunction) json.get("toList");
         assertEquals(list, method.apply(list));
 
-        method = (FuncFunctionDeclare) json.get("parse");
+        method = (AdaptFunction) json.get("parse");
         assertEquals(map, method.apply(mapString));
         assertEquals(list, method.apply(listString));
 
-        method = (FuncFunctionDeclare) json.get("parseAsMap");
+        method = (AdaptFunction) json.get("parseAsMap");
         assertEquals(map, method.apply(mapString));
 
-        method = (FuncFunctionDeclare) json.get("parseAsList");
+        method = (AdaptFunction) json.get("parseAsList");
         assertEquals(list, method.apply(listString));
     }
 
     @Test
     void yaml() {
-        FuncFunctionDeclare method;
+        AdaptFunction method;
 
         var map = Map.of("id", 123);
         var mapString = "---\nid: 123\n";
@@ -106,23 +106,23 @@ class JacksonFunctionsTest {
         var list = List.of("id", 123);
         var listString = "- id\n- 123\n";
 
-        method = (FuncFunctionDeclare) yaml.get("stringify");
+        method = (AdaptFunction) yaml.get("stringify");
         assertEquals(mapString, method.apply(map));
 
-        method = (FuncFunctionDeclare) yaml.get("toMap");
+        method = (AdaptFunction) yaml.get("toMap");
         assertEquals(map, method.apply(map));
 
-        method = (FuncFunctionDeclare) yaml.get("toList");
+        method = (AdaptFunction) yaml.get("toList");
         assertEquals(list, method.apply(list));
 
-        method = (FuncFunctionDeclare) yaml.get("parse");
+        method = (AdaptFunction) yaml.get("parse");
         assertEquals(map, method.apply(mapString));
         assertEquals(list, method.apply(listString));
 
-        method = (FuncFunctionDeclare) yaml.get("parseAsMap");
+        method = (AdaptFunction) yaml.get("parseAsMap");
         assertEquals(map, method.apply(mapString));
 
-        method = (FuncFunctionDeclare) yaml.get("parseAsList");
+        method = (AdaptFunction) yaml.get("parseAsList");
         assertEquals(list, method.apply(listString));
     }
 
