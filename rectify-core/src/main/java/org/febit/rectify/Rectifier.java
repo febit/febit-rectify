@@ -25,6 +25,10 @@ import java.util.function.Function;
 
 public interface Rectifier<I, O> {
 
+    Schema schema();
+
+    List<String> hints();
+
     /**
      * Process input one by one.
      *
@@ -50,10 +54,6 @@ public interface Rectifier<I, O> {
         process(input, (o, raw) -> onSucceed.accept(o), (reason, raw) -> onFailed.accept(reason));
     }
 
-    Schema schema();
-
-    List<String> getHints();
-
     default <S> Rectifier<S, O> with(SourceFormat<S, I> sourceFormat) {
         return Rectifiers.formatted(this, sourceFormat);
     }
@@ -72,8 +72,8 @@ public interface Rectifier<I, O> {
         }
 
         @Override
-        default List<String> getHints() {
-            return delegate().getHints();
+        default List<String> hints() {
+            return delegate().hints();
         }
     }
 

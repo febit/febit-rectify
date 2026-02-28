@@ -21,7 +21,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.operators.StreamFlatMap;
 import org.apache.flink.types.Row;
-import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSettings;
 import org.febit.rectify.Rectifiers;
 import org.febit.rectify.SerializableRectifier;
 import org.febit.rectify.SourceFormat;
@@ -42,21 +42,21 @@ public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
         return new FlinkStreamingRectifier<>(rectifier, typeInfo);
     }
 
-    public static <I> FlinkStreamingRectifier<I> create(RectifierConf conf) {
+    public static <I> FlinkStreamingRectifier<I> create(RectifierSettings conf) {
         return new FlinkStreamingRectifier<>(
-                Rectifiers.lazy(() -> conf.build(RowStructSpec.get())),
-                TypeInfoUtils.ofRowType(conf.resolveSchema())
+                Rectifiers.lazy(() -> conf.create(RowStructSpec.get())),
+                TypeInfoUtils.ofRowType(conf.schema())
         );
     }
 
-    public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierConf conf) {
+    public static <I> FlinkStreamingRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierSettings conf) {
         return new FlinkStreamingRectifier<>(
-                Rectifiers.lazy(() -> conf.build(sourceFormat, RowStructSpec.get())),
-                TypeInfoUtils.ofRowType(conf.resolveSchema())
+                Rectifiers.lazy(() -> conf.create(sourceFormat, RowStructSpec.get())),
+                TypeInfoUtils.ofRowType(conf.schema())
         );
     }
 
-    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierConf conf) {
+    public static <I> SingleOutputStreamOperator<Row> operator(DataStream<I> dataStream, RectifierSettings conf) {
         var rectifier = FlinkStreamingRectifier.<I>create(conf);
         return rectifier.operator(dataStream);
     }
@@ -64,7 +64,7 @@ public class FlinkStreamingRectifier<I> extends FlinkRectifier<I> {
     public static <I> SingleOutputStreamOperator<Row> operator(
             DataStream<I> dataStream,
             SourceFormat<I, Object> sourceFormat,
-            RectifierConf conf
+            RectifierSettings conf
     ) {
         var rectifier = create(sourceFormat, conf);
         return rectifier.operator(dataStream);

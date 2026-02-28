@@ -18,11 +18,10 @@ package org.febit.rectify.wit;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
-import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSettings;
 import org.jspecify.annotations.Nullable;
-
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScriptBuilder {
@@ -47,41 +46,41 @@ public class ScriptBuilder {
         char ch;
         for (int i = 0; i < len; i++) {
             ch = str.charAt(i);
-            char replace;
+            char escape;
             switch (ch) {
                 case '\b', '\f' -> {
                     // Ignore ctrl chars
                     continue;
                     // Ignore ctrl chars
                 }
-                case '\n' -> replace = 'n';
-                case '\r' -> replace = 'r';
-                case '\t' -> replace = 't';
-                case '"' -> replace = '"';
-                case '/' -> replace = '/';
-                case '\\' -> replace = '\\';
+                case '\n' -> escape = 'n';
+                case '\r' -> escape = 'r';
+                case '\t' -> escape = 't';
+                case '"' -> escape = '"';
+                case '/' -> escape = '/';
+                case '\\' -> escape = '\\';
                 default -> {
                     buf.append(ch);
                     continue;
                 }
             }
-            buf.append('\\').append(replace);
+            buf.append('\\').append(escape);
         }
         buf.append('"');
         return buf.toString();
     }
 
-    public static String build(RectifierConf conf, boolean debug) {
+    public static String build(RectifierSettings conf, boolean debug) {
         return build(new Context(conf, debug));
     }
 
     public static String build(final Context context) {
-        final RectifierConf conf = context.getConf();
+        var settings = context.settings();
 
         // Vars
         context.append("const ").append(VAR_SCHEMA_NAME)
                 .append(" = ")
-                .appendStringValue(conf.getName())
+                .appendStringValue(settings.name())
                 .append(";\n");
         context.append("\n"
                 + "// -- Internal Vars:\n"
@@ -95,14 +94,14 @@ public class ScriptBuilder {
         context.append("\n"
                 + "// -- Global Segments:\n"
         );
-        for (RectifierConf.Segment segment : conf.getFrontSegments()) {
+        for (var setup : settings.setups()) {
             context.append("//-\n");
-            segment.appendTo(context);
+            setup.render(context);
             context.append(";\n");
         }
 
         // Columns
-        final List<RectifierConf.Column> columns = conf.getColumns();
+        var columns = settings.columns();
         context.append("\n// -- Columns\n");
         for (int i = 0; i < columns.size(); i++) {
             appendColumn(context, columns.get(i), i);
@@ -136,10 +135,10 @@ public class ScriptBuilder {
         context.append(");\n");
     }
 
-    public static void appendColumn(final Context context, final RectifierConf.Column column,
+    public static void appendColumn(final Context context, final RectifierSettings.Column column,
                                     final int index) {
         var escapedName = escapeForString(column.name());
-        var expr = column.expr();
+        var expr = column.expression();
         if (StringUtils.isBlank(expr)) {
             expr = VAR_INPUT + '[' + escapedName + ']';
         }
@@ -152,23 +151,25 @@ public class ScriptBuilder {
                 .append(expr)
                 .append(";\n");
 
-        var checkExpr = column.checkExpr();
-        if (StringUtils.isNotEmpty(checkExpr)) {
-            appendFilter(context, checkExpr, index, column.name());
+        var validation = column.validation();
+        if (StringUtils.isNotEmpty(validation)) {
+            appendFilter(context, validation, index, column.name());
         }
     }
 
+    @Accessors(fluent = true)
     public static class Context {
 
-        private final boolean debug;
+        private final boolean debugMode;
         private final StringBuilder buf;
         @Getter
-        private final RectifierConf conf;
+        private final RectifierSettings settings;
+
         private int filterCounter;
 
-        public Context(RectifierConf conf, boolean debug) {
-            this.debug = debug;
-            this.conf = conf;
+        public Context(RectifierSettings settings, boolean debugMode) {
+            this.debugMode = debugMode;
+            this.settings = settings;
             this.buf = new StringBuilder(1024);
         }
 
@@ -196,7 +197,7 @@ public class ScriptBuilder {
         }
 
         public boolean isDebugEnabled() {
-            return debug;
+            return debugMode;
         }
 
         @Override

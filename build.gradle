@@ -19,7 +19,8 @@ allprojects {
 
   repositories {
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://projectlombok.org/edge-releases' }
+
   }
 
   standardMavenPublish {
@@ -31,7 +32,6 @@ allprojects {
   codegenModule {
     defaultTemplate = fromFile("$rootDir/etc/module.java.tmpl")
   }
-
 
   license {
     mapping {
@@ -55,6 +55,10 @@ configure(subprojects.findAll {
     targetCompatibility = JavaVersion.VERSION_17
 
     withSourcesJar()
+  }
+
+  lombok {
+    version = 'edge-SNAPSHOT'
   }
 
   tasks.named("licenseMain").configure {

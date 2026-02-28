@@ -24,7 +24,7 @@ import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.schema.ScannableTable;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.util.Source;
-import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSettings;
 import org.febit.rectify.SourceFormat;
 import org.jspecify.annotations.Nullable;
 
@@ -35,15 +35,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class RectifyTable extends AbstractTable implements ScannableTable {
 
     protected final Source source;
-    protected final RectifierConf conf;
+    protected final RectifierSettings conf;
     protected final SourceFormat<String, Object> sourceFormat;
 
     @Nullable
     protected RelDataType rowTypeCaching;
 
-    RectifyTable(Source source, RectifierConf rectifierConf, SourceFormat<String, Object> sourceFormat) {
+    RectifyTable(Source source, RectifierSettings rectifierConfig, SourceFormat<String, Object> sourceFormat) {
         this.source = source;
-        this.conf = rectifierConf;
+        this.conf = rectifierConfig;
         this.sourceFormat = sourceFormat;
     }
 
@@ -53,7 +53,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
         if (type != null) {
             return rowTypeCaching;
         }
-        type = DataTypeUtils.toDataType(conf.resolveSchema(), typeFactory);
+        type = DataTypeUtils.toDataType(conf.schema(), typeFactory);
         rowTypeCaching = type;
         return type;
     }

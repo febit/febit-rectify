@@ -21,7 +21,7 @@ import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.febit.lang.modeler.Schema;
 import org.febit.lang.util.SingleElementConsumer;
-import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSettings;
 import org.febit.rectify.SourceFormat;
 import org.jspecify.annotations.Nullable;
 
@@ -61,7 +61,7 @@ public class RectifierDeserializationSchema implements DeserializationSchema<Row
         return this.rectifier.getRectifierSchema();
     }
 
-    public static RectifierDeserializationSchema of(SourceFormat<byte[], Object> sourceFormat, RectifierConf conf) {
+    public static RectifierDeserializationSchema of(SourceFormat<byte[], Object> sourceFormat, RectifierSettings conf) {
         return of(FlinkRectifier.create(sourceFormat, conf));
     }
 

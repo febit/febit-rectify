@@ -44,19 +44,19 @@ public class BasicFunctions implements IFunctions {
 
     @Nullable
     private static Object checkFilter(@Nullable Object isAccept) {
-        // Pass, if expr returns NULL
+        // Pass, if expression returns NULL
         if (isAccept == null) {
             return null;
         }
         if (isAccept instanceof Boolean bool) {
-            // Pass, if expr is TRUE
+            // Pass, if expression is TRUE
             if (bool) {
                 return null;
             }
-            // Exit, if expr is FALSE
+            // Exit, if expression is FALSE
             return exit(null);
         }
-        // Exit, if expr is STRING, as reason.
+        // Exit, if expression is STRING, as reason.
         if (isAccept instanceof String str) {
             return exit(str);
         }

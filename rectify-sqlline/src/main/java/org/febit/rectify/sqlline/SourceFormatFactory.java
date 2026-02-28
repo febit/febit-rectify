@@ -15,24 +15,27 @@
  */
 package org.febit.rectify.sqlline;
 
+import lombok.experimental.UtilityClass;
+import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.SourceFormat;
 import org.febit.rectify.format.AccessLogSourceFormat;
 import org.febit.rectify.format.JsonSourceFormat;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.Objects;
 
-public class SourceFormatProvider {
+@UtilityClass
+public class SourceFormatFactory {
 
-    public static SourceFormat<String, Object> create(String name, Map<String, Object> props) {
-        return switch (name) {
+    public static SourceFormat<String, Object> create(
+            TableSettings.Source source) {
+        return switch (source.format()) {
             case "json" -> new JsonSourceFormat();
             case "access" -> {
-                @SuppressWarnings({"unchecked"})
-                var columns = (Collection<String>) props.get("columns");
-                yield AccessLogSourceFormat.create(columns);
+                var options = JacksonUtils.to(source.properties(), AccessLogSourceFormat.Options.class);
+                Objects.requireNonNull(options, "Properties is required for access log format");
+                yield AccessLogSourceFormat.create(options);
             }
-            default -> throw new IllegalArgumentException("Unsupported format: " + name);
+            default -> throw new IllegalArgumentException("Unsupported format: " + source.format());
         };
     }
 

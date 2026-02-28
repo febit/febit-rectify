@@ -17,6 +17,8 @@ package org.febit.rectify.format;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Singular;
+import lombok.extern.jackson.Jacksonized;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
@@ -24,10 +26,9 @@ import org.febit.rectify.util.IndexedArray;
 import org.febit.rectify.util.Indexer;
 import org.jspecify.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.List;
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,14 +36,24 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
     private final Indexer<String> indexer;
 
-    public static AccessLogSourceFormat create(String... columns) {
-        return create(Arrays.asList(columns));
-    }
-
-    public static AccessLogSourceFormat create(Collection<String> columns) {
-        Objects.requireNonNull(columns, "Columns is required to create a AccessLogSourceFormat");
+    public static AccessLogSourceFormat create(Options options) {
+        var columns = options.columns();
+        if (columns.isEmpty()) {
+            throw new IllegalArgumentException("Columns is required to create a AccessLogSourceFormat");
+        }
         var indexer = Indexer.of(columns);
         return new AccessLogSourceFormat(indexer);
+    }
+
+    @Jacksonized
+    @lombok.Builder(
+            builderClassName = "Builder",
+            toBuilder = true
+    )
+    public record Options(
+            @Singular
+            List<String> columns
+    ) implements Serializable {
     }
 
     @Nullable

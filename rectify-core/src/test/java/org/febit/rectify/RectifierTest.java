@@ -36,11 +36,11 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 class RectifierTest {
 
-    final RectifierConf conf = RectifierConf.create()
+    final RectifierSettings settings = RectifierSettings.builder()
             // Named your schema
             .name("Demo")
             // Global code
-            .frontSegment("""
+            .setup("""
                     var isTruly = obj -> {
                        return obj == true
                                   || obj == "on" || obj == "true"
@@ -49,21 +49,40 @@ class RectifierTest {
                     """)
             // Global filters:
             //    Notice: only a Boolean.FALSE or a non-null String (reason) can ban current row, others pass.
-            .frontFilter("$.status > 0")
+            .filter("$.status > 0")
             //    Recommend: give a reason if falsely, `||` is logic OR (just what it means to in JS, feel free!).
-            .frontFilter("$.status < 100 || \"status should <100\"")
+            .filter("$.status < 100 || \"status should <100\"")
             // Global code and filters, Will be executed in defined order.
-            .frontSegment("var isEven = $.status % 2 == 0 ")
-            .frontSegment("var statusCopy = $.status")
-            .frontFilter("isEven || \"status is not even\"")
+            .setup("var isEven = $.status % 2 == 0 ")
+            .setup("var statusCopy = $.status")
+            .filter("isEven || \"status is not even\"")
             // Columns
-            .column("long", "id", "$.id")
-            // column with check expression
-            .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
-            .column("int", "status", "$.status")
+
+            .column()
+            .name("id")
+            .type("long")
+            .expression("$.id")
+            .commit()
+
+            .column()
+            .name("enable")
+            .comment("The enable column, should be true or truthy")
+            .type("boolean")
+            // If expression is not specified, the default value is `$.{columnName}`
+            //   So here the default expression is `.expression("$.enable")`
+            .validation("$$ || \"enable is falsely\"")
+            .commit()
+
+            .column()
+            .type("string")
+            .name("content")
+            .expression("\"prefix:\" + $.content")
+            .commit()
+
+            .column("int", "status", null)
             .column("boolean", "isEven", "isEven")
             .column("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
-            .column("string", "content", "\"prefix:\"+$.content");
+            .build();
 
     private static String buildInput(
             Object id,
@@ -81,9 +100,9 @@ class RectifierTest {
     }
 
     @Test
-    void getHints() {
-        var rectifier = conf.build();
-        List<String> hints = rectifier.getHints();
+    void hints() {
+        var rectifier = settings.create();
+        List<String> hints = rectifier.hints();
 
         assertFalse(hints.isEmpty());
         assertFalse(hints.contains("SomeoneAbsent"));
@@ -103,7 +122,7 @@ class RectifierTest {
 
     @Test
     void testBaseInfo() {
-        var rectifier = conf.build()
+        var rectifier = settings.create()
                 .with(new JsonSourceFormat());
 
         Schema schema = rectifier.schema();
@@ -111,12 +130,12 @@ class RectifierTest {
         assertEquals(6, schema.fieldsSize());
         assertEquals(0, schema.field("id").pos());
         assertEquals(1, schema.field("enable").pos());
-        assertEquals(2, schema.field("status").pos());
+        assertEquals(3, schema.field("status").pos());
     }
 
     @Test
     void process() {
-        var rectifier = conf.build()
+        var rectifier = settings.create()
                 .with(new JsonSourceFormat());
 
         SingleElementRectifierSink<Map<String, Object>> consumer;
@@ -161,7 +180,7 @@ class RectifierTest {
     @Test
     void testFilter() {
 
-        var rectifier = conf.build()
+        var rectifier = settings.create()
                 .with(new JsonSourceFormat());
         SingleElementRectifierSink<Map<String, Object>> consumer;
         consumer = new SingleElementRectifierSink<>();
@@ -219,19 +238,19 @@ class RectifierTest {
 
     @Test
     void processInDebugMode() {
-
         var breakpoints = new ArrayList<Tuple2<FilterBreakpoint, Object>>();
-        conf.breakpointHandler((label, context, statement, val) -> {
-            if (label instanceof FilterBreakpoint breakpoint) {
-                breakpoints.add(Tuple2.ofNullable(breakpoint, val));
-                if ("enable".equals(breakpoint.field())) {
-                    assertEquals(1, context.variables().get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
-                }
-            }
-        });
-
-        var rectifier = conf.build().with(new JsonSourceFormat());
-        conf.setBreakpointHandler(null);
+        var rectifier = settings.toBuilder()
+                .breakpointHandler((label, context, statement, val) -> {
+                    if (label instanceof FilterBreakpoint breakpoint) {
+                        breakpoints.add(Tuple2.ofNullable(breakpoint, val));
+                        if ("enable".equals(breakpoint.field())) {
+                            assertEquals(1, context.variables().get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
+                        }
+                    }
+                })
+                .build()
+                .create()
+                .with(new JsonSourceFormat());
 
         SingleElementRectifierSink<Map<String, Object>> consumer;
         Tuple2<FilterBreakpoint, Object> breakpoint;

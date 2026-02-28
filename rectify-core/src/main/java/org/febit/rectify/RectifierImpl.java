@@ -40,10 +40,10 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class RectifierImpl<I, O> implements Rectifier<I, O> {
 
-    protected final Schema schema;
-    protected final Modeler outputModeler;
-    protected final Supplier<List<String>> hints;
-    protected final Function<Vars, Context> script;
+    private final Schema schema;
+    private final Modeler outputModeler;
+    private final Supplier<List<String>> hints;
+    private final Function<Vars, Context> script;
 
     /**
      * Get script hints.
@@ -51,7 +51,7 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
      * @return hints string list
      */
     @Override
-    public List<String> getHints() {
+    public List<String> hints() {
         return hints.get();
     }
 

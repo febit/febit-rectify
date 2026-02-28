@@ -16,7 +16,7 @@
 package org.febit.rectify.flink;
 
 import org.febit.lang.util.JacksonUtils;
-import org.febit.rectify.RectifierConf;
+import org.febit.rectify.RectifierSettings;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,14 +24,15 @@ import java.util.Map;
 
 class FlinkRectifierTests {
 
-    static final RectifierConf CONF = RectifierConf.create()
+    static final RectifierSettings CONF = RectifierSettings.builder()
             .name("Demo")
-            .frontFilter("$.status > 0")
-            .frontFilter("$.status < 100 || \"status should <100\"")
+            .filter("$.status > 0")
+            .filter("$.status < 100 || \"status should <100\"")
             .column("long", "id", "$.id")
             .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
             .column("int", "status", "$.status")
-            .column("string", "content", "\"prefix:\"+$.content");
+            .column("string", "content", "\"prefix:\"+$.content")
+            .build();
 
     static final List<String> SOURCE = Arrays.asList(
             buildInput(6, true, 6, "666"),
