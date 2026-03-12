@@ -16,7 +16,7 @@
 package org.febit.rectify.lib.extra;
 
 import org.febit.lang.func.Function1;
-import org.febit.rectify.lib.IFunctions;
+import org.febit.rectify.lib.ILib;
 import org.febit.rectify.lib.IProto;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JavaType;
@@ -33,7 +33,7 @@ import static org.febit.lang.util.JacksonUtils.yaml;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class JacksonFunctions implements IFunctions {
+public class JacksonLib implements ILib {
 
     private static final JavaType T_OBJECT = TYPES.constructType(Object.class);
     private static final JavaType TYPE_LIST = TYPES

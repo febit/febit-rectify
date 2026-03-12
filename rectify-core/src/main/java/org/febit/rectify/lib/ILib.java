@@ -16,12 +16,11 @@
 package org.febit.rectify.lib;
 
 import org.febit.rectify.RectifierWitModule;
-import org.febit.rectify.util.FuncUtils;
 import org.febit.wit.Wit;
 
 import java.lang.annotation.*;
 
-public interface IFunctions extends RectifierWitModule {
+public interface ILib extends RectifierWitModule {
 
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
@@ -34,6 +33,6 @@ public interface IFunctions extends RectifierWitModule {
 
     @Override
     default void apply(Wit engine) {
-        FuncUtils.scanConstFields(getClass(), engine.staticHeaps().constants()::set);
+        LibUtils.collect(getClass(), engine.staticHeaps().constants()::set);
     }
 }

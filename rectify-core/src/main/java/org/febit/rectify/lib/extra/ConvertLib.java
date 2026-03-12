@@ -17,7 +17,7 @@ package org.febit.rectify.lib.extra;
 
 import org.febit.lang.func.Function1;
 import org.febit.lang.util.ConvertUtils;
-import org.febit.rectify.lib.IFunctions;
+import org.febit.rectify.lib.ILib;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -26,7 +26,7 @@ import java.math.BigDecimal;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class ConvertFunctions implements IFunctions {
+public class ConvertLib implements ILib {
 
     public static final Function1<@Nullable Object, @Nullable Number> toNumber = ConvertUtils::toNumber;
     public static final Function1<@Nullable Object, @Nullable Byte> toByte = ConvertUtils::toByte;

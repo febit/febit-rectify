@@ -22,8 +22,8 @@ import lombok.extern.jackson.Jacksonized;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.util.IndexedArray;
 import org.febit.rectify.util.Indexer;
+import org.febit.rectify.util.MappedArray;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
@@ -101,6 +101,6 @@ public class AccessLogSourceFormat implements SourceFormat<String, Object> {
         if (values.length == 0) {
             return;
         }
-        sink.accept(IndexedArray.of(indexer, values));
+        sink.accept(MappedArray.of(indexer, values));
     }
 }

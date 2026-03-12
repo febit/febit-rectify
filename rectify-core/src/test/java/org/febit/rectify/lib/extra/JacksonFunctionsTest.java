@@ -15,8 +15,8 @@
  */
 package org.febit.rectify.lib.extra;
 
-import org.febit.rectify.util.AdaptFunction;
-import org.febit.rectify.util.FuncUtils;
+import org.febit.rectify.lib.LibUtils;
+import org.febit.rectify.wit.function.AdaptFunction;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ class JacksonFunctionsTest {
 
     {
         var map = new HashMap<String, Object>();
-        FuncUtils.scanConstFields(JacksonFunctions.class, map::put);
+        LibUtils.collect(JacksonLib.class, map::put);
 
         assertInstanceOf(Map.class, map.get("JSON"));
         assertInstanceOf(Map.class, map.get("YAML"));

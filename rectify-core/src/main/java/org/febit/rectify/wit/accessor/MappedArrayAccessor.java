@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.rectify.wit.accessor;
 
+import org.febit.rectify.util.MappedArray;
 import org.febit.wit.runtime.accessor.Getter;
 import org.febit.wit.runtime.accessor.Setter;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
 
-public class IndexedArrayAccessor
-        implements Getter<IndexedArray>, Setter<IndexedArray>, Serializable {
+public class MappedArrayAccessor
+        implements Getter<MappedArray>, Setter<MappedArray>, Serializable {
 
     @Override
-    public @Nullable Object get(IndexedArray obj, @Nullable Object property) {
+    public @Nullable Object get(MappedArray obj, @Nullable Object property) {
         return obj.get(property);
     }
 
     @Override
-    public void set(IndexedArray obj, @Nullable Object property, @Nullable Object value) {
+    public void set(MappedArray obj, @Nullable Object property, @Nullable Object value) {
         obj.set(property, value);
     }
 }

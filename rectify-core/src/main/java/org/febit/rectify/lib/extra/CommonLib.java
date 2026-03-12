@@ -19,7 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
-import org.febit.rectify.lib.IFunctions;
+import org.febit.rectify.lib.ILib;
+import org.febit.wit.runtime.ALU;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class CommonFunctions implements IFunctions {
+public class CommonLib implements ILib {
 
     private static final AtomicLong NEXT_ID = new AtomicLong(1);
 
@@ -46,7 +47,7 @@ public class CommonFunctions implements IFunctions {
     public static final Function0<Object> newList = ArrayList::new;
     public static final Function0<Object> newSet = HashSet::new;
     public static final Function0<Object> newMap = LinkedHashMap::new;
-    public static final Function1<@Nullable Object, Integer> size = org.febit.wit.util.CollectionUtils::size;
+    public static final Function1<@Nullable Object, Integer> size = ALU::size;
 
     public static final Function1<@Nullable Object, Boolean> isNull = Objects::isNull;
     public static final Function1<@Nullable Object, Boolean> nonNull = Objects::nonNull;

@@ -20,7 +20,7 @@ import org.apache.commons.lang3.Strings;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
 import org.febit.lang.func.Function3;
-import org.febit.rectify.lib.IFunctions;
+import org.febit.rectify.lib.ILib;
 import org.febit.rectify.lib.IProto;
 import org.jspecify.annotations.Nullable;
 
@@ -30,7 +30,7 @@ import java.util.function.Function;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class StringFunctions implements IFunctions {
+public class StringLib implements ILib {
 
     @Alias(value = {"Str", "Strings"}, keepOriginName = false)
     public static final Proto STR = new Proto();

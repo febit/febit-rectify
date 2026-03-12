@@ -48,7 +48,7 @@ public class Indexer<T extends Serializable> implements Iterable<T>, Serializabl
     }
 
     @Nullable
-    public Integer getIndex(@Nullable T key) {
+    public Integer lookup(@Nullable T key) {
         if (key == null) {
             return null;
         }

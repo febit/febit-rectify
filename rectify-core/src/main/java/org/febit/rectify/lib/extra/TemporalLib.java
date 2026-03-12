@@ -19,7 +19,7 @@ import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
 import org.febit.lang.util.ConvertUtils;
-import org.febit.rectify.lib.IFunctions;
+import org.febit.rectify.lib.ILib;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
@@ -38,7 +38,7 @@ import java.time.temporal.TemporalAdjusters;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class TemporalFunctions implements IFunctions {
+public class TemporalLib implements ILib {
 
     /**
      * Namespace: Dates.
@@ -52,9 +52,9 @@ public class TemporalFunctions implements IFunctions {
         public final Function1<Object, @Nullable ZoneOffset> zone = ConvertUtils::toZone;
 
         public final Function2<@Nullable String, @Nullable String, @Nullable Temporal> parse
-                = TemporalFunctions::parse;
+                = TemporalLib::parse;
         public final Function2<@Nullable Temporal, @Nullable String, @Nullable String> format
-                = TemporalFunctions::format;
+                = TemporalLib::format;
 
         public final Function1<@Nullable Object, @Nullable Long> toMillis
                 = ConvertUtils::toMillis;

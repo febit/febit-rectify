@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.rectify.wit.function;
 
 import lombok.RequiredArgsConstructor;
+import org.febit.rectify.util.Args;
 import org.febit.wit.runtime.WitFunction;
 import org.jspecify.annotations.Nullable;
 

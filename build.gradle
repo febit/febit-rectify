@@ -58,7 +58,7 @@ configure(subprojects.findAll {
   }
 
   lombok {
-    version = 'edge-SNAPSHOT'
+    version = '1.18.44'
   }
 
   tasks.named("licenseMain").configure {

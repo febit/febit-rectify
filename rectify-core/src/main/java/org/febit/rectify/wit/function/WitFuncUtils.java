@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.rectify.wit.function;
 
 import lombok.experimental.UtilityClass;
 import org.febit.lang.Unchecked;
@@ -46,17 +46,14 @@ import org.febit.lang.func.ThrowingFunction5;
 import org.febit.lang.func.ThrowingRunnable;
 import org.febit.lang.func.ThrowingSupplier;
 import org.febit.lang.util.ConvertUtils;
-import org.febit.rectify.lib.IFunctions;
-import org.febit.rectify.lib.IProto;
-import org.febit.wit.exception.UncheckedException;
+import org.febit.rectify.util.Args;
 import org.febit.wit.runtime.WitFunction;
-import org.febit.wit.util.ClassUtils;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.type.TypeFactory;
 import tools.jackson.databind.util.SimpleLookupCache;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -65,17 +62,13 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.Map.entry;
 
 @UtilityClass
-public class FuncUtils {
+public class WitFuncUtils {
 
     private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance()
             .withCache(new SimpleLookupCache<>(16, 128));
@@ -100,68 +93,12 @@ public class FuncUtils {
             entry(Object.class, Function.identity())
     );
 
-    public static void scanConstFields(Class<?> cls, BiConsumer<String, Object> consumer) {
-        Stream.of(cls.getFields())
-                .filter(ClassUtils::isStatic)
-                .filter(ClassUtils::isFinal)
-                .forEach(field -> sinkConst(consumer, field, null));
-    }
-
-    public static Map<Object, Object> scanProto(IProto proto) {
-        var map = new HashMap<>();
-        Stream.of(proto.getClass().getFields())
-                .filter(f -> !ClassUtils.isStatic(f))
-                .filter(ClassUtils::isFinal)
-                .forEach(field -> sinkConst(map::put, field, proto));
-        return Collections.unmodifiableMap(new HashMap<>(map));
-    }
-
-    private static void sinkConst(
-            BiConsumer<String, @Nullable Object> consumer,
-            Field field,
-            @Nullable Object owner
-    ) {
-        var fieldValue = resolveConstFrom(field, owner);
-        var originName = field.getName();
-        var aliasAnno = field.getAnnotation(IFunctions.Alias.class);
-        if (aliasAnno == null) {
-            consumer.accept(originName, fieldValue);
-            return;
-        }
-        if (aliasAnno.keepOriginName()) {
-            consumer.accept(originName, fieldValue);
-        }
-        for (var alias : aliasAnno.value()) {
-            consumer.accept(alias, fieldValue);
-        }
-    }
-
-    @Nullable
-    private static Object resolveConstFrom(Field field, @Nullable Object owner) {
-        Object original;
-        try {
-            original = field.get(owner);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new UncheckedException(e);
-        }
-        if (original == null) {
-            return null;
-        }
-        if (original instanceof IFunction f) {
-            return toWitFunction(f, field);
-        }
-        if (original instanceof IProto proto) {
-            return scanProto(proto);
-        }
-        return original;
-    }
-
     @SuppressWarnings({
             "java:S3776", // Cognitive Complexity of methods should not be too high
             "rawtypes",
             "unchecked"
     })
-    private static WitFunction.Constable toWitFunction(IFunction func, Field field) {
+    public static WitFunction.Constable wrap(IFunction func, Type funcGenericType) {
         if (func instanceof Function0 f) {
             return args -> f.apply();
         }
@@ -193,7 +130,7 @@ public class FuncUtils {
             };
         }
 
-        var javaType = TYPE_FACTORY.constructType(field.getGenericType());
+        var javaType = TYPE_FACTORY.constructType(funcGenericType);
         if (func instanceof Function1 f) {
             return adapt(f, javaType);
         }
@@ -258,19 +195,20 @@ public class FuncUtils {
     }
 
     @SuppressWarnings({"unchecked", "SameParameterValue"})
-    private static Function<@Nullable Object, @Nullable Object>[] resolveParamConverters(JavaType[] types, int start, int end) {
-        if (start < 0) {
-            throw new IllegalArgumentException("start < 0");
+    private static Function<@Nullable Object, @Nullable Object>[] convertersForParams(
+            JavaType[] types, int from, int to) {
+        if (from < 0) {
+            throw new IllegalArgumentException("from < 0");
         }
-        if (end > types.length) {
-            throw new IllegalArgumentException("end > types.length");
+        if (to > types.length) {
+            throw new IllegalArgumentException("to > types.length");
         }
-        if (end < start) {
-            throw new IllegalArgumentException("end < start");
+        if (to < from) {
+            throw new IllegalArgumentException("end < from");
         }
-        var size = end - start;
+        var size = to - from;
         var converters = new Function[size];
-        for (int i = start; i < end; i++) {
+        for (int i = from; i < to; i++) {
             converters[i] = converter(types[i]);
         }
         return converters;
@@ -289,7 +227,7 @@ public class FuncUtils {
             Function1<@Nullable Object, ?> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Function1.class),
                 0, 1
         );
@@ -300,7 +238,7 @@ public class FuncUtils {
             Function2<@Nullable Object, @Nullable Object, ?> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Function2.class),
                 0, 2
         );
@@ -311,7 +249,7 @@ public class FuncUtils {
             Function3<@Nullable Object, @Nullable Object, @Nullable Object, ?> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Function3.class),
                 0, 3
         );
@@ -322,7 +260,7 @@ public class FuncUtils {
             Function4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Function4.class),
                 0, 4
         );
@@ -333,7 +271,7 @@ public class FuncUtils {
             Function5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, ?> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Function5.class),
                 0, 5
         );
@@ -341,7 +279,7 @@ public class FuncUtils {
     }
 
     private static AdaptFunction adapt(Consumer1<@Nullable Object> func, JavaType javaType) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Consumer1.class),
                 0, 1
         );
@@ -352,7 +290,7 @@ public class FuncUtils {
     }
 
     private static AdaptFunction adapt(Consumer2<@Nullable Object, @Nullable Object> func, JavaType javaType) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Consumer2.class),
                 0, 2
         );
@@ -366,7 +304,7 @@ public class FuncUtils {
             Consumer3<@Nullable Object, @Nullable Object, @Nullable Object> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Consumer3.class),
                 0, 3
         );
@@ -380,7 +318,7 @@ public class FuncUtils {
             Consumer4<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Consumer4.class),
                 0, 4
         );
@@ -394,7 +332,7 @@ public class FuncUtils {
             Consumer5<@Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object, @Nullable Object> func,
             JavaType javaType
     ) {
-        var paramTypes = resolveParamConverters(
+        var paramTypes = convertersForParams(
                 javaType.findTypeParameters(Consumer5.class),
                 0, 5
         );

@@ -26,16 +26,16 @@ import org.jspecify.annotations.Nullable;
         "java:S1118", // Utility classes should not have public constructors
         "unused",
 })
-public class BasicFunctions implements IFunctions {
+public class InternalLib implements ILib {
 
     @Alias(value = {ScriptBuilder.VAR_EXIT}, keepOriginName = false)
-    public static final Function1<String, Object> EXIT = BasicFunctions::exit;
+    public static final Function1<@Nullable String, Object> EXIT = InternalLib::exit;
 
     @Alias(value = {ScriptBuilder.VAR_CHECK_FILTER}, keepOriginName = false)
-    public static final Function1<Object, Object> CHECK_FILTER = BasicFunctions::checkFilter;
+    public static final Function1<@Nullable Object, @Nullable Object> CHECK_FILTER = InternalLib::checkFilter;
 
     @Alias(value = {ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT}, keepOriginName = false)
-    public static final Function3<Integer, String, String, FilterBreakpoint>
+    public static final Function3<@Nullable Integer, @Nullable String, @Nullable String, FilterBreakpoint>
             NEW_FILTER_BREAKPOINT = FilterBreakpoint::of;
 
     private static Object exit(@Nullable String reason) {

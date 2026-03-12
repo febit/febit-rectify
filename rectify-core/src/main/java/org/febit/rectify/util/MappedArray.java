@@ -23,21 +23,21 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class IndexedArray implements Serializable {
+public class MappedArray implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private final Indexer<String> indexer;
-    private final Object[] table;
+    private final @Nullable Object[] table;
 
-    private IndexedArray(Indexer<String> indexer, @Nullable Object @Nullable [] table) {
+    private MappedArray(Indexer<String> indexer, @Nullable Object @Nullable [] table) {
         this.indexer = indexer;
         this.table = table == null ? new Object[0] : table;
     }
 
-    public static IndexedArray of(Indexer<String> indexer, @Nullable Object @Nullable [] values) {
-        return new IndexedArray(indexer, values);
+    public static MappedArray of(Indexer<String> indexer, @Nullable Object @Nullable [] values) {
+        return new MappedArray(indexer, values);
     }
 
     private int resolveIndex(@Nullable Object key) {
@@ -45,7 +45,7 @@ public class IndexedArray implements Serializable {
             return number.intValue();
         }
         if (key instanceof String str) {
-            var i = this.indexer.getIndex(str);
+            var i = this.indexer.lookup(str);
             return i == null ? -1 : i;
         }
         return -1;

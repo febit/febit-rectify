@@ -13,40 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.rectify.lib;
 
-import org.febit.rectify.lib.IFunctions;
+import org.febit.lang.func.Function1;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class FuncUtilsTest {
+class LibUtilsTest {
 
     @SuppressWarnings({"unused"})
     public static class Proto {
 
         public static final Object CONST = new Object();
 
-        @IFunctions.Alias({"obj1Alias1", "obj1Alias2"})
+        @ILib.Alias({"obj1Alias1", "obj1Alias2"})
         public static final Object CONST_WITH_ALIAS = new Object();
 
-        @IFunctions.Alias(value = {"obj2Alias1"}, keepOriginName = false)
+        @ILib.Alias(value = {"obj2Alias1"}, keepOriginName = false)
         public static final Object CONST_WITH_ALIAS_NO_ORIGIN = new Object();
 
         public static Object NON_FINAL = new Object();
         public final Object NON_STATIC = new Object();
         private static final Object PRIVATE = new Object();
+
+        public static final TestProto PROTO = new TestProto();
+
+        public static class TestProto implements IProto {
+            public final Object nullObj = null;
+            public final Object obj = new Object();
+            public final Function1<@Nullable String, Boolean> isNull = Objects::isNull;
+        }
     }
 
     @Test
-    void scanConstFields() {
+    @SuppressWarnings("unchecked")
+    void collect() {
         var map = new HashMap<String, Object>();
-        FuncUtils.scanConstFields(Proto.class, map::put);
+        LibUtils.collect(Proto.class, map::put);
 
         assertThat(map)
                 .containsEntry("CONST", Proto.CONST)
+                .containsKey("PROTO")
                 .containsEntry("CONST_WITH_ALIAS", Proto.CONST_WITH_ALIAS)
                 .containsEntry("obj1Alias1", Proto.CONST_WITH_ALIAS)
                 .containsEntry("obj1Alias2", Proto.CONST_WITH_ALIAS)
@@ -56,5 +69,9 @@ class FuncUtilsTest {
                         "NON_FINAL", "NON_STATIC", "PRIVATE"
                 );
 
+        assertThat((Map<String, Object>) map.get("PROTO"))
+                .containsKey("obj")
+                .containsKey("isNull")
+                .doesNotContainKey("nullObj");
     }
 }

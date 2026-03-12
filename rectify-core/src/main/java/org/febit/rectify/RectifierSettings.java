@@ -23,17 +23,16 @@ import org.febit.lang.modeler.Schema;
 import org.febit.lang.modeler.Schemas;
 import org.febit.lang.modeler.StructSpec;
 import org.febit.lang.modeler.StructSpecs;
-import org.febit.rectify.util.IndexedArray;
-import org.febit.rectify.util.IndexedArrayAccessor;
+import org.febit.rectify.util.MappedArray;
 import org.febit.rectify.wit.ScriptBuilder;
 import org.febit.rectify.wit.SerializableBreakpointHandler;
+import org.febit.rectify.wit.accessor.MappedArrayAccessor;
 import org.febit.wit.Script;
 import org.febit.wit.Wit;
 import org.febit.wit.exception.NoSuchSourceException;
-import org.febit.wit.io.DiscardOut;
-import org.febit.wit.loader.Loaders;
-import org.febit.wit.loader.impl.StringLoader;
-import org.febit.wit.runtime.Source;
+import org.febit.wit.io.Loaders;
+import org.febit.wit.io.Source;
+import org.febit.wit.io.out.DiscardOut;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
@@ -46,8 +45,6 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-;
 
 /**
  * Rectifier config & factory, serializable.
@@ -144,7 +141,7 @@ public class RectifierSettings implements Serializable {
                 () -> collectHints(script),
                 vars -> script.eval(
                         vars,
-                        new DiscardOut(),
+                        DiscardOut.get(),
                         myBreakpointHandler
                 )
         );
@@ -263,12 +260,12 @@ public class RectifierSettings implements Serializable {
 
         static {
             var builder = Wit.builder();
-            builder.accessor(IndexedArray.class, new IndexedArrayAccessor());
+            builder.accessor(MappedArray.class, new MappedArrayAccessor());
             builder.loader(Loaders.dispatcher()
-                    .rule("code:", StringLoader.builder()
+                    .rule("code:", Loaders.string()
                             .beginWith(Source.BeginWith.SCRIPT)
                             .build())
-                    .fallback(Loaders.noop())
+                    .fallback(Loaders.empty())
                     .build());
 
             ServiceLoader.load(RectifierWitModule.class)
