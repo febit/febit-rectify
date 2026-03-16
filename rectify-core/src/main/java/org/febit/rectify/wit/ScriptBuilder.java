@@ -23,24 +23,29 @@ import org.apache.commons.lang3.StringUtils;
 import org.febit.rectify.RectifierSettings;
 import org.jspecify.annotations.Nullable;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScriptBuilder {
 
     public static final String VAR_INPUT = "$";
-    public static final String VAR_CURR_FIELD = "$$";
+
     public static final String VAR_EXIT = "$$_EXIT";
     public static final String VAR_RESULT = "$$_RESULT";
     public static final String VAR_SCHEMA_NAME = "$$_SCHEMA_NAME";
-    public static final String VAR_CURR_FIELD_INDEX = "$$_CURR_FIELD_INDEX";
-    public static final String VAR_CHECK_FILTER = "$$_CHECK_FILTER";
-    public static final String VAR_NEW_FILTER_BREAKPOINT = "$$_NEW_FILTER_BREAKPOINT";
+
+    public static final String VAR_PROPERTY_VALUE = "$$";
+    public static final String VAR_PROPERTY_INDEX = "$$_PROPERTY_INDEX";
+
+    public static final String VAR_FILTER_VERIFY = "$$_FILTER_VERIFY";
+    public static final String VAR_CREATE_FILTER_BREAKPOINT = "$$_CREATE_FILTER_BREAKPOINT";
 
     static String escapeForString(@Nullable String str) {
         if (str == null) {
             return "null";
         }
-        final int len = str.length();
-        final StringBuilder buf = new StringBuilder(len + 16);
+        var len = str.length();
+        var buf = new StringBuilder(len + 16);
         buf.append('"');
 
         char ch;
@@ -70,11 +75,11 @@ public class ScriptBuilder {
         return buf.toString();
     }
 
-    public static String build(RectifierSettings conf, boolean debug) {
-        return build(new Context(conf, debug));
+    public static String build(RectifierSettings settings, boolean debug) {
+        return build(new Context(settings, debug));
     }
 
-    public static String build(final Context context) {
+    private static String build(final Context context) {
         var settings = context.settings();
 
         // Vars
@@ -85,110 +90,113 @@ public class ScriptBuilder {
         context.append("\n"
                 + "// -- Internal Vars:\n"
                 + "var " + VAR_INPUT + ";   // formatted input\n"
-                + "var " + VAR_CURR_FIELD + ";  // value of current column/field\n"
                 + "var " + VAR_RESULT + ";  // raw result (output)\n"
-                + "var " + VAR_CURR_FIELD_INDEX + " = -1;  // index of current column/field\n"
+                + "var " + VAR_PROPERTY_VALUE + ";  // value of current property\n"
+                + "var " + VAR_PROPERTY_INDEX + " = -1;  // index of current property\n"
         );
 
         // Global Segments
         context.append("\n"
                 + "// -- Global Segments:\n"
         );
-        for (var setup : settings.setups()) {
+        for (var setup : settings.preinstalls()) {
             context.append("//-\n");
-            setup.render(context);
+            setup.setup(context);
             context.append(";\n");
         }
 
-        // Columns
-        var columns = settings.columns();
-        context.append("\n// -- Columns\n");
-        for (int i = 0; i < columns.size(); i++) {
-            appendColumn(context, columns.get(i), i);
+        // Properties
+        var properties = settings.properties();
+        context.append("\n// -- Properties:\n");
+        for (int i = 0; i < properties.size(); i++) {
+            appendProperty(context, properties.get(i), i);
         }
 
-        return context.toString();
+        return context.buildScript();
     }
 
     public static void appendFilter(Context context, String filterExpr) {
-        appendFilter(context, filterExpr, context.getAndIncFilterCounter(), null);
+        appendFilter(context, filterExpr, context.filterCounter().getAndIncrement(), null);
     }
 
     private static void appendFilter(
-            Context context, String filterExpr,
+            Context context,
+            String filterExpr,
             int index,
-            @Nullable String column) {
-        context.append(VAR_CHECK_FILTER + "(");
-        if (context.isDebugEnabled()) {
-            context.append("[? " + VAR_NEW_FILTER_BREAKPOINT + "(")
+            @Nullable String property
+    ) {
+        context.append(VAR_FILTER_VERIFY + "(");
+        if (context.debugEnabled()) {
+            context.append("[? " + VAR_CREATE_FILTER_BREAKPOINT + "(")
                     .append(index)
                     .append(", ")
-                    .appendStringValue(column)
+                    .appendStringValue(property)
                     .append(", ")
                     .appendStringValue(filterExpr)
                     .append(") : (");
         }
         context.append(filterExpr);
-        if (context.isDebugEnabled()) {
+        if (context.debugEnabled()) {
             context.append(") ?]");
         }
         context.append(");\n");
     }
 
-    public static void appendColumn(final Context context, final RectifierSettings.Column column,
-                                    final int index) {
-        var escapedName = escapeForString(column.name());
-        var expr = column.expression();
+    public static void appendProperty(
+            Context context,
+            RectifierSettings.Property property,
+            int index
+    ) {
+        var escapedName = escapeForString(property.name());
+        var expr = property.expression();
         if (StringUtils.isBlank(expr)) {
             expr = VAR_INPUT + '[' + escapedName + ']';
         }
 
         context.append("// -\n");
-        context.append(VAR_CURR_FIELD_INDEX + " = " + index + "; \n");
-        context.append(VAR_CURR_FIELD + " = " + VAR_RESULT + '[')
+        context.append(VAR_PROPERTY_INDEX + " = " + index + "; \n");
+        context.append(VAR_PROPERTY_VALUE + " = " + VAR_RESULT + '[')
                 .append(escapedName)
                 .append("] = ")
                 .append(expr)
                 .append(";\n");
 
-        var validation = column.validation();
+        var validation = property.validation();
         if (StringUtils.isNotEmpty(validation)) {
-            appendFilter(context, validation, index, column.name());
+            appendFilter(context, validation, index, property.name());
         }
     }
 
     @Accessors(fluent = true)
     public static class Context {
 
-        private final boolean debugMode;
-        private final StringBuilder buf;
+        @Getter
+        private final boolean debugEnabled;
+
         @Getter
         private final RectifierSettings settings;
+        @Getter
+        private final AtomicInteger filterCounter = new AtomicInteger(0);
 
-        private int filterCounter;
+        private final StringBuilder buffer = new StringBuilder(1024);
 
-        public Context(RectifierSettings settings, boolean debugMode) {
-            this.debugMode = debugMode;
+        public Context(RectifierSettings settings, boolean debugEnabled) {
             this.settings = settings;
-            this.buf = new StringBuilder(1024);
-        }
-
-        public int getAndIncFilterCounter() {
-            return filterCounter++;
+            this.debugEnabled = debugEnabled;
         }
 
         public Context append(String code) {
-            this.buf.append(code);
+            this.buffer.append(code);
             return this;
         }
 
         public Context append(int num) {
-            this.buf.append(num);
+            this.buffer.append(num);
             return this;
         }
 
         public Context append(char c) {
-            this.buf.append(c);
+            this.buffer.append(c);
             return this;
         }
 
@@ -196,13 +204,8 @@ public class ScriptBuilder {
             return append(escapeForString(str));
         }
 
-        public boolean isDebugEnabled() {
-            return debugMode;
-        }
-
-        @Override
-        public String toString() {
-            return this.buf.toString();
+        public String buildScript() {
+            return this.buffer.toString();
         }
     }
 

@@ -58,8 +58,8 @@ import java.util.function.Predicate;
 )
 public class RectifierSettings implements Serializable {
 
-    private final List<Column> columns;
-    private final List<Setup> setups;
+    private final List<Setup> preinstalls;
+    private final List<Property> properties;
 
     @lombok.Builder.Default
     private final String name = "Unnamed";
@@ -78,7 +78,7 @@ public class RectifierSettings implements Serializable {
 
         // vars
         hints.add(ScriptBuilder.VAR_INPUT);
-        hints.add(ScriptBuilder.VAR_CURR_FIELD);
+        hints.add(ScriptBuilder.VAR_PROPERTY_VALUE);
 
         // globals
         var staticHeaps = script.engine().staticHeaps();
@@ -92,9 +92,9 @@ public class RectifierSettings implements Serializable {
         return schema(col -> true);
     }
 
-    public Schema schema(Predicate<Column> filter) {
+    public Schema schema(Predicate<Property> filter) {
         var struct = Schemas.newStruct();
-        this.columns.stream()
+        this.properties.stream()
                 .filter(filter)
                 .forEach(col -> {
                     var colSchema = Schema.parse(name, col.name(), col.type());
@@ -137,7 +137,11 @@ public class RectifierSettings implements Serializable {
         }
 
         return new RectifierImpl<>(
-                schema, Modeler.builder().structSpec(outputSpec).emptyIfAbsent().build(),
+                schema,
+                Modeler.builder()
+                        .structSpec(outputSpec)
+                        .emptyIfAbsent()
+                        .build(),
                 () -> collectHints(script),
                 vars -> script.eval(
                         vars,
@@ -175,29 +179,29 @@ public class RectifierSettings implements Serializable {
     public static class Builder {
 
         public Builder() {
-            this.columns = new ArrayList<>();
-            this.setups = new ArrayList<>();
+            this.properties = new ArrayList<>();
+            this.preinstalls = new ArrayList<>();
         }
 
         @Tolerate
-        public Builder setups(Setup... setups) {
-            return setups(Arrays.asList(setups));
+        public Builder preinstalls(Setup... setups) {
+            return preinstalls(Arrays.asList(setups));
         }
 
         @Tolerate
-        public Builder setup(Setup setup) {
-            this.setups.add(setup);
+        public Builder preinstall(Setup setup) {
+            this.preinstalls.add(setup);
             return this;
         }
 
         @Tolerate
-        public Builder setup(String code) {
-            return setup(context -> context.append(code));
+        public Builder preinstall(String code) {
+            return preinstall(context -> context.append(code));
         }
 
         @Tolerate
         public Builder filter(String expr) {
-            return setup(context -> ScriptBuilder.appendFilter(context, expr));
+            return preinstall(context -> ScriptBuilder.appendFilter(context, expr));
         }
 
         @Tolerate
@@ -207,38 +211,38 @@ public class RectifierSettings implements Serializable {
         }
 
         @Tolerate
-        public Builder columns(Column... columns) {
-            return columns(Arrays.asList(columns));
+        public Builder properties(Property... properties) {
+            return properties(Arrays.asList(properties));
         }
 
         @Tolerate
-        public Builder column(Column column) {
-            this.columns.add(column);
+        public Builder property(Property property) {
+            this.properties.add(property);
             return this;
         }
 
         @Tolerate
-        public Builder column(String type, String name, @Nullable String expression) {
-            return column(type, name, expression, null, null);
+        public Builder property(String type, String name, @Nullable String expression) {
+            return property(type, name, expression, null, null);
         }
 
         @Tolerate
-        public Builder column(
+        public Builder property(
                 String type,
                 String name,
                 @Nullable String expression,
                 @Nullable String validation
         ) {
-            return column(type, name, expression, validation, null);
+            return property(type, name, expression, validation, null);
         }
 
         @Tolerate
         @lombok.Builder(
-                builderClassName = "ColumnBuilder",
+                builderClassName = "PropertyBuilder",
                 buildMethodName = "commit",
-                builderMethodName = "column"
+                builderMethodName = "property"
         )
-        public Builder column(
+        public Builder property(
                 @lombok.NonNull
                 @SuppressWarnings("NullableProblems")
                 String type,
@@ -249,8 +253,8 @@ public class RectifierSettings implements Serializable {
                 @Nullable String validation,
                 @Nullable String comment
         ) {
-            return column(
-                    new Column(type, name, expression, validation, comment)
+            return property(
+                    new Property(type, name, expression, validation, comment)
             );
         }
     }
@@ -285,11 +289,11 @@ public class RectifierSettings implements Serializable {
 
     @FunctionalInterface
     public interface Setup extends Serializable {
-        void render(ScriptBuilder.Context context);
+        void setup(ScriptBuilder.Context context);
     }
 
     @lombok.Builder(builderClassName = "Builder")
-    public record Column(
+    public record Property(
             @lombok.NonNull
             @SuppressWarnings("NullableProblems")
             String type,

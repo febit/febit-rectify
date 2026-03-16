@@ -28,10 +28,10 @@ class FlinkRectifierTests {
             .name("Demo")
             .filter("$.status > 0")
             .filter("$.status < 100 || \"status should <100\"")
-            .column("long", "id", "$.id")
-            .column("boolean", "enable", "", "$$ || \"enable is falsely\"")
-            .column("int", "status", "$.status")
-            .column("string", "content", "\"prefix:\"+$.content")
+            .property("long", "id", "$.id")
+            .property("boolean", "enable", "", "$$ || \"enable is falsely\"")
+            .property("int", "status", "$.status")
+            .property("string", "content", "\"prefix:\"+$.content")
             .build();
 
     static final List<String> SOURCE = Arrays.asList(

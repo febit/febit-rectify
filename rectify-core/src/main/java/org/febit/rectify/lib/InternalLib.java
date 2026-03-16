@@ -31,36 +31,36 @@ public class InternalLib implements ILib {
     @Alias(value = {ScriptBuilder.VAR_EXIT}, keepOriginName = false)
     public static final Function1<@Nullable String, Object> EXIT = InternalLib::exit;
 
-    @Alias(value = {ScriptBuilder.VAR_CHECK_FILTER}, keepOriginName = false)
-    public static final Function1<@Nullable Object, @Nullable Object> CHECK_FILTER = InternalLib::checkFilter;
+    @Alias(value = {ScriptBuilder.VAR_FILTER_VERIFY}, keepOriginName = false)
+    public static final Function1<@Nullable Object, @Nullable Object> VERIFY_FILTER = InternalLib::verifyFilter;
 
-    @Alias(value = {ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT}, keepOriginName = false)
+    @Alias(value = {ScriptBuilder.VAR_CREATE_FILTER_BREAKPOINT}, keepOriginName = false)
     public static final Function3<@Nullable Integer, @Nullable String, @Nullable String, FilterBreakpoint>
-            NEW_FILTER_BREAKPOINT = FilterBreakpoint::of;
+            CREATE_FILTER_BREAKPOINT = FilterBreakpoint::of;
 
     private static Object exit(@Nullable String reason) {
         throw new ExitException(reason);
     }
 
     @Nullable
-    private static Object checkFilter(@Nullable Object isAccept) {
-        // Pass, if expression returns NULL
-        if (isAccept == null) {
+    private static Object verifyFilter(@Nullable Object accepted) {
+        // OK - if accepted is null
+        if (accepted == null) {
             return null;
         }
-        if (isAccept instanceof Boolean bool) {
-            // Pass, if expression is TRUE
+        if (accepted instanceof Boolean bool) {
+            // OK - if accepted is TRUE
             if (bool) {
                 return null;
             }
-            // Exit, if expression is FALSE
+            // Exit - if accepted is FALSE, without reason.
             return exit(null);
         }
-        // Exit, if expression is STRING, as reason.
-        if (isAccept instanceof String str) {
+        // Exit - if accepted is String, with reason.
+        if (accepted instanceof String str) {
             return exit(str);
         }
-        // Pass, by default
+        // OK - for other cases.
         return null;
     }
 }

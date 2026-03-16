@@ -37,51 +37,49 @@ import static org.junit.jupiter.api.Assertions.*;
 class RectifierTest {
 
     final RectifierSettings settings = RectifierSettings.builder()
-            // Named your schema
+            // Naming your schema
             .name("Demo")
-            // Global code
-            .setup("""
+            // Preinstall code or functions, which can be used in filters or property expressions.
+            .preinstall("""
                     var isTruly = obj -> {
                        return obj == true
                                   || obj == "on" || obj == "true"
                                   || obj == 1;
                     };
                     """)
-            // Global filters:
-            //    Notice: only a Boolean.FALSE or a non-null String (reason) can ban current row, others pass.
+            // Global filters: false or non-null string (as reason) will ban current record.
             .filter("$.status > 0")
-            //    Recommend: give a reason if falsely, `||` is logic OR (just what it means to in JS, feel free!).
+            //    Recommend: give a reason if falsy, `||` is logic OR (just what it means to in JS, feel free!).
             .filter("$.status < 100 || \"status should <100\"")
-            // Global code and filters, Will be executed in defined order.
-            .setup("var isEven = $.status % 2 == 0 ")
-            .setup("var statusCopy = $.status")
+            .preinstall("var isEven = $.status % 2 == 0 ")
+            .preinstall("var statusCopy = $.status")
             .filter("isEven || \"status is not even\"")
-            // Columns
 
-            .column()
+            // Properties:
+            .property()
             .name("id")
             .type("long")
             .expression("$.id")
             .commit()
 
-            .column()
+            .property()
             .name("enable")
-            .comment("The enable column, should be true or truthy")
+            .comment("The enable property, should be true or truthy")
             .type("boolean")
-            // If expression is not specified, the default value is `$.{columnName}`
+            // If expression is not specified, the default value is `$.property`
             //   So here the default expression is `.expression("$.enable")`
             .validation("$$ || \"enable is falsely\"")
             .commit()
 
-            .column()
+            .property()
             .type("string")
             .name("content")
             .expression("\"prefix:\" + $.content")
             .commit()
 
-            .column("int", "status", null)
-            .column("boolean", "isEven", "isEven")
-            .column("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
+            .property("int", "status", null)
+            .property("boolean", "isEven", "isEven")
+            .property("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
             .build();
 
     private static String buildInput(
@@ -109,15 +107,15 @@ class RectifierTest {
         assertFalse(hints.contains("checkAccept"));
 
         assertTrue(hints.contains(ScriptBuilder.VAR_EXIT));
-        assertTrue(hints.contains(ScriptBuilder.VAR_CHECK_FILTER));
-        assertTrue(hints.contains(ScriptBuilder.VAR_NEW_FILTER_BREAKPOINT));
+        assertTrue(hints.contains(ScriptBuilder.VAR_FILTER_VERIFY));
+        assertTrue(hints.contains(ScriptBuilder.VAR_CREATE_FILTER_BREAKPOINT));
 
         assertTrue(hints.contains(ScriptBuilder.VAR_INPUT));
-        assertTrue(hints.contains(ScriptBuilder.VAR_CURR_FIELD));
+        assertTrue(hints.contains(ScriptBuilder.VAR_PROPERTY_VALUE));
 
         assertFalse(hints.contains(ScriptBuilder.VAR_RESULT));
         assertFalse(hints.contains(ScriptBuilder.VAR_SCHEMA_NAME));
-        assertFalse(hints.contains(ScriptBuilder.VAR_CURR_FIELD_INDEX));
+        assertFalse(hints.contains(ScriptBuilder.VAR_PROPERTY_INDEX));
     }
 
     @Test
@@ -148,7 +146,7 @@ class RectifierTest {
                 true,
                 "tell something"
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.reason);
         assertNotNull(consumer.rawOutput);
         assertEquals(123L, consumer.out.get("id"));
@@ -166,7 +164,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.reason);
         assertNotNull(consumer.rawOutput);
         assertEquals(456L, consumer.out.get("id"));
@@ -191,7 +189,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.out);
         assertNotNull(consumer.rawOutput);
         assertNull(consumer.reason);
@@ -204,7 +202,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.out);
         assertNotNull(consumer.rawOutput);
         assertEquals("status should <100", consumer.reason);
@@ -217,7 +215,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.out);
         assertNotNull(consumer.rawOutput);
         assertEquals("status is not even", consumer.reason);
@@ -230,7 +228,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.out);
         assertNotNull(consumer.rawOutput);
         assertEquals("enable is falsely", consumer.reason);
@@ -244,7 +242,7 @@ class RectifierTest {
                     if (label instanceof FilterBreakpoint breakpoint) {
                         breakpoints.add(Tuple2.ofNullable(breakpoint, val));
                         if ("enable".equals(breakpoint.field())) {
-                            assertEquals(1, context.variables().get(ScriptBuilder.VAR_CURR_FIELD_INDEX));
+                            assertEquals(1, context.variables().get(ScriptBuilder.VAR_PROPERTY_INDEX));
                         }
                     }
                 })
@@ -264,7 +262,7 @@ class RectifierTest {
                 true,
                 "tell something"
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.reason);
         assertNotNull(consumer.rawOutput);
 
@@ -306,7 +304,7 @@ class RectifierTest {
                 0,
                 null
         ), consumer);
-        assertTrue(consumer.flag);
+        assertTrue(consumer.completed);
         assertNull(consumer.out);
         assertNotNull(consumer.rawOutput);
         assertEquals("status is not even", consumer.reason);
@@ -318,17 +316,18 @@ class RectifierTest {
 
     private static class SingleElementRectifierSink<O> implements RectifierSink<O> {
 
-        boolean flag = false;
+        boolean completed = false;
+
         O out;
         RawOutput rawOutput;
         String reason;
 
         @Override
         public void onCompleted(@Nullable O out, RawOutput raw, @Nullable String reason) {
-            if (flag) {
+            if (completed) {
                 throw new AssertionError("Assert single element, but onCompleted called more than once.");
             }
-            this.flag = true;
+            this.completed = true;
             this.out = out;
             this.rawOutput = raw;
             this.reason = reason;

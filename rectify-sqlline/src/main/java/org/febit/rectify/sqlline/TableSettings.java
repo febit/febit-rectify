@@ -45,7 +45,7 @@ public record TableSettings(
         @Nullable
         List<String> setups,
         @Nullable
-        List<RectifierSettings.Column> columns
+        List<RectifierSettings.Property> properties
 ) implements Serializable {
 
     @Jacksonized
@@ -93,10 +93,10 @@ public record TableSettings(
         var builder = RectifierSettings.builder()
                 .name(name);
         if (setups != null) {
-            setups.forEach(builder::setup);
+            setups.forEach(builder::preinstall);
         }
-        if (columns != null) {
-            builder.columns(columns);
+        if (properties != null) {
+            builder.properties(properties);
         }
         return builder.build();
     }

@@ -43,12 +43,12 @@ class TableSettingsTest {
                 source:
                   format: access
                   properties:
-                    columns: [a, b, c]
+                    properties: [a, b, c]
                 """).source();
 
         assertEquals("access", source.format());
         assertThat(source.properties())
-                .containsEntry("columns", List.of("a", "b", "c"));
+                .containsEntry("properties", List.of("a", "b", "c"));
     }
 
     @Test
@@ -60,7 +60,7 @@ class TableSettingsTest {
                 setups:
                   - var isEven = $.status % 2 == 0
                   - var statusCopy = $.status
-                columns:
+                properties:
                   - name: id
                     type: long
                     expression: $.id
@@ -79,7 +79,7 @@ class TableSettingsTest {
         );
 
         var codes = config.setups();
-        var columns = config.columns();
+        var properties = config.properties();
 
         assertNotNull(codes);
         assertEquals(2, codes.size());
@@ -87,17 +87,17 @@ class TableSettingsTest {
         assertEquals("var statusCopy = $.status", codes.get(1));
 
         assertEquals(List.of(
-                RectifierSettings.Column.builder()
+                RectifierSettings.Property.builder()
                         .name("id")
                         .type("long")
                         .expression("$.id")
                         .build(),
-                RectifierSettings.Column.builder()
+                RectifierSettings.Property.builder()
                         .name("enable")
                         .type("boolean")
                         .validation("$$ || \"enable is falsely\"")
                         .build()
-        ), columns);
+        ), properties);
 
     }
 }
