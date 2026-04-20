@@ -8,24 +8,22 @@ plugins {
   alias libs.plugins.license
 }
 
-group 'org.febit.rectify'
-version '2.0.0-SNAPSHOT'
+group = 'org.febit.rectify'
+version = '2.0.0-SNAPSHOT'
 
-allprojects {
+allprojects { subproject ->
   apply plugin: 'com.github.hierynomus.license'
 
-  group rootProject.group
-  version rootProject.version
+  group = rootProject.group
+  version = rootProject.version
 
   repositories {
     mavenCentral()
-    maven { url 'https://projectlombok.org/edge-releases' }
-
   }
 
   standardMavenPublish {
     pom {
-      customPom(it)
+      customPom(subproject, it)
     }
   }
 
@@ -38,9 +36,9 @@ allprojects {
       java = 'SLASHSTAR_STYLE'
     }
     include '**/*.java'
-    strictCheck false
-    skipExistingHeaders false
-    header rootProject.file('etc/license-header.txt')
+    strictCheck = false
+    skipExistingHeaders = false
+    header = rootProject.file('etc/license-header.txt')
   }
 
 }
@@ -105,7 +103,7 @@ configure(subprojects.findAll {
   }
 }
 
-def customPom(MavenPom pom) {
+static def customPom(Project project, MavenPom pom) {
   pom.with {
     url = 'https://github.com/febit/febit-rectify'
     organization {
@@ -132,7 +130,7 @@ def customPom(MavenPom pom) {
       developer {
         id = 'kurt'
         name = 'Kurt Zhu'
-        email = 'zqq@febit.org'
+        email = 'kurt@febit.org'
         timezone = '+8'
       }
     }

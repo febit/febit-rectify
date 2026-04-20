@@ -16,8 +16,8 @@
 package org.febit.rectify.wit.accessor;
 
 import org.febit.rectify.util.MappedArray;
-import org.febit.wit.runtime.accessor.Getter;
-import org.febit.wit.runtime.accessor.Setter;
+import org.febit.wit.engine.accessor.Getter;
+import org.febit.wit.engine.accessor.Setter;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;

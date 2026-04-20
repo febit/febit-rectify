@@ -19,7 +19,7 @@ import lombok.experimental.UtilityClass;
 import org.febit.lang.func.IFunction;
 import org.febit.rectify.wit.function.WitFuncUtils;
 import org.febit.wit.exception.UncheckedException;
-import org.febit.wit.util.ClassUtils;
+import org.febit.wit.util.Modifiers;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -33,8 +33,8 @@ public class LibUtils {
 
     public static void collect(Class<?> cls, BiConsumer<String, @Nullable Object> consumer) {
         Stream.of(cls.getFields())
-                .filter(ClassUtils::isStatic)
-                .filter(ClassUtils::isFinal)
+                .filter(Modifiers::isStatic)
+                .filter(Modifiers::isFinal)
                 .forEach(field -> collect(field, null, consumer));
     }
 
@@ -79,8 +79,8 @@ public class LibUtils {
     private static Map<Object, @Nullable Object> inspectProto(IProto proto) {
         var map = new HashMap<>();
         Stream.of(proto.getClass().getFields())
-                .filter(f -> !ClassUtils.isStatic(f))
-                .filter(ClassUtils::isFinal)
+                .filter(Modifiers::isNotStatic)
+                .filter(Modifiers::isFinal)
                 .forEach(field -> collect(field, proto, (k, v) -> {
                     if (v != null) {
                         map.put(k, v);

@@ -17,7 +17,7 @@ package org.febit.rectify.wit.function;
 
 import lombok.RequiredArgsConstructor;
 import org.febit.rectify.util.Args;
-import org.febit.wit.runtime.WitFunction;
+import org.febit.wit.engine.WitFunction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;

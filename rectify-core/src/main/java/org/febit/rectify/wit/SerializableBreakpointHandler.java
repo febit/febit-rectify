@@ -15,7 +15,7 @@
  */
 package org.febit.rectify.wit;
 
-import org.febit.wit.runtime.BreakpointHandler;
+import org.febit.wit.engine.BreakpointHandler;
 
 import java.io.Serializable;
 

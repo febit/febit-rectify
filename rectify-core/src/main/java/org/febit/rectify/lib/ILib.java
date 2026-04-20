@@ -33,6 +33,6 @@ public interface ILib extends RectifierWitModule {
 
     @Override
     default void apply(Wit engine) {
-        LibUtils.collect(getClass(), engine.staticHeaps().constants()::set);
+        LibUtils.collect(getClass(), engine.globals().constants()::set);
     }
 }

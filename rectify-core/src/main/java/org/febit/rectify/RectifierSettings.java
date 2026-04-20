@@ -32,7 +32,6 @@ import org.febit.wit.Wit;
 import org.febit.wit.exception.NoSuchSourceException;
 import org.febit.wit.io.Loaders;
 import org.febit.wit.io.Source;
-import org.febit.wit.io.out.DiscardOut;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
@@ -81,9 +80,9 @@ public class RectifierSettings implements Serializable {
         hints.add(ScriptBuilder.VAR_PROPERTY_VALUE);
 
         // globals
-        var staticHeaps = script.engine().staticHeaps();
-        staticHeaps.constants().each((k, v) -> hints.add(k));
-        staticHeaps.variables().each((k, v) -> hints.add(k));
+        var globals = script.engine().globals();
+        globals.constants().forEach((k, v) -> hints.add(k));
+        globals.variables().forEach((k, v) -> hints.add(k));
 
         return List.copyOf(hints);
     }
@@ -128,7 +127,7 @@ public class RectifierSettings implements Serializable {
 
         final Script script;
         try {
-            var code = "code: " + ScriptBuilder.build(this, myBreakpointHandler != null);
+            var code = "code: \n" + ScriptBuilder.build(this, myBreakpointHandler != null);
             script = WitLazyHolder.WIT.script(code);
             // fast-fail check
             script.reload();
@@ -143,11 +142,10 @@ public class RectifierSettings implements Serializable {
                         .emptyIfAbsent()
                         .build(),
                 () -> collectHints(script),
-                vars -> script.eval(
-                        vars,
-                        DiscardOut.get(),
-                        myBreakpointHandler
-                )
+                vars -> script.evaluator()
+                        .inputs(vars)
+                        .breakpointHandler(myBreakpointHandler)
+                        .eval()
         );
     }
 
@@ -244,10 +242,8 @@ public class RectifierSettings implements Serializable {
         )
         public Builder property(
                 @lombok.NonNull
-                @SuppressWarnings("NullableProblems")
                 String type,
                 @lombok.NonNull
-                @SuppressWarnings("NullableProblems")
                 String name,
                 @Nullable String expression,
                 @Nullable String validation,
@@ -265,9 +261,10 @@ public class RectifierSettings implements Serializable {
         static {
             var builder = Wit.builder();
             builder.accessor(MappedArray.class, new MappedArrayAccessor());
-            builder.loader(Loaders.dispatcher()
+            builder.loader(Loaders.dispatch()
                     .rule("code:", Loaders.string()
                             .beginWith(Source.BeginWith.SCRIPT)
+                            .cacheEnabled(false)
                             .build())
                     .fallback(Loaders.empty())
                     .build());
@@ -295,10 +292,8 @@ public class RectifierSettings implements Serializable {
     @lombok.Builder(builderClassName = "Builder")
     public record Property(
             @lombok.NonNull
-            @SuppressWarnings("NullableProblems")
             String type,
             @lombok.NonNull
-            @SuppressWarnings("NullableProblems")
             String name,
 
             @Nullable String expression,

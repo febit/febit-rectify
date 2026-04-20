@@ -47,7 +47,7 @@ import org.febit.lang.func.ThrowingRunnable;
 import org.febit.lang.func.ThrowingSupplier;
 import org.febit.lang.util.ConvertUtils;
 import org.febit.rectify.util.Args;
-import org.febit.wit.runtime.WitFunction;
+import org.febit.wit.engine.WitFunction;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.type.TypeFactory;

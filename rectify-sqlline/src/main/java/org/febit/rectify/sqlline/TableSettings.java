@@ -31,15 +31,12 @@ import java.util.Objects;
 
 public record TableSettings(
         @lombok.NonNull
-        @SuppressWarnings("NullableProblems")
         String name,
 
         @lombok.NonNull
-        @SuppressWarnings("NullableProblems")
         String path,
 
         @lombok.NonNull
-        @SuppressWarnings("NullableProblems")
         Source source,
 
         @Nullable
@@ -54,7 +51,6 @@ public record TableSettings(
     )
     public record Source(
             @lombok.NonNull
-            @SuppressWarnings("NullableProblems")
             String format,
             @Singular
             Map<String, Object> properties

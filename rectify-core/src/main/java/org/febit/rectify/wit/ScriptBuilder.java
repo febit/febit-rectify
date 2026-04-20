@@ -96,8 +96,10 @@ public class ScriptBuilder {
         );
 
         // Global Segments
-        context.append("\n"
-                + "// -- Global Segments:\n"
+        context.append("""
+
+                // -- Global Segments:
+                """
         );
         for (var setup : settings.preinstalls()) {
             context.append("//-\n");
@@ -107,7 +109,10 @@ public class ScriptBuilder {
 
         // Properties
         var properties = settings.properties();
-        context.append("\n// -- Properties:\n");
+        context.append("""
+
+                // -- Properties:
+                """);
         for (int i = 0; i < properties.size(); i++) {
             appendProperty(context, properties.get(i), i);
         }

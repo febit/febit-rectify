@@ -20,7 +20,7 @@ import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
 import org.febit.rectify.lib.ILib;
-import org.febit.wit.runtime.ALU;
+import org.febit.wit.ir.support.ALU;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
