@@ -25,26 +25,26 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LibUtilsTest {
+class LibrariesTest {
 
     @SuppressWarnings({"unused"})
-    public static class Proto {
+    public static class TestLib {
 
         public static final Object CONST = new Object();
 
-        @ILib.Alias({"obj1Alias1", "obj1Alias2"})
+        @BindingAlias({"obj1Alias1", "obj1Alias2"})
         public static final Object CONST_WITH_ALIAS = new Object();
 
-        @ILib.Alias(value = {"obj2Alias1"}, keepOriginName = false)
-        public static final Object CONST_WITH_ALIAS_NO_ORIGIN = new Object();
+        @BindingAlias(value = {"obj2Alias1"}, keepDeclaredName = false)
+        public static final Object CONST_WITH_ALIAS_NO_DECLARED = new Object();
 
         public static Object NON_FINAL = new Object();
         public final Object NON_STATIC = new Object();
         private static final Object PRIVATE = new Object();
 
-        public static final TestProto PROTO = new TestProto();
+        public static final DemoNamespace DEMO = new DemoNamespace();
 
-        public static class TestProto implements IProto {
+        public static class DemoNamespace implements Namespace {
             public final Object nullObj = null;
             public final Object obj = new Object();
             public final Function1<@Nullable String, Boolean> isNull = Objects::isNull;
@@ -55,21 +55,21 @@ class LibUtilsTest {
     @SuppressWarnings("unchecked")
     void collect() {
         var map = new HashMap<String, Object>();
-        LibUtils.collect(Proto.class, map::put);
+        Libraries.collect(TestLib.class, map::put);
 
         assertThat(map)
-                .containsEntry("CONST", Proto.CONST)
-                .containsKey("PROTO")
-                .containsEntry("CONST_WITH_ALIAS", Proto.CONST_WITH_ALIAS)
-                .containsEntry("obj1Alias1", Proto.CONST_WITH_ALIAS)
-                .containsEntry("obj1Alias2", Proto.CONST_WITH_ALIAS)
-                .containsEntry("obj2Alias1", Proto.CONST_WITH_ALIAS_NO_ORIGIN)
-                .doesNotContainKey("CONST_WITH_ALIAS_NO_ORIGIN")
+                .containsEntry("CONST", TestLib.CONST)
+                .containsKey("DEMO")
+                .containsEntry("CONST_WITH_ALIAS", TestLib.CONST_WITH_ALIAS)
+                .containsEntry("obj1Alias1", TestLib.CONST_WITH_ALIAS)
+                .containsEntry("obj1Alias2", TestLib.CONST_WITH_ALIAS)
+                .containsEntry("obj2Alias1", TestLib.CONST_WITH_ALIAS_NO_DECLARED)
+                .doesNotContainKey("CONST_WITH_ALIAS_NO_DECLARED")
                 .doesNotContainKeys(
                         "NON_FINAL", "NON_STATIC", "PRIVATE"
                 );
 
-        assertThat((Map<String, Object>) map.get("PROTO"))
+        assertThat((Map<String, Object>) map.get("DEMO"))
                 .containsKey("obj")
                 .containsKey("isNull")
                 .doesNotContainKey("nullObj");

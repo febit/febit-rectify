@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package org.febit.rectify.util;
+package org.febit.rectify.wit.function;
 
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+@FunctionalInterface
+public interface ParameterConverter {
+
+    @Nullable
+    Object convert(@Nullable Object value);
+}

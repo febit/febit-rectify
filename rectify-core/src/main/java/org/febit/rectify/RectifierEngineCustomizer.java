@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.lib;
+package org.febit.rectify;
 
-import org.febit.rectify.RectifierWitModule;
-import org.febit.wit.Wit;
+import org.febit.wit.WitBuilder;
 
-import java.lang.annotation.*;
+/**
+ * Plugin interface to customize wit engine builder for Rectifier.
+ */
+@FunctionalInterface
+public interface RectifierEngineCustomizer {
 
-public interface ILib extends RectifierWitModule {
-
-    @Inherited
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD, ElementType.FIELD})
-    @interface Alias {
-        String[] value();
-
-        boolean keepOriginName() default true;
-    }
-
-    @Override
-    default void apply(Wit engine) {
-        LibUtils.collect(getClass(), engine.globals().constants()::set);
-    }
+    void customize(WitBuilder builder);
 }
+

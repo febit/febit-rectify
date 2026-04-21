@@ -17,7 +17,7 @@ package org.febit.rectify.lib;
 
 import lombok.experimental.UtilityClass;
 import org.febit.lang.func.IFunction;
-import org.febit.rectify.wit.function.WitFuncUtils;
+import org.febit.rectify.wit.function.LibFunctions;
 import org.febit.wit.exception.UncheckedException;
 import org.febit.wit.util.Modifiers;
 import org.jspecify.annotations.Nullable;
@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 @UtilityClass
-public class LibUtils {
+public class Libraries {
 
     public static void collect(Class<?> cls, BiConsumer<String, @Nullable Object> consumer) {
         Stream.of(cls.getFields())
@@ -42,14 +42,14 @@ public class LibUtils {
             Field field, @Nullable Object owner, BiConsumer<String, @Nullable Object> consumer
     ) {
         var fieldValue = resolveConst(field, owner);
-        var originName = field.getName();
-        var aliasAnno = field.getAnnotation(ILib.Alias.class);
+        var declaredName = field.getName();
+        var aliasAnno = field.getAnnotation(BindingAlias.class);
         if (aliasAnno == null) {
-            consumer.accept(originName, fieldValue);
+            consumer.accept(declaredName, fieldValue);
             return;
         }
-        if (aliasAnno.keepOriginName()) {
-            consumer.accept(originName, fieldValue);
+        if (aliasAnno.keepDeclaredName()) {
+            consumer.accept(declaredName, fieldValue);
         }
         for (var alias : aliasAnno.value()) {
             consumer.accept(alias, fieldValue);
@@ -68,20 +68,20 @@ public class LibUtils {
             return null;
         }
         if (value instanceof IFunction f) {
-            return WitFuncUtils.wrap(f, field.getGenericType());
+            return LibFunctions.wrap(f, field.getGenericType());
         }
-        if (value instanceof IProto proto) {
-            return inspectProto(proto);
+        if (value instanceof Namespace namespace) {
+            return inspect(namespace);
         }
         return value;
     }
 
-    private static Map<Object, @Nullable Object> inspectProto(IProto proto) {
+    private static Map<Object, @Nullable Object> inspect(Namespace namespace) {
         var map = new HashMap<>();
-        Stream.of(proto.getClass().getFields())
+        Stream.of(namespace.getClass().getFields())
                 .filter(Modifiers::isNotStatic)
                 .filter(Modifiers::isFinal)
-                .forEach(field -> collect(field, proto, (k, v) -> {
+                .forEach(field -> collect(field, namespace, (k, v) -> {
                     if (v != null) {
                         map.put(k, v);
                     }

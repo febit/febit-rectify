@@ -23,18 +23,18 @@ import org.febit.rectify.wit.ScriptBuilder;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings({
-        "java:S1118", // Utility classes should not have public constructors
         "unused",
+        "java:S1118", // Utility classes should not have public constructors
 })
-public class InternalLib implements ILib {
+public class SystemLibrary implements Library {
 
-    @Alias(value = {ScriptBuilder.VAR_EXIT}, keepOriginName = false)
-    public static final Function1<@Nullable String, Object> EXIT = InternalLib::exit;
+    @BindingAlias(value = {ScriptBuilder.VAR_EXIT}, keepDeclaredName = false)
+    public static final Function1<@Nullable String, Object> EXIT = SystemLibrary::exit;
 
-    @Alias(value = {ScriptBuilder.VAR_FILTER_VERIFY}, keepOriginName = false)
-    public static final Function1<@Nullable Object, @Nullable Object> VERIFY_FILTER = InternalLib::verifyFilter;
+    @BindingAlias(value = {ScriptBuilder.VAR_FILTER_VERIFY}, keepDeclaredName = false)
+    public static final Function1<@Nullable Object, @Nullable Object> VERIFY_FILTER = SystemLibrary::verifyFilter;
 
-    @Alias(value = {ScriptBuilder.VAR_CREATE_FILTER_BREAKPOINT}, keepOriginName = false)
+    @BindingAlias(value = {ScriptBuilder.VAR_CREATE_FILTER_BREAKPOINT}, keepDeclaredName = false)
     public static final Function3<@Nullable Integer, @Nullable String, @Nullable String, FilterBreakpoint>
             CREATE_FILTER_BREAKPOINT = FilterBreakpoint::of;
 
@@ -44,23 +44,21 @@ public class InternalLib implements ILib {
 
     @Nullable
     private static Object verifyFilter(@Nullable Object accepted) {
-        // OK - if accepted is null
-        if (accepted == null) {
-            return null;
-        }
-        if (accepted instanceof Boolean bool) {
-            // OK - if accepted is TRUE
-            if (bool) {
-                return null;
+        return switch (accepted) {
+            // OK - if accepted is null
+            case null -> null;
+            case Boolean bool -> {
+                // OK - if accepted is TRUE
+                if (bool) {
+                    yield null;
+                }
+                // Exit - if accepted is FALSE, without reason.
+                yield exit(null);
             }
-            // Exit - if accepted is FALSE, without reason.
-            return exit(null);
-        }
-        // Exit - if accepted is String, with reason.
-        if (accepted instanceof String str) {
-            return exit(str);
-        }
-        // OK - for other cases.
-        return null;
+            // Exit - if accepted is String, with reason.
+            case String str -> exit(str);
+            // OK - for other cases.
+            default -> null;
+        };
     }
 }

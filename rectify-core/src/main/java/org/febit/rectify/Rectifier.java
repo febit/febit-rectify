@@ -16,6 +16,7 @@
 package org.febit.rectify;
 
 import org.febit.lang.modeler.Schema;
+import org.febit.wit.engine.Heap;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public interface Rectifier<I, O> {
      *
      * @param input input
      */
-    void process(@Nullable I input, BiConsumer<O, RawOutput> onSucceed, BiConsumer<String, RawOutput> onFailed);
+    void process(@Nullable I input, BiConsumer<O, Heap> onSucceed, BiConsumer<String, Heap> onFailed);
 
     /**
      * Process input one by one.

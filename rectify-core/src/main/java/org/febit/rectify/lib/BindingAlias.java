@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.rectify.lib;
 
-import org.febit.wit.engine.Heap;
-import org.jspecify.annotations.Nullable;
+import java.lang.annotation.*;
 
-@FunctionalInterface
-public interface RectifierSink<O> {
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD})
+public @interface BindingAlias {
 
-    void onCompleted(@Nullable O out, Heap raw, @Nullable String reason);
+    String[] value();
 
-    default void onSucceed(O out, Heap raw) {
-        this.onCompleted(out, raw, null);
-    }
-
-    default void onFailed(String reason, Heap raw) {
-        this.onCompleted(null, raw, reason);
-    }
+    boolean keepDeclaredName() default true;
 }

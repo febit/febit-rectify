@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.rectify.lib.extra;
 
-import org.febit.wit.engine.Heap;
-import org.jspecify.annotations.Nullable;
+import lombok.experimental.UtilityClass;
+import tools.jackson.databind.JavaType;
 
-@FunctionalInterface
-public interface RectifierSink<O> {
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
-    void onCompleted(@Nullable O out, Heap raw, @Nullable String reason);
+import static org.febit.lang.util.JacksonUtils.TYPES;
 
-    default void onSucceed(O out, Heap raw) {
-        this.onCompleted(out, raw, null);
-    }
+@UtilityClass
+public class JacksonSupport {
 
-    default void onFailed(String reason, Heap raw) {
-        this.onCompleted(null, raw, reason);
-    }
+    static final JavaType T_OBJECT = TYPES.constructType(Object.class);
+    static final JavaType T_LIST = TYPES
+            .constructCollectionLikeType(ArrayList.class, Object.class);
+    static final JavaType T_MAP = TYPES
+            .constructMapType(LinkedHashMap.class, Object.class, Object.class);
 }

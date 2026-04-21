@@ -62,7 +62,6 @@ public class ScriptBuilder {
                 case '\r' -> escape = 'r';
                 case '\t' -> escape = 't';
                 case '"' -> escape = '"';
-                case '/' -> escape = '/';
                 case '\\' -> escape = '\\';
                 default -> {
                     buf.append(ch);

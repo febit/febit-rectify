@@ -23,9 +23,12 @@ import org.febit.rectify.wit.ExitException;
 import org.febit.rectify.wit.ScriptBuilder;
 import org.febit.wit.Context;
 import org.febit.wit.Vars;
+import org.febit.wit.engine.Heap;
 import org.febit.wit.exception.ScriptEvaluateException;
+import org.febit.wit.runtime.heap.GenericHeap;
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -77,27 +80,29 @@ public class RectifierImpl<I, O> implements Rectifier<I, O> {
     @Override
     public void process(
             @Nullable I input,
-            BiConsumer<@Nullable O, RawOutput> onSuccess,
-            BiConsumer<@Nullable String, RawOutput> onFailed
+            BiConsumer<@Nullable O, Heap> onSuccess,
+            BiConsumer<@Nullable String, Heap> onFailed
     ) {
-        var rawOutput = new RawOutput();
+        var outputRaw = new HashMap<String, Object>();
+        var outputHeap = new GenericHeap(outputRaw);
         try {
             script.apply(acceptor -> {
                 acceptor.set(ScriptBuilder.VAR_INPUT, input);
-                acceptor.set(ScriptBuilder.VAR_RESULT, rawOutput);
+                acceptor.set(ScriptBuilder.VAR_RESULT, outputHeap);
             });
         } catch (ScriptEvaluateException e) {
             var exitException = searchExitException(e);
             if (exitException != null) {
-                onFailed.accept(exitException.getReason(), rawOutput);
+                onFailed.accept(exitException.getReason(), outputHeap);
                 return;
             }
-            onFailed.accept("RUNTIME_ERROR: " + e.getMessage(), rawOutput);
+            onFailed.accept("RUNTIME_ERROR: " + e.getMessage(), outputHeap);
             return;
         }
+
         @SuppressWarnings("unchecked")
-        O output = (O) outputModeler.process(schema, rawOutput);
-        onSuccess.accept(output, rawOutput);
+        O output = (O) outputModeler.process(schema, outputRaw);
+        onSuccess.accept(output, outputHeap);
     }
 
 }

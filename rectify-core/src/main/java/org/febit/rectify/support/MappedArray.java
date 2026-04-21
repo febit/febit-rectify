@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.util;
+package org.febit.rectify.support;
 
 import org.febit.lang.util.ArraysUtils;
 import org.jspecify.annotations.Nullable;

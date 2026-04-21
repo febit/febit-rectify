@@ -23,7 +23,7 @@ import org.febit.lang.modeler.Schema;
 import org.febit.lang.modeler.Schemas;
 import org.febit.lang.modeler.StructSpec;
 import org.febit.lang.modeler.StructSpecs;
-import org.febit.rectify.util.MappedArray;
+import org.febit.rectify.support.MappedArray;
 import org.febit.rectify.wit.ScriptBuilder;
 import org.febit.rectify.wit.SerializableBreakpointHandler;
 import org.febit.rectify.wit.accessor.MappedArrayAccessor;
@@ -272,7 +272,7 @@ public class RectifierSettings implements Serializable {
             ServiceLoader.load(RectifierWitModule.class)
                     .forEach(builder::module);
 
-            ServiceLoader.load(RectifierWitCustomizer.class)
+            ServiceLoader.load(RectifierEngineCustomizer.class)
                     .forEach(customizer -> customizer.customize(builder));
 
             WIT = builder.build();

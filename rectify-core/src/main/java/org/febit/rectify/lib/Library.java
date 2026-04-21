@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.wit.accessor;
+package org.febit.rectify.lib;
 
-import org.febit.rectify.support.MappedArray;
-import org.febit.wit.engine.accessor.Getter;
-import org.febit.wit.engine.accessor.Setter;
-import org.jspecify.annotations.Nullable;
+import org.febit.rectify.RectifierWitModule;
+import org.febit.wit.Wit;
 
-import java.io.Serializable;
-
-public class MappedArrayAccessor
-        implements Getter<MappedArray>, Setter<MappedArray>, Serializable {
+public interface Library extends RectifierWitModule {
 
     @Override
-    public @Nullable Object get(MappedArray obj, @Nullable Object property) {
-        return obj.get(property);
-    }
-
-    @Override
-    public void set(MappedArray obj, @Nullable Object property, @Nullable Object value) {
-        obj.set(property, value);
+    default void apply(Wit engine) {
+        Libraries.collect(
+                getClass(),
+                engine.globals().constants()::set
+        );
     }
 }

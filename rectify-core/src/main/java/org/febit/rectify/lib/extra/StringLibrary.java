@@ -20,22 +20,23 @@ import org.apache.commons.lang3.Strings;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
 import org.febit.lang.func.Function3;
-import org.febit.rectify.lib.ILib;
-import org.febit.rectify.lib.IProto;
+import org.febit.rectify.lib.BindingAlias;
+import org.febit.rectify.lib.Library;
+import org.febit.rectify.lib.Namespace;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 
 @SuppressWarnings({
-        "java:S1118", // Utility classes should not have public constructors
         "unused",
+        "java:S1118", // Utility classes should not have public constructors
 })
-public class StringLib implements ILib {
+public class StringLibrary implements Library {
 
-    @Alias(value = {"Str", "Strings"}, keepOriginName = false)
-    public static final Proto STR = new Proto();
+    @BindingAlias(value = {"Str", "Strings"}, keepDeclaredName = false)
+    public static final StringNamespace STR = new StringNamespace();
 
-    public static class Proto implements IProto {
+    public static class StringNamespace implements Namespace {
         public final Function1<@Nullable String, Boolean> isEmpty = StringUtils::isEmpty;
         public final Function1<@Nullable String, Boolean> isNotEmpty = StringUtils::isNotEmpty;
         public final Function1<@Nullable String, Boolean> isBlank = StringUtils::isBlank;
@@ -49,11 +50,10 @@ public class StringLib implements ILib {
 
         public final Function1<@Nullable String, @Nullable String> trim = text -> ifPresent(text, String::trim);
 
+        @BindingAlias({"toLowerCase"})
         public final Function1<@Nullable String, @Nullable String> lower = text -> ifPresent(text, String::toLowerCase);
+        @BindingAlias({"toUpperCase"})
         public final Function1<@Nullable String, @Nullable String> upper = text -> ifPresent(text, String::toUpperCase);
-
-        public final Function1<String, String> toLowerCase = lower;
-        public final Function1<String, String> toUpperCase = upper;
 
         public final Function3<@Nullable String, @Nullable Integer, @Nullable Integer, @Nullable String> sub =
                 (text, start, end) -> ifPresent(text,
@@ -89,8 +89,8 @@ public class StringLib implements ILib {
                 );
 
         public final Function3<@Nullable String, @Nullable String, @Nullable String, @Nullable String> replace =
-                (text, sub, with) -> ifPresent(text,
-                        t -> Strings.CS.replace(t, sub, with)
+                (text, search, replacement) -> ifPresent(text,
+                        t -> Strings.CS.replace(t, search, replacement)
                 );
 
         @Nullable

@@ -18,6 +18,7 @@ package org.febit.rectify;
 import lombok.experimental.UtilityClass;
 import org.febit.lang.Lazy;
 import org.febit.lang.func.SerializableSupplier;
+import org.febit.wit.engine.Heap;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -49,8 +50,8 @@ public class Rectifiers {
         @Override
         public void process(
                 @Nullable I input,
-                BiConsumer<O, RawOutput> onSucceed,
-                BiConsumer<String, RawOutput> onFailed
+                BiConsumer<O, Heap> onSucceed,
+                BiConsumer<String, Heap> onFailed
         ) {
             delegate().process(input, onSucceed, onFailed);
         }
@@ -64,8 +65,8 @@ public class Rectifiers {
         @Override
         public void process(
                 @Nullable S source,
-                BiConsumer<O, RawOutput> onSucceed,
-                BiConsumer<String, RawOutput> onFailed
+                BiConsumer<O, Heap> onSucceed,
+                BiConsumer<String, Heap> onFailed
         ) {
             var in = transfer.apply(source);
             delegate.process(in, onSucceed, onFailed);
@@ -79,8 +80,8 @@ public class Rectifiers {
 
         public void process(
                 @Nullable S source,
-                BiConsumer<O, RawOutput> onSucceed,
-                BiConsumer<String, RawOutput> onFailed
+                BiConsumer<O, Heap> onSucceed,
+                BiConsumer<String, Heap> onFailed
         ) {
             sourceFormat.process(source, in -> delegate.process(in, onSucceed, onFailed));
         }

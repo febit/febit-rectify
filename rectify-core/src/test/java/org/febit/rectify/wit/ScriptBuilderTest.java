@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.wit.accessor;
+package org.febit.rectify.wit;
 
-import org.febit.rectify.support.MappedArray;
-import org.febit.wit.engine.accessor.Getter;
-import org.febit.wit.engine.accessor.Setter;
-import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
+import static org.febit.rectify.wit.ScriptBuilder.escapeForString;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MappedArrayAccessor
-        implements Getter<MappedArray>, Setter<MappedArray>, Serializable {
+class ScriptBuilderTest {
 
-    @Override
-    public @Nullable Object get(MappedArray obj, @Nullable Object property) {
-        return obj.get(property);
-    }
+    @Test
+    void testEscapeForString() {
+        assertEquals("null", escapeForString(null));
+        assertEquals("\"\"", escapeForString(""));
+        assertEquals("\"abc\"", escapeForString("abc"));
+        assertEquals("\"a\\\"b\\\\c\"", escapeForString("a\"b\\c"));
+        assertEquals("\"a\\nb\\rc\"", escapeForString("a\nb\rc"));
 
-    @Override
-    public void set(MappedArray obj, @Nullable Object property, @Nullable Object value) {
-        obj.set(property, value);
+        assertEquals("\"a\\tbc\"", escapeForString("a\tb\b\fc"));
+
     }
 }

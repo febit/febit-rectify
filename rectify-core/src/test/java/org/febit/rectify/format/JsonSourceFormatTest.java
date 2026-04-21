@@ -17,10 +17,77 @@ package org.febit.rectify.format;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 class JsonSourceFormatTest {
 
+    private final JsonSourceFormat format = new JsonSourceFormat();
+
     @Test
-    void test() {
-        // TODO
+    void processIgnoresNullEmptyAndBlankInput() {
+        var calls = new AtomicInteger();
+
+        format.process(null, ignored -> calls.incrementAndGet());
+        format.process("", ignored -> calls.incrementAndGet());
+        format.process("   ", ignored -> calls.incrementAndGet());
+
+        assertEquals(0, calls.get());
     }
+
+    @Test
+    void processIgnoresInvalidOrUnsupportedJson() {
+        var calls = new AtomicInteger();
+
+        format.process("{", ignored -> calls.incrementAndGet());
+        format.process("[]", ignored -> calls.incrementAndGet());
+        format.process("123", ignored -> calls.incrementAndGet());
+
+        assertEquals(0, calls.get());
+    }
+
+    @Test
+    void processIgnoresEmptyObject() {
+        var calls = new AtomicInteger();
+
+        format.process("{}", ignored -> calls.incrementAndGet());
+
+        assertEquals(0, calls.get());
+    }
+
+    @Test
+    void processEmitsFlatObject() {
+        var sinkValue = new AtomicReference<>();
+
+        format.process("{\"name\":\"Alice\",\"age\":18,\"active\":true}", sinkValue::set);
+
+        assertNotNull(sinkValue.get());
+        assertInstanceOf(Map.class, sinkValue.get());
+        var values = (Map<?, ?>) sinkValue.get();
+        assertEquals(3, values.size());
+        assertEquals("Alice", values.get("name"));
+        assertEquals(18, values.get("age"));
+        assertEquals(Boolean.TRUE, values.get("active"));
+    }
+
+    @Test
+    void processPreservesNestedObjectsAndArrays() {
+        var sinkValue = new AtomicReference<>();
+
+        format.process("{\"meta\":{\"source\":\"api\"},\"tags\":[\"a\",\"b\"],\"count\":2}", sinkValue::set);
+
+        assertNotNull(sinkValue.get());
+        assertInstanceOf(Map.class, sinkValue.get());
+        var values = (Map<?, ?>) sinkValue.get();
+        assertEquals(2, values.get("count"));
+        assertInstanceOf(Map.class, values.get("meta"));
+        assertInstanceOf(List.class, values.get("tags"));
+        assertEquals("api", ((Map<?, ?>) values.get("meta")).get("source"));
+        assertEquals(List.of("a", "b"), values.get("tags"));
+    }
+
 }

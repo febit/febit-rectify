@@ -17,16 +17,17 @@ package org.febit.rectify.lib.extra;
 
 import org.febit.lang.func.Function1;
 import org.febit.lang.util.ConvertUtils;
-import org.febit.rectify.lib.ILib;
+import org.febit.rectify.lib.BindingAlias;
+import org.febit.rectify.lib.Library;
 import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 
 @SuppressWarnings({
-        "java:S1118", // Utility classes should not have public constructors
         "unused",
+        "java:S1118", // Utility classes should not have public constructors
 })
-public class ConvertLib implements ILib {
+public class ConvertLibrary implements Library {
 
     public static final Function1<@Nullable Object, @Nullable Number> toNumber = ConvertUtils::toNumber;
     public static final Function1<@Nullable Object, @Nullable Byte> toByte = ConvertUtils::toByte;
@@ -37,5 +38,7 @@ public class ConvertLib implements ILib {
     public static final Function1<@Nullable Object, @Nullable Double> toDouble = ConvertUtils::toDouble;
     public static final Function1<@Nullable Object, @Nullable BigDecimal> toBigDecimal = ConvertUtils::toBigDecimal;
     public static final Function1<@Nullable Object, @Nullable Boolean> toBoolean = ConvertUtils::toBoolean;
-    public static final Function1<@Nullable Object, @Nullable String> toString = ConvertUtils::toString;
+
+    @BindingAlias({"toString"})
+    public static final Function1<@Nullable Object, @Nullable String> stringify = ConvertUtils::toString;
 }

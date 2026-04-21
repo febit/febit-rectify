@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.lib;
+package org.febit.rectify.wit.function;
 
-public interface IProto {
+import org.febit.wit.engine.WitFunction;
+import org.jspecify.annotations.Nullable;
+
+public interface LibFunction extends WitFunction.Constable {
+
+    @Nullable
+    @Override
+    Object apply(@Nullable Object @Nullable ... args);
 }

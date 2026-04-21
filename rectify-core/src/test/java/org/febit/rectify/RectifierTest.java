@@ -21,6 +21,7 @@ import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.format.JsonSourceFormat;
 import org.febit.rectify.wit.FilterBreakpoint;
 import org.febit.rectify.wit.ScriptBuilder;
+import org.febit.wit.engine.Heap;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -319,11 +320,11 @@ class RectifierTest {
         boolean completed = false;
 
         O out;
-        RawOutput rawOutput;
+        Heap rawOutput;
         String reason;
 
         @Override
-        public void onCompleted(@Nullable O out, RawOutput raw, @Nullable String reason) {
+        public void onCompleted(@Nullable O out, Heap raw, @Nullable String reason) {
             if (completed) {
                 throw new AssertionError("Assert single element, but onCompleted called more than once.");
             }

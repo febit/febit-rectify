@@ -13,12 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+@NullMarked
+package org.febit.rectify.wit.function;
 
-import java.util.HashMap;
-
-/**
- * Raw result outed by script wit.
- */
-public class RawOutput extends HashMap<String, Object> {
-}
+import org.jspecify.annotations.NullMarked;

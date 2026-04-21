@@ -13,21 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+@NullMarked
+package org.febit.rectify.support;
 
-import org.febit.wit.engine.Heap;
-import org.jspecify.annotations.Nullable;
-
-@FunctionalInterface
-public interface RectifierSink<O> {
-
-    void onCompleted(@Nullable O out, Heap raw, @Nullable String reason);
-
-    default void onSucceed(O out, Heap raw) {
-        this.onCompleted(out, raw, null);
-    }
-
-    default void onFailed(String reason, Heap raw) {
-        this.onCompleted(null, raw, reason);
-    }
-}
+import org.jspecify.annotations.NullMarked;

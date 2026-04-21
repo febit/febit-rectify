@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify;
+package org.febit.rectify.lib;
 
-import org.febit.wit.WitBuilder;
+import lombok.experimental.UtilityClass;
 
-/**
- * Plugin interface to customize wit builder for Rectifier.
- */
-@FunctionalInterface
-public interface RectifierWitCustomizer {
+import java.util.LinkedHashMap;
 
-    void customize(WitBuilder builder);
+@UtilityClass
+public class LibraryTestSupport {
+
+    public static Lib export(Class<?> cls) {
+        var map = new LinkedHashMap<String, Object>();
+        Libraries.collect(cls, map::put);
+        return new Lib(map);
+    }
+
+    public static Lib namespace(Class<?> cls, String namespace) {
+        return export(cls)
+                .namespace(namespace);
+    }
+
 }
-

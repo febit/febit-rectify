@@ -16,27 +16,26 @@
 package org.febit.rectify.wit.function;
 
 import lombok.RequiredArgsConstructor;
-import org.febit.rectify.util.Args;
-import org.febit.wit.engine.WitFunction;
+import org.febit.wit.util.Args;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 
 @RequiredArgsConstructor(staticName = "create")
-public class AdaptFunction implements WitFunction.Constable {
+public class AdapterFunction implements LibFunction {
 
-    private final Function<@Nullable Object, @Nullable Object>[] paramConverters;
-    private final Function<@Nullable Object[], @Nullable Object> func;
+    private final ParameterConverter[] parameterConverters;
+    private final Function<@Nullable Object[], @Nullable Object> delegate;
 
     @Nullable
     @Override
-    public Object apply(@Nullable Object @Nullable ... rawArgs) {
-        var converters = this.paramConverters;
+    public Object apply(@Nullable Object @Nullable ... args) {
+        var converters = this.parameterConverters;
         var argsSize = converters.length;
-        var args = new Object[argsSize];
+        var converted = new Object[argsSize];
         for (int i = 0; i < argsSize; i++) {
-            args[i] = converters[i].apply(Args.argX(rawArgs, i));
+            converted[i] = converters[i].convert(Args.at(args, i));
         }
-        return func.apply(args);
+        return delegate.apply(converted);
     }
 }

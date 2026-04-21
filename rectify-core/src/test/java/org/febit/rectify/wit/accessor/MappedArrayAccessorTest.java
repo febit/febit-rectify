@@ -16,22 +16,23 @@
 package org.febit.rectify.wit.accessor;
 
 import org.febit.rectify.support.MappedArray;
-import org.febit.wit.engine.accessor.Getter;
-import org.febit.wit.engine.accessor.Setter;
-import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-public class MappedArrayAccessor
-        implements Getter<MappedArray>, Setter<MappedArray>, Serializable {
+class MappedArrayAccessorTest {
 
-    @Override
-    public @Nullable Object get(MappedArray obj, @Nullable Object property) {
-        return obj.get(property);
+    @Test
+    void test() {
+        var accessor = new MappedArrayAccessor();
+        var array = mock(MappedArray.class);
+
+        accessor.set(array, "key1", "value1");
+        verify(array).set("key1", "value1");
+
+        accessor.get(array, "key1");
+        verify(array).get("key1");
     }
 
-    @Override
-    public void set(MappedArray obj, @Nullable Object property, @Nullable Object value) {
-        obj.set(property, value);
-    }
 }

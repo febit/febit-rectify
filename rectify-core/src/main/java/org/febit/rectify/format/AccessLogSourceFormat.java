@@ -22,8 +22,8 @@ import lombok.extern.jackson.Jacksonized;
 import org.apache.commons.lang3.StringUtils;
 import org.febit.lang.util.StringWalker;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.util.Indexer;
-import org.febit.rectify.util.MappedArray;
+import org.febit.rectify.support.Indexer;
+import org.febit.rectify.support.MappedArray;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;

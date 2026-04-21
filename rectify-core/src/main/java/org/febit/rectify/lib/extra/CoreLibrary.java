@@ -15,11 +15,10 @@
  */
 package org.febit.rectify.lib.extra;
 
-import lombok.extern.slf4j.Slf4j;
 import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
-import org.febit.rectify.lib.ILib;
+import org.febit.rectify.lib.Library;
 import org.febit.wit.ir.support.ALU;
 import org.jspecify.annotations.Nullable;
 
@@ -30,12 +29,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Slf4j
 @SuppressWarnings({
-        "java:S1118", // Utility classes should not have public constructors
         "unused",
+        "java:S1118", // Utility classes should not have public constructors
 })
-public class CommonLib implements ILib {
+public class CoreLibrary implements Library {
 
     private static final AtomicLong NEXT_ID = new AtomicLong(1);
 
