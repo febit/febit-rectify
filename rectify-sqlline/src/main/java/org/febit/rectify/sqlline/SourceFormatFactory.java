@@ -29,9 +29,9 @@ public class SourceFormatFactory {
     public static SourceFormat<String, Object> create(
             TableSettings.Source source) {
         return switch (source.format()) {
-            case "json" -> new JsonSourceFormat();
-            case "access" -> {
-                var options = JacksonUtils.to(source.properties(), AccessLogSourceFormat.Options.class);
+            case JsonSourceFormat.NAME -> new JsonSourceFormat();
+            case AccessLogSourceFormat.NAME -> {
+                var options = JacksonUtils.to(source.options(), AccessLogSourceFormat.Options.class);
                 Objects.requireNonNull(options, "Properties is required for access log format");
                 yield AccessLogSourceFormat.create(options);
             }

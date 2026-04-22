@@ -78,6 +78,8 @@ configure(subprojects.findAll {
         entry "flink-table"
         entry "flink-table-api-java"
         entry "flink-table-common"
+        entry "flink-table-planner-loader"
+        entry "flink-table-runtime"
       }
       dependency "${libs.wit.core.get()}"
       dependency "${libs.calcite.core.get()}"

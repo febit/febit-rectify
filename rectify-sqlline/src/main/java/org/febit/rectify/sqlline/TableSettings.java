@@ -40,7 +40,7 @@ public record TableSettings(
         Source source,
 
         @Nullable
-        List<String> setups,
+        List<String> preinstalls,
         @Nullable
         List<RectifierSettings.Property> properties
 ) implements Serializable {
@@ -53,7 +53,7 @@ public record TableSettings(
             @lombok.NonNull
             String format,
             @Singular
-            Map<String, Object> properties
+            Map<String, Object> options
     ) implements Serializable {
 
         public static class Builder {
@@ -88,8 +88,8 @@ public record TableSettings(
     public RectifierSettings toRectifierSettings() {
         var builder = RectifierSettings.builder()
                 .name(name);
-        if (setups != null) {
-            setups.forEach(builder::preinstall);
+        if (preinstalls != null) {
+            preinstalls.forEach(builder::preinstall);
         }
         if (properties != null) {
             builder.properties(properties);

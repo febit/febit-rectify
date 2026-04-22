@@ -34,6 +34,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AccessLogSourceFormat implements SourceFormat<String, Object> {
 
+    public static final String NAME = "access";
+
     private final Indexer<String> indexer;
 
     public static AccessLogSourceFormat create(Options options) {

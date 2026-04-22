@@ -35,19 +35,19 @@ class TableSettingsTest {
                 """).source();
 
         assertEquals("json", source.format());
-        assertTrue(source.properties().isEmpty());
+        assertTrue(source.options().isEmpty());
 
         source = TableSettings.fromYaml("""
                 name: x
                 path: /path/to/file
                 source:
                   format: access
-                  properties:
+                  options:
                     properties: [a, b, c]
                 """).source();
 
         assertEquals("access", source.format());
-        assertThat(source.properties())
+        assertThat(source.options())
                 .containsEntry("properties", List.of("a", "b", "c"));
     }
 
@@ -57,7 +57,7 @@ class TableSettingsTest {
                 name: Demo
                 source: json
                 path: /path/to/file
-                setups:
+                preinstalls:
                   - var isEven = $.status % 2 == 0
                   - var statusCopy = $.status
                 properties:
@@ -78,7 +78,7 @@ class TableSettingsTest {
                 config.source()
         );
 
-        var codes = config.setups();
+        var codes = config.preinstalls();
         var properties = config.properties();
 
         assertNotNull(codes);

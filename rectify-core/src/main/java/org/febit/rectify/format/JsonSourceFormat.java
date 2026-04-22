@@ -25,6 +25,8 @@ import java.util.function.Consumer;
 
 public class JsonSourceFormat implements SourceFormat<String, Object> {
 
+    public static final String NAME = "json";
+
     @Override
     public void process(@Nullable String input, Consumer<Object> sink) {
         if (StringUtils.isEmpty(input)) {

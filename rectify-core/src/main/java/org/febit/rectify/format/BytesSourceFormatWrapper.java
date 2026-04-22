@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink.table;
+package org.febit.rectify.format;
 
-import lombok.experimental.UtilityClass;
+import org.febit.rectify.SourceFormat;
+import org.jspecify.annotations.Nullable;
 
-@UtilityClass
-public class RectifierFormatOptions {
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+
+public record BytesSourceFormatWrapper(
+        SourceFormat<String, Object> delegate
+) implements SourceFormat<byte[], Object> {
+
+    @Override
+    public void process(byte @Nullable [] input, Consumer<Object> sink) {
+        var text = input == null
+                ? null
+                : new String(input, StandardCharsets.UTF_8);
+        delegate.process(text, sink);
+    }
 }

@@ -6,7 +6,13 @@ dependencies {
   compileOnly "org.apache.flink:flink-streaming-java"
   compileOnly "org.apache.flink:flink-format-common"
   compileOnly "org.apache.flink:flink-table-common"
+  compileOnly "org.apache.flink:flink-table"
 
   testImplementation "org.apache.flink:flink-streaming-java"
   testImplementation "org.apache.flink:flink-clients"
+  testImplementation "org.apache.flink:flink-table-common"
+  testImplementation "org.apache.flink:flink-table"
+  testImplementation "org.apache.flink:flink-table-api-java"
+  testRuntimeOnly "org.apache.flink:flink-table-runtime"
+  testRuntimeOnly "org.apache.flink:flink-table-planner-loader"
 }
