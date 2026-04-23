@@ -34,16 +34,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 class RectifyTable extends AbstractTable implements ScannableTable {
 
+    protected final RectifierSettings settings;
     protected final Source source;
-    protected final RectifierSettings conf;
     protected final SourceFormat<String, Object> sourceFormat;
 
     @Nullable
     protected RelDataType rowTypeCaching;
 
-    RectifyTable(Source source, RectifierSettings rectifierConfig, SourceFormat<String, Object> sourceFormat) {
+    RectifyTable(RectifierSettings settings, Source source, SourceFormat<String, Object> sourceFormat) {
         this.source = source;
-        this.conf = rectifierConfig;
+        this.settings = settings;
         this.sourceFormat = sourceFormat;
     }
 
@@ -53,7 +53,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
         if (type != null) {
             return rowTypeCaching;
         }
-        type = DataTypeUtils.toDataType(conf.schema(), typeFactory);
+        type = DataTypeUtils.toDataType(settings.schema(), typeFactory);
         rowTypeCaching = type;
         return type;
     }
@@ -64,7 +64,7 @@ class RectifyTable extends AbstractTable implements ScannableTable {
         return new AbstractEnumerable<>() {
             public Enumerator<Object[]> enumerator() {
                 try {
-                    return RectifyEnumerator.create(conf, source, sourceFormat, cancelFlag);
+                    return RectifyEnumerator.create(settings, source, sourceFormat, cancelFlag);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }

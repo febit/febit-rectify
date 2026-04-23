@@ -69,6 +69,6 @@ class RectifySchema extends AbstractSchema {
 
     private Table createTable(TableSettings settings) {
         var source = Sources.of(new File(directoryFile, settings.path()));
-        return new RectifyTable(source, settings.toRectifierSettings(), settings.createSourceFormat());
+        return new RectifyTable(settings.toRectifierSettings(), source, settings.createSourceFormat());
     }
 }

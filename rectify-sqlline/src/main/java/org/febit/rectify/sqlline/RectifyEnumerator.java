@@ -46,9 +46,14 @@ class RectifyEnumerator implements Enumerator<Object[]> {
         this.pending = new ArrayDeque<>();
     }
 
-    static RectifyEnumerator create(RectifierSettings conf, Source source, SourceFormat<String, Object> sourceFormat, AtomicBoolean cancelFlag) throws IOException {
+    static RectifyEnumerator create(
+            RectifierSettings settings,
+            Source source,
+            SourceFormat<String, Object> sourceFormat,
+            AtomicBoolean cancelFlag
+    ) throws IOException {
         var reader = new BufferedReader(source.reader());
-        var rectifier = conf.create(StructSpecs.asArray())
+        var rectifier = settings.create(StructSpecs.asArray())
                 .with(sourceFormat);
         return new RectifyEnumerator(reader, rectifier, cancelFlag);
     }
