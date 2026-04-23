@@ -15,11 +15,10 @@
  */
 package org.febit.rectify.flink;
 
-import lombok.Getter;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
-import org.febit.lang.modeler.Schema;
+import org.apache.flink.util.Collector;
 import org.febit.lang.util.SingleElementConsumer;
 import org.febit.rectify.RectifierSettings;
 import org.febit.rectify.SourceFormat;
@@ -27,16 +26,25 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.Serial;
 
-public class RectifierDeserializationSchema implements DeserializationSchema<Row> {
+import static java.util.Objects.requireNonNull;
+
+public record RowRectifierSchema(
+        FlinkRectifier<byte[]> rectifier
+) implements DeserializationSchema<Row> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Getter
-    private final FlinkRectifier<byte[]> rectifier;
+    public RowRectifierSchema {
+        requireNonNull(rectifier, "rectifier must not be null");
+    }
 
-    protected RectifierDeserializationSchema(FlinkRectifier<byte[]> rectifier) {
-        this.rectifier = rectifier;
+    public static RowRectifierSchema of(RectifierSettings settings, SourceFormat<byte[], Object> sourceFormat) {
+        return of(FlinkRectifier.of(settings, sourceFormat));
+    }
+
+    public static RowRectifierSchema of(FlinkRectifier<byte[]> rectifier) {
+        return new RowRectifierSchema(rectifier);
     }
 
     @Nullable
@@ -48,24 +56,18 @@ public class RectifierDeserializationSchema implements DeserializationSchema<Row
     }
 
     @Override
-    public boolean isEndOfStream(Row nextElement) {
-        return false;
+    public void deserialize(byte[] message, Collector<Row> out) {
+        this.rectifier.process(message, out);
     }
 
     @Override
     public RowTypeInfo getProducedType() {
-        return this.rectifier.getReturnType();
+        return this.rectifier.producedType();
     }
 
-    public Schema getRectifierSchema() {
-        return this.rectifier.getRectifierSchema();
+    @Override
+    public boolean isEndOfStream(Row nextElement) {
+        return false;
     }
 
-    public static RectifierDeserializationSchema of(SourceFormat<byte[], Object> sourceFormat, RectifierSettings conf) {
-        return of(FlinkRectifier.create(sourceFormat, conf));
-    }
-
-    public static RectifierDeserializationSchema of(FlinkRectifier<byte[]> rectifier) {
-        return new RectifierDeserializationSchema(rectifier);
-    }
 }

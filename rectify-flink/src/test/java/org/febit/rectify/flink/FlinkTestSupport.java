@@ -15,6 +15,7 @@
  */
 package org.febit.rectify.flink;
 
+import lombok.experimental.UtilityClass;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierSettings;
 
@@ -22,9 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-class FlinkRectifierTests {
+@UtilityClass
+public class FlinkTestSupport {
 
-    static final RectifierSettings CONF = RectifierSettings.builder()
+    public static final RectifierSettings SETTINGS = RectifierSettings.builder()
             .name("Demo")
             .filter("$.status > 0")
             .filter("$.status < 100 || \"status should <100\"")
@@ -34,7 +36,7 @@ class FlinkRectifierTests {
             .property("string", "content", "\"prefix:\"+$.content")
             .build();
 
-    static final List<String> SOURCE = Arrays.asList(
+    public static final List<String> SOURCE = Arrays.asList(
             buildInput(6, true, 6, "666"),
             buildInput(5, true, 50, "5555"),
             // not pass: status <= 0

@@ -28,14 +28,13 @@ import org.apache.flink.table.types.logical.RowType;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierSettings;
 import org.febit.rectify.SourceFormat;
-import org.febit.rectify.flink.RectifierDeserializationSchema;
+import org.febit.rectify.flink.FlinkRectifier;
 import org.febit.rectify.flink.table.TableTypeUtils;
 import org.febit.rectify.format.AccessLogSourceFormat;
 import org.febit.rectify.format.BytesSourceFormatWrapper;
 import org.febit.rectify.format.JsonSourceFormat;
 
-import java.util.Objects;
-
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public record RectifierDecodingFormat(
@@ -50,12 +49,10 @@ public record RectifierDecodingFormat(
     ) {
         var projectedDataType = Projection.of(projections).project(physicalDataType);
         var producedType = context.<RowData>createTypeInformation(projectedDataType);
-
-        var rowType = TableTypeUtils.toRowType(physicalDataType);
-        var deserializer = createDeserializer(config, rowType);
         var converter = context.createDataStructureConverter(projectedDataType);
-
-        return new RectifierFormatDeserializer(deserializer, converter, producedType, projections);
+        var rowType = TableTypeUtils.toRowType(physicalDataType);
+        var rectifier = createRectifier(config, rowType);
+        return new RectifierFormatSchema(rectifier, producedType, converter, projections);
     }
 
     @Override
@@ -68,10 +65,10 @@ public record RectifierDecodingFormat(
         return true;
     }
 
-    private static RectifierDeserializationSchema createDeserializer(ReadableConfig config, RowType rowType) {
+    private static FlinkRectifier<byte[]> createRectifier(ReadableConfig config, RowType producedType) {
         var sourceFormat = createSourceFormat(config);
-        var settings = createSettings(config, rowType);
-        return RectifierDeserializationSchema.of(sourceFormat, settings);
+        var settings = createSettings(config, producedType);
+        return FlinkRectifier.of(settings, sourceFormat);
     }
 
     private static SourceFormat<byte[], Object> createSourceFormat(ReadableConfig conf) {
@@ -82,14 +79,14 @@ public record RectifierDecodingFormat(
             case JsonSourceFormat.NAME -> new BytesSourceFormatWrapper(new JsonSourceFormat());
             case AccessLogSourceFormat.NAME -> {
                 var options = JacksonUtils.to(props, AccessLogSourceFormat.Options.class);
-                Objects.requireNonNull(options, "Properties is required for access log format");
+                requireNonNull(options, "Properties is required for access log format");
                 yield new BytesSourceFormatWrapper(AccessLogSourceFormat.create(options));
             }
             default -> throw new IllegalArgumentException("Unsupported format: " + name);
         };
     }
 
-    private static RectifierSettings createSettings(ReadableConfig conf, RowType rowType) {
+    private static RectifierSettings createSettings(ReadableConfig conf, RowType producedType) {
         var builder = RectifierSettings.builder()
                 .name(conf.get(RectifierFormatOptions.NAME));
 
@@ -103,14 +100,14 @@ public record RectifierDecodingFormat(
 
         var bindings = conf.get(RectifierFormatOptions.COLUMNS);
         var invalidColumns = bindings.keySet().stream()
-                .filter(name -> rowType.getFieldIndex(name) < 0)
+                .filter(name -> producedType.getFieldIndex(name) < 0)
                 .toList();
         if (!invalidColumns.isEmpty()) {
             throw new IllegalArgumentException("Invalid column names in 'columns' option: " + invalidColumns
-                    + ", they conflict with physical field names: " + rowType.getFieldNames());
+                    + ", they conflict with physical field names: " + producedType.getFieldNames());
         }
 
-        for (var field : rowType.getFields()) {
+        for (var field : producedType.getFields()) {
             var name = field.getName();
             var expr = bindings.get(name);
             builder.property()

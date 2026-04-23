@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify.flink.support;
 
 import org.apache.flink.types.Row;
 import org.febit.lang.modeler.Schema;

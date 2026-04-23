@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.febit.rectify.flink.table.TableTestSupport.assertRow;
+import static org.febit.rectify.flink.table.TableTestSupport.assertFooRow;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RectifierFormatIntegrationTest {
@@ -33,8 +33,8 @@ class RectifierFormatIntegrationTest {
     void createDynamicTableSourceDiscoversFormatAndDecodesRows() throws Exception {
         var source = FactoryUtil.createDynamicTableSource(
                 null,
-                ObjectIdentifier.of("default_catalog", "default_database", TableTestData.TABLE_NAME),
-                TableTestData.catalogTable(),
+                ObjectIdentifier.of("default_catalog", "default_database", FooTableData.TABLE),
+                FooTableData.catalogTable(),
                 Map.of(),
                 new Configuration(),
                 getClass().getClassLoader(),
@@ -45,10 +45,10 @@ class RectifierFormatIntegrationTest {
         var runtimeProvider = testingSource.getScanRuntimeProvider(new TableTestSupport.TestDynamicTableSourceContext());
         var scanRuntimeProvider = assertInstanceOf(TestingScanRuntimeProvider.class, runtimeProvider);
         var rows = TableTestSupport.collectRows(scanRuntimeProvider);
-        var expectedRows = TableTestData.expectedRows();
+        var expectedRows = FooTableData.EXPECTED;
         assertEquals(expectedRows.size(), rows.size());
         for (int i = 0; i < expectedRows.size(); i++) {
-            assertRow(rows.get(i), expectedRows.get(i));
+            assertFooRow(rows.get(i), expectedRows.get(i));
         }
     }
 }

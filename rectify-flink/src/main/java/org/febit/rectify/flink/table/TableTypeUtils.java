@@ -38,16 +38,22 @@ public class TableTypeUtils {
 
     public static Schema toSchema(LogicalType logicalType) {
         var schema = switch (logicalType.getTypeRoot()) {
-            case CHAR, VARCHAR -> Schemas.ofPrimitive(SchemaType.STRING);
+            case CHAR,
+                 VARCHAR -> Schemas.ofPrimitive(SchemaType.STRING);
+            case BINARY,
+                 VARBINARY -> Schemas.ofPrimitive(SchemaType.BYTES);
             case BOOLEAN -> Schemas.ofPrimitive(SchemaType.BOOLEAN);
-            case TINYINT, SMALLINT -> Schemas.ofPrimitive(SchemaType.SHORT);
+            case TINYINT -> Schemas.ofPrimitive(SchemaType.BYTE);
+            case SMALLINT -> Schemas.ofPrimitive(SchemaType.SHORT);
             case INTEGER -> Schemas.ofPrimitive(SchemaType.INT);
             case BIGINT -> Schemas.ofPrimitive(SchemaType.LONG);
             case FLOAT -> Schemas.ofPrimitive(SchemaType.FLOAT);
             case DOUBLE -> Schemas.ofPrimitive(SchemaType.DOUBLE);
+            case DECIMAL -> Schemas.ofPrimitive(SchemaType.DECIMAL);
             case DATE -> Schemas.ofPrimitive(SchemaType.DATE);
             case TIME_WITHOUT_TIME_ZONE -> Schemas.ofPrimitive(SchemaType.TIME);
             case TIMESTAMP_WITHOUT_TIME_ZONE -> Schemas.ofPrimitive(SchemaType.DATETIME);
+            case TIMESTAMP_WITH_LOCAL_TIME_ZONE -> Schemas.ofPrimitive(SchemaType.INSTANT);
             case TIMESTAMP_WITH_TIME_ZONE -> Schemas.ofPrimitive(SchemaType.DATETIME_ZONED);
             case ARRAY -> Schemas.ofArray(toSchema(((ArrayType) logicalType).getElementType()));
             case MAP -> {
@@ -65,9 +71,7 @@ public class TableTypeUtils {
                 }
                 yield builder.build();
             }
-            case BINARY, VARBINARY, DECIMAL,
-                 TIMESTAMP_WITH_LOCAL_TIME_ZONE,
-                 INTERVAL_YEAR_MONTH, INTERVAL_DAY_TIME,
+            case INTERVAL_YEAR_MONTH, INTERVAL_DAY_TIME,
                  MULTISET, DISTINCT_TYPE, STRUCTURED_TYPE, NULL, RAW, SYMBOL,
                  UNRESOLVED, DESCRIPTOR, VARIANT -> throw new IllegalArgumentException(
                     "Unsupported table field type for rectifier: " + logicalType.asSummaryString());

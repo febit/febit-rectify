@@ -1,6 +1,6 @@
 [versions]
 febit-devkit = '1.6.0'
-febit-commons = '4.0.1'
+febit-commons = '4.0.2-SNAPSHOT'
 febit-wit = '3.0.0'
 
 avro = '1.12.1'

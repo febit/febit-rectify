@@ -18,13 +18,17 @@ package org.febit.rectify.flink.table;
 import lombok.experimental.UtilityClass;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.catalog.ResolvedCatalogTable;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
+import org.febit.lang.util.JacksonUtils;
+import org.febit.lang.util.Lists;
 import org.febit.rectify.flink.table.factory.RectifierFormatFactory;
 import org.febit.rectify.flink.table.factory.RectifierFormatOptions;
 import org.febit.rectify.format.JsonSourceFormat;
@@ -35,28 +39,47 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @UtilityClass
-final class TableTestData {
+final class FooTableData {
 
-    static final String TABLE_NAME = "rectifier_input";
+    static final String TABLE = "foo";
 
-    static final String QUERY_ALL = """
-            SELECT id, enable, status, content
-            FROM rectifier_input
-            ORDER BY id DESC
-            """;
-
-    private static final List<ExpectedRow> EXPECTED_ROWS = List.of(
-            new ExpectedRow(6L, 60, "666"),
-            new ExpectedRow(4L, 40, "444")
+    static final List<Foo> ALL = List.of(
+            new Foo(6L, true, 60, "666"),
+            new Foo(7L, false, 70, "777"),
+            new Foo(4L, true, 40, "444"),
+            new Foo(8L, true, 0, "888")
     );
 
-    record ExpectedRow(long id, int status, String content) {
-        Row toRow() {
-            return Row.of(id, true, status, content);
+    static final List<Foo> EXPECTED = ALL.stream()
+            .filter(Foo::enable)
+            .filter(foo -> foo.status() > 0)
+            .map(foo -> foo.withStatus(foo.status() * 10))
+            .toList();
+
+    static final String RAW_LINES = ALL.stream()
+            .map(JacksonUtils::jsonify)
+            .collect(Collectors.joining("\n"));
+
+    private static class EnvHolder {
+        static final TableEnvironment ENV;
+
+        static {
+            try {
+                ENV = TableEnvironment.create(EnvironmentSettings.inBatchMode());
+                ENV.executeSql(createTable());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    static DataType physicalDataType() {
+    static List<Row> query(String sql) throws Exception {
+        try (var results = EnvHolder.ENV.executeSql(sql).collect()) {
+            return Lists.collect(results);
+        }
+    }
+
+    static DataType dataType() {
         return DataTypes.ROW(
                 DataTypes.FIELD("id", DataTypes.BIGINT().notNull()),
                 DataTypes.FIELD("enable", DataTypes.BOOLEAN().notNull()),
@@ -82,40 +105,32 @@ final class TableTestData {
         return options;
     }
 
-    static List<ExpectedRow> expectedRows() {
-        return EXPECTED_ROWS;
-    }
-
     static ResolvedCatalogTable catalogTable() {
-        var physicalDataType = physicalDataType();
-        var rowType = (RowType) physicalDataType.getLogicalType();
+        var dataType = dataType();
+        var rowType = (RowType) dataType.getLogicalType();
         var catalogTable = CatalogTable.newBuilder()
-                .schema(Schema.newBuilder().fromRowDataType(physicalDataType).build())
-                .options(options())
+                .schema(Schema.newBuilder().fromRowDataType(dataType).build())
+                .options(tableOptions())
                 .build();
         return new ResolvedCatalogTable(
                 catalogTable,
-                ResolvedSchema.physical(rowType.getFieldNames(), physicalDataType.getChildren())
+                ResolvedSchema.physical(rowType.getFieldNames(), dataType.getChildren())
         );
     }
 
-    static Map<String, String> options() {
-        return options(TestingBytesTableSourceFactory.IDENTIFIER);
-    }
-
-    static Map<String, String> options(String connectorIdentifier) {
+    static Map<String, String> tableOptions() {
         var options = new LinkedHashMap<String, String>();
-        options.put("connector", connectorIdentifier);
-        options.put("data", rawInput());
+        options.put("connector", TestingBytesTableSourceFactory.IDENTIFIER);
         options.put("format", RectifierFormatFactory.IDENTIFIER);
         options.put("febit-rectifier.source.format", JsonSourceFormat.NAME);
         options.put("febit-rectifier.name", "Demo");
         options.put("febit-rectifier.filters", "['$.status > 0', '$.enable']");
         options.put("febit-rectifier.columns", "{id: '$.id', status: '$.status * 10', content: '$.content'}");
+        options.put("data", RAW_LINES);
         return options;
     }
 
-    static String createTableSql() {
+    static String createTable() {
         return """
                 CREATE TEMPORARY TABLE `%s` (
                   id BIGINT NOT NULL,
@@ -125,29 +140,7 @@ final class TableTestData {
                 ) WITH (
                 %s
                 )
-                """.formatted(TABLE_NAME, sqlOptions());
-    }
-
-    static String rawInput() {
-        return """
-                {"id":6,"enable":true,"status":6,"content":"666"}
-                {"id":7,"enable":false,"status":7,"content":"777"}
-                {"id":4,"enable":true,"status":4,"content":"444"}
-                {"id":8,"enable":true,"status":0,"content":"888"}
-                """.stripIndent();
-    }
-
-    private static String sqlOptions() {
-        return options().entrySet().stream()
-                .map(entry -> "  '%s' = '%s'".formatted(
-                        entry.getKey(),
-                        escapeSqlLiteral(entry.getValue()))
-                )
-                .collect(Collectors.joining(",\n"));
-    }
-
-    private static String escapeSqlLiteral(String value) {
-        return value.replace("'", "''");
+                """.formatted(TABLE, TableTestSupport.sqlOptions(tableOptions()));
     }
 }
 

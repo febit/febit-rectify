@@ -13,34 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink;
+package org.febit.rectify.flink.support;
 
 import lombok.experimental.UtilityClass;
 import org.apache.flink.types.Row;
 import org.jspecify.annotations.Nullable;
 
 @UtilityClass
-public class RowProjectUtils {
+public class ProjectUtils {
 
     public static Row project(Row row, int[][] projections) {
-        Row projected = Row.withPositions(row.getKind(), projections.length);
+        var projected = Row.withPositions(row.getKind(), projections.length);
         for (int i = 0; i < projections.length; i++) {
-            projected.setField(i, getField(row, projections[i]));
+            projected.setField(i, dive(row, projections[i]));
         }
         return projected;
     }
 
     @Nullable
-    private static Object getField(@Nullable Object current, int[] path) {
+    private static Object dive(@Nullable Object current, int[] path) {
         Object value = current;
-        for (int index : path) {
+        for (int idx : path) {
             if (value == null) {
                 return null;
             }
             if (!(value instanceof Row row)) {
-                throw new IllegalArgumentException("Nested projection requires ROW values: " + value.getClass());
+                throw new IllegalArgumentException("Expected a Row at path " + idx
+                        + ", but got: " + value.getClass());
             }
-            value = row.getField(index);
+            value = row.getField(idx);
         }
         return value;
     }

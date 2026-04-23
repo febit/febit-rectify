@@ -19,34 +19,36 @@ import lombok.Getter;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.table.connector.RuntimeConverter;
-import org.apache.flink.table.connector.source.DynamicTableSource;
+import org.apache.flink.table.connector.source.DynamicTableSource.DataStructureConverter;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.types.Row;
-import org.febit.rectify.flink.RectifierDeserializationSchema;
-import org.febit.rectify.flink.RowProjectUtils;
+import org.apache.flink.util.Collector;
+import org.febit.lang.util.SingleElementConsumer;
+import org.febit.rectify.flink.FlinkRectifier;
+import org.febit.rectify.flink.support.ProjectUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serial;
 
-final class RectifierFormatDeserializer implements DeserializationSchema<RowData> {
+final class RectifierFormatSchema implements DeserializationSchema<RowData> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Getter
-    private final RectifierDeserializationSchema deserializer;
-    private final DynamicTableSource.DataStructureConverter converter;
+    private final FlinkRectifier<byte[]> rectifier;
     @Getter
     private final TypeInformation<RowData> producedType;
+    private final DataStructureConverter converter;
     private final int[][] projections;
 
-    RectifierFormatDeserializer(
-            RectifierDeserializationSchema deserializer,
-            DynamicTableSource.DataStructureConverter converter,
+    RectifierFormatSchema(
+            FlinkRectifier<byte[]> rectifier,
             TypeInformation<RowData> producedType,
+            DataStructureConverter converter,
             int[][] projections
     ) {
-        this.deserializer = deserializer;
+        this.rectifier = rectifier;
         this.converter = converter;
         this.producedType = producedType;
         this.projections = projections;
@@ -60,14 +62,30 @@ final class RectifierFormatDeserializer implements DeserializationSchema<RowData
     }
 
     @Nullable
-    @Override
-    public RowData deserialize(byte[] message) {
-        Row row = deserializer.deserialize(message);
+    private RowData project(@Nullable Row row) {
         if (row == null) {
             return null;
         }
-        var projected = RowProjectUtils.project(row, projections);
+        var projected = ProjectUtils.project(row, projections);
         return (RowData) converter.toInternal(projected);
+    }
+
+    @Nullable
+    @Override
+    public RowData deserialize(byte[] message) {
+        var cell = new SingleElementConsumer<Row>();
+        this.rectifier.process(message, cell);
+        return project(cell.getValue());
+    }
+
+    @Override
+    public void deserialize(byte[] message, Collector<RowData> out) {
+        this.rectifier.process(message, row -> {
+            var projected = project(row);
+            if (projected != null) {
+                out.collect(projected);
+            }
+        });
     }
 
     @Override

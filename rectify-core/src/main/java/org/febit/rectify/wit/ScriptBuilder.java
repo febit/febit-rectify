@@ -40,7 +40,7 @@ public class ScriptBuilder {
     public static final String VAR_FILTER_VERIFY = "$$_FILTER_VERIFY";
     public static final String VAR_CREATE_FILTER_BREAKPOINT = "$$_CREATE_FILTER_BREAKPOINT";
 
-    static String escapeForString(@Nullable String str) {
+    static String escapeStringLiteral(@Nullable String str) {
         if (str == null) {
             return "null";
         }
@@ -151,7 +151,7 @@ public class ScriptBuilder {
             RectifierSettings.Property property,
             int index
     ) {
-        var escapedName = escapeForString(property.name());
+        var escapedName = escapeStringLiteral(property.name());
         var expr = property.expression();
         if (StringUtils.isBlank(expr)) {
             expr = VAR_INPUT + '[' + escapedName + ']';
@@ -205,7 +205,7 @@ public class ScriptBuilder {
         }
 
         public Context appendStringValue(@Nullable String str) {
-            return append(escapeForString(str));
+            return append(escapeStringLiteral(str));
         }
 
         public String buildScript() {

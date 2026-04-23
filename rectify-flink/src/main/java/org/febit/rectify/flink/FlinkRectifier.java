@@ -15,8 +15,6 @@
  */
 package org.febit.rectify.flink;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
@@ -26,97 +24,78 @@ import org.febit.rectify.RectifierSink;
 import org.febit.rectify.Rectifiers;
 import org.febit.rectify.SerializableRectifier;
 import org.febit.rectify.SourceFormat;
+import org.febit.rectify.flink.support.RowStructSpec;
+import org.febit.rectify.flink.support.TypeUtils;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Consumer;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * @param <I>
+ * A wrapper around a Rectifier that produces Flink Rows.
+ *
+ * @param <I> the type of the input to the rectifier
  */
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class FlinkRectifier<I> implements Serializable {
+public record FlinkRectifier<I>(
+        SerializableRectifier<I, Row> rectifier,
+        RowTypeInfo producedType
+) implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
-    private final SerializableRectifier<I, Row> rectifier;
-    private final RowTypeInfo typeInfo;
-
-    public static <I> FlinkRectifier<I> create(SerializableRectifier<I, Row> rectifier, RowTypeInfo typeInfo) {
-        Objects.requireNonNull(rectifier, "rectifier");
-        Objects.requireNonNull(typeInfo, "typeInfo");
-        return new FlinkRectifier<>(rectifier, typeInfo);
+    public FlinkRectifier {
+        requireNonNull(rectifier, "rectifier must not be null");
+        requireNonNull(producedType, "producedType must not be null");
     }
 
-    public static <I> FlinkRectifier<I> create(RectifierSettings conf) {
-        return create(
-                Rectifiers.lazy(() -> conf.create(RowStructSpec.get())),
-                TypeInfoUtils.ofRowType(conf.schema())
+    public static <I> FlinkRectifier<I> of(
+            SerializableRectifier<I, Row> rectifier,
+            RowTypeInfo producedType
+    ) {
+        return new FlinkRectifier<>(rectifier, producedType);
+    }
+
+    public static <I> FlinkRectifier<I> of(RectifierSettings settings) {
+        return of(
+                Rectifiers.lazy(() -> settings.create(RowStructSpec.get())),
+                TypeUtils.toRowType(settings.schema())
         );
     }
 
-    public static <I> FlinkRectifier<I> create(SourceFormat<I, Object> sourceFormat, RectifierSettings conf) {
-        return create(
-                Rectifiers.lazy(() -> conf.create(sourceFormat, RowStructSpec.get())),
-                TypeInfoUtils.ofRowType(conf.schema())
+    public static <I> FlinkRectifier<I> of(RectifierSettings settings, SourceFormat<I, Object> sourceFormat) {
+        return of(
+                Rectifiers.lazy(() -> settings.create(sourceFormat, RowStructSpec.get())),
+                TypeUtils.toRowType(settings.schema())
         );
     }
 
-    protected void process(I raw, Collector<Row> out) {
-        process(raw, out::collect);
-    }
-
-    protected void processRaw(I in, RectifierSink<Row> sink) {
+    private void process0(I in, RectifierSink<Row> sink) {
         this.rectifier.process(in, sink);
     }
 
+    public void process(I raw, Collector<Row> out) {
+        process(raw, out::collect);
+    }
+
     public void process(I in, Consumer<Row> out) {
-        processRaw(in, (record, raw, error) -> {
-            if (record != null) {
-                out.accept(record);
+        process0(in, (row, raw, error) -> {
+            if (row != null) {
+                out.accept(row);
             }
         });
     }
 
-    public RowTypeInfo getReturnType() {
-        return this.typeInfo;
-    }
-
-    public int getFieldIndex(String fieldName) {
-        return this.typeInfo.getFieldIndex(fieldName);
-    }
-
-    public int requireFieldIndex(String fieldName) {
-        int index = this.typeInfo.getFieldIndex(fieldName);
-        if (index < 0) {
-            throw new NoSuchElementException(
-                    "Not found field in schema '" + rectifier.schema().fullname() + "' : " + fieldName);
-        }
-        return index;
-    }
-
-    public List<String> getFieldNameList() {
-        return Collections.unmodifiableList(Arrays.asList(this.typeInfo.getFieldNames()));
-    }
-
-    public Schema getRectifierSchema() {
+    public Schema producedSchema() {
         return this.rectifier.schema();
-    }
-
-    public String explainSource() {
-        return toString();
     }
 
     @Override
     public String toString() {
         return "FlinkRectifier{"
-                + "schema=" + rectifier.schema().fullname()
+                + "schema=" + producedSchema().fullname()
                 + '}';
     }
 

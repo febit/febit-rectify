@@ -35,6 +35,8 @@ import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.SOURC
 
 public class RectifierFormatFactory implements DeserializationFormatFactory {
 
+    public static final String IDENTIFIER = "febit-rectifier";
+
     public static final Set<ConfigOption<?>> REQUIRED_OPTIONS = Set.of(
             SOURCE_FORMAT
     );
@@ -46,8 +48,6 @@ public class RectifierFormatFactory implements DeserializationFormatFactory {
             FILTERS,
             COLUMNS
     );
-
-    public static final String IDENTIFIER = "febit-rectifier";
 
     @Override
     public ProjectableDecodingFormat<DeserializationSchema<RowData>> createDecodingFormat(

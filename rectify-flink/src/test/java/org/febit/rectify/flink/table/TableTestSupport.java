@@ -38,6 +38,8 @@ import org.apache.flink.util.UserCodeClassLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -63,12 +65,25 @@ public class TableTestSupport {
         return rows;
     }
 
-    static void assertRow(RowData row, TableTestData.ExpectedRow expected) {
+    static void assertFooRow(RowData row, Foo expected) {
         assertEquals(4, row.getArity());
         assertEquals(expected.id(), row.getLong(0));
         assertTrue(row.getBoolean(1));
         assertEquals(expected.status(), row.getInt(2));
         assertEquals(expected.content(), row.getString(3).toString());
+    }
+
+    static String escapeSqlLiteral(String value) {
+        return value.replace("'", "''");
+    }
+
+    static String sqlOptions(Map<String, String> options) {
+        return options.entrySet().stream()
+                .map(entry -> "  '%s' = '%s'".formatted(
+                        entry.getKey(),
+                        escapeSqlLiteral(entry.getValue()))
+                )
+                .collect(Collectors.joining(",\n"));
     }
 
     static final class TestDynamicTableSourceContext implements ScanTableSource.ScanContext {

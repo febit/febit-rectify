@@ -17,20 +17,20 @@ package org.febit.rectify.wit;
 
 import org.junit.jupiter.api.Test;
 
-import static org.febit.rectify.wit.ScriptBuilder.escapeForString;
+import static org.febit.rectify.wit.ScriptBuilder.escapeStringLiteral;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ScriptBuilderTest {
 
     @Test
-    void testEscapeForString() {
-        assertEquals("null", escapeForString(null));
-        assertEquals("\"\"", escapeForString(""));
-        assertEquals("\"abc\"", escapeForString("abc"));
-        assertEquals("\"a\\\"b\\\\c\"", escapeForString("a\"b\\c"));
-        assertEquals("\"a\\nb\\rc\"", escapeForString("a\nb\rc"));
+    void testEscapeStringLiteral() {
+        assertEquals("null", escapeStringLiteral(null));
+        assertEquals("\"\"", escapeStringLiteral(""));
+        assertEquals("\"abc\"", escapeStringLiteral("abc"));
+        assertEquals("\"a\\\"b\\\\c\"", escapeStringLiteral("a\"b\\c"));
+        assertEquals("\"a\\nb\\rc\"", escapeStringLiteral("a\nb\rc"));
 
-        assertEquals("\"a\\tbc\"", escapeForString("a\tb\b\fc"));
+        assertEquals("\"a\\tbc\"", escapeStringLiteral("a\tb\b\fc"));
 
     }
 }

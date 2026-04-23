@@ -37,8 +37,8 @@ class RectifierFormatFactoryTest {
     @Test
     void createRuntimeDecoderBuildsRowDataFromOptionsAndPhysicalSchema() throws Exception {
         var schema = createRuntimeDecoder(
-                TableTestData.factoryOptions(),
-                TableTestData.physicalDataType(),
+                FooTableData.factoryOptions(),
+                FooTableData.dataType(),
                 0, 2, 3
         );
         schema.open(new TableTestSupport.TestInitializationContext());
@@ -75,10 +75,10 @@ class RectifierFormatFactoryTest {
 
     @Test
     void unknownPropertyBindingIsRejected() {
-        var options = TableTestData.factoryOptions();
+        var options = FooTableData.factoryOptions();
         options.set(RectifierFormatOptions.COLUMNS, Map.of("missing", "$.missing"));
 
-        assertThatThrownBy(() -> createRuntimeDecoder(options, TableTestData.physicalDataType(), 0))
+        assertThatThrownBy(() -> createRuntimeDecoder(options, FooTableData.dataType(), 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("missing")
                 .hasMessageContaining("Invalid column names");
@@ -86,7 +86,7 @@ class RectifierFormatFactoryTest {
 
     @Test
     void unsupportedFieldTypeIsRejected() {
-        var options = TableTestData.factoryOptions();
+        var options = FooTableData.factoryOptions();
         var unsupportedType = DataTypes.ROW(
                 DataTypes.FIELD("price", DataTypes.DECIMAL(10, 2))
         );

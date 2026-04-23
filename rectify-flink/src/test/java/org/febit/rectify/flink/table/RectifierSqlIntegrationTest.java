@@ -15,27 +15,55 @@
  */
 package org.febit.rectify.flink.table;
 
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.TableEnvironment;
-import org.febit.lang.util.Lists;
 import org.junit.jupiter.api.Test;
 
+import static org.febit.rectify.flink.table.FooTableData.query;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RectifierSqlIntegrationTest {
 
     @Test
-    void createTableAndSelectRowsViaSql() throws Exception {
-        var tableEnv = TableEnvironment.create(EnvironmentSettings.inBatchMode());
-        tableEnv.executeSql(TableTestData.createTableSql());
+    void queryId() throws Exception {
+        var rows = query("""
+                SELECT id
+                FROM `%s`
+                ORDER BY id DESC"""
+                .formatted(FooTableData.TABLE)
+        );
+        var expectedRows = FooTableData.EXPECTED;
+        assertEquals(expectedRows.size(), rows.size());
+        for (int i = 0; i < expectedRows.size(); i++) {
+            assertEquals(expectedRows.get(i).id(), rows.get(i).getField(0));
+        }
+    }
 
-        try (var results = tableEnv.executeSql(TableTestData.QUERY_ALL).collect()) {
-            var rows = Lists.collect(results);
-            var expectedRows = TableTestData.expectedRows();
-            assertEquals(expectedRows.size(), rows.size());
-            for (int i = 0; i < expectedRows.size(); i++) {
-                assertEquals(expectedRows.get(i).toRow(), rows.get(i));
-            }
+    @Test
+    void queryEnable() throws Exception {
+        var rows = query("""
+                SELECT enable
+                FROM `%s`
+                ORDER BY id DESC"""
+                .formatted(FooTableData.TABLE)
+        );
+        var expectedRows = FooTableData.EXPECTED;
+        assertEquals(expectedRows.size(), rows.size());
+        for (int i = 0; i < expectedRows.size(); i++) {
+            assertEquals(true, rows.get(i).getField(0));
+        }
+    }
+
+    @Test
+    void queryAll() throws Exception {
+        var rows = query("""
+                SELECT id, enable, status, content
+                FROM `%s`
+                ORDER BY id DESC"""
+                .formatted(FooTableData.TABLE)
+        );
+        var expectedRows = FooTableData.EXPECTED;
+        assertEquals(expectedRows.size(), rows.size());
+        for (int i = 0; i < expectedRows.size(); i++) {
+            assertEquals(expectedRows.get(i).toRow(), rows.get(i));
         }
     }
 }
