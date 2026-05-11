@@ -63,9 +63,9 @@ public interface Rectifier<I, O> {
         return Rectifiers.transformed(this, transfer);
     }
 
-    interface Decorator<I, O, DI, DO> extends Rectifier<I, O> {
+    interface Decorator<I2, O2, I1, O1> extends Rectifier<I2, O2> {
 
-        Rectifier<DI, DO> delegate();
+        Rectifier<I1, O1> delegate();
 
         @Override
         default Schema schema() {
