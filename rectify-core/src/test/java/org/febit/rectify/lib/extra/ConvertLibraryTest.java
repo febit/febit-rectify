@@ -44,14 +44,14 @@ class ConvertLibraryTest {
                 )
                 .forEach(name -> assertDoesNotThrow(() -> lib.function(name)));
 
-        var number = (Number) lib.function("toNumber").apply("12");
+        var number = (Number) lib.call("toNumber", "12");
         assertNotNull(number);
         assertEquals(12, number.intValue());
 
-        assertEquals((byte) 1, lib.function("toByte").apply(1));
-        assertEquals((short) 2, lib.function("toShort").apply(2));
-        assertEquals(123, lib.function("toInteger").apply("123"));
-        assertEquals(123L, lib.function("toLong").apply("123"));
+        assertEquals((byte) 1, lib.call("toByte", 1));
+        assertEquals((short) 2, lib.call("toShort", 2));
+        assertEquals(123, lib.call("toInteger", "123"));
+        assertEquals(123L, lib.call("toLong", "123"));
     }
 
     @Test
@@ -65,14 +65,14 @@ class ConvertLibraryTest {
                 )
                 .forEach(name -> assertDoesNotThrow(() -> lib.function(name)));
 
-        assertEquals(1.5f, lib.function("toFloat").apply("1.5"));
-        assertEquals(2.5d, lib.function("toDouble").apply("2.5"));
-        assertEquals(Boolean.TRUE, lib.function("toBoolean").apply("true"));
-        assertEquals("123", lib.function("stringify").apply(123));
-        assertEquals("123", lib.function("toString").apply(123));
+        assertEquals(1.5f, lib.call("toFloat", "1.5"));
+        assertEquals(2.5d, lib.call("toDouble", "2.5"));
+        assertEquals(Boolean.TRUE, lib.call("toBoolean", "true"));
+        assertEquals("123", lib.call("stringify", 123));
+        assertEquals("123", lib.call("toString", 123));
 
-        assertNull(lib.function("toInteger").apply((Object) null));
-        assertNull(lib.function("stringify").apply((Object) null));
+        assertNull(lib.call("toInteger", (Object) null));
+        assertNull(lib.call("stringify", (Object) null));
     }
 
 }

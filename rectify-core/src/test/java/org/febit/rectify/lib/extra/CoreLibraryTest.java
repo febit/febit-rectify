@@ -59,36 +59,36 @@ class CoreLibraryTest {
 
     @Test
     void values() {
-        assertNull(lib.function("noop").apply());
+        assertNull(lib.call("noop", new Object[0]));
 
-        var first = (Long) lib.function("seq").apply();
-        var second = (Long) lib.function("seq").apply();
+        var first = (Long) lib.call("seq", new Object[0]);
+        var second = (Long) lib.call("seq", new Object[0]);
         assertNotNull(first);
         assertNotNull(second);
         long firstValue = first;
         long secondValue = second;
         assertEquals(firstValue + 1, secondValue);
 
-        var uuid1 = (UUID) lib.function("uuid").apply();
-        var uuid2 = (UUID) lib.function("uuid").apply();
+        var uuid1 = (UUID) lib.call("uuid", new Object[0]);
+        var uuid2 = (UUID) lib.call("uuid", new Object[0]);
         assertNotNull(uuid1);
         assertNotNull(uuid2);
         assertNotEquals(uuid1, uuid2);
 
-        assertInstanceOf(ArrayList.class, lib.function("newList").apply());
-        assertInstanceOf(HashSet.class, lib.function("newSet").apply());
-        assertInstanceOf(LinkedHashMap.class, lib.function("newMap").apply());
+        assertInstanceOf(ArrayList.class, lib.call("newList", new Object[0]));
+        assertInstanceOf(HashSet.class, lib.call("newSet", new Object[0]));
+        assertInstanceOf(LinkedHashMap.class, lib.call("newMap", new Object[0]));
     }
 
     @Test
     void predicates() {
-        assertEquals(3, lib.function("size").apply(List.of(1, 2, 3)));
-        assertEquals(2, lib.function("size").apply(Map.of("a", 1, "b", 2)));
+        assertEquals(3, lib.call("size", List.of(1, 2, 3)));
+        assertEquals(2, lib.call("size", Map.of("a", 1, "b", 2)));
 
-        assertEquals(true, lib.function("isNull").apply((Object) null));
-        assertEquals(true, lib.function("nonNull").apply("x"));
-        assertEquals(true, lib.function("isEquals").apply("same", "same"));
-        assertEquals(false, lib.function("isEquals").apply("left", "right"));
+        assertEquals(true, lib.call("isNull", (Object) null));
+        assertEquals(true, lib.call("nonNull", "x"));
+        assertEquals(true, lib.call("isEquals", "same", "same"));
+        assertEquals(false, lib.call("isEquals", "left", "right"));
     }
 
 }

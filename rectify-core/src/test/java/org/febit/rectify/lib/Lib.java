@@ -16,6 +16,7 @@
 package org.febit.rectify.lib;
 
 import org.febit.rectify.wit.function.LibFunction;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
@@ -39,6 +40,12 @@ public record Lib(Map<String, Object> members) {
             throw new IllegalArgumentException("Member is not a function: " + name);
         }
         return f;
+    }
+
+    @Nullable
+    public Object call(String name, Object... args) {
+        return function(name)
+                .apply(args);
     }
 
     @SuppressWarnings("unchecked")
