@@ -29,7 +29,7 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.lang.util.Lists;
-import org.febit.rectify.flink.table.factory.RectifierFormatFactory;
+import org.febit.rectify.flink.table.factory.FactorySupport;
 import org.febit.rectify.flink.table.factory.RectifierFormatOptions;
 import org.febit.rectify.format.JsonSourceFormat;
 
@@ -121,7 +121,7 @@ final class FooTableData {
     static Map<String, String> tableOptions() {
         var options = new LinkedHashMap<String, String>();
         options.put("connector", TestingBytesTableSourceFactory.IDENTIFIER);
-        options.put("format", RectifierFormatFactory.IDENTIFIER);
+        options.put("format", FactorySupport.IDENTIFIER);
         options.put("febit-rectifier.source.format", JsonSourceFormat.NAME);
         options.put("febit-rectifier.name", "Demo");
         options.put("febit-rectifier.filters", "['$.status > 0', '$.enable']");

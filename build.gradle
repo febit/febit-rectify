@@ -73,6 +73,8 @@ configure(subprojects.findAll {
     dependencies {
       dependencySet(group: 'org.apache.flink', version: "${libs.versions.flink.get()}") {
         entry "flink-clients"
+        entry "flink-connector-files"
+        entry "flink-csv"
         entry "flink-format-common"
         entry "flink-streaming-java"
         entry "flink-table"

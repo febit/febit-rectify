@@ -25,7 +25,6 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.febit.lang.util.SingleElementConsumer;
 import org.febit.rectify.flink.FlinkRectifier;
-import org.febit.rectify.flink.support.ProjectUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serial;
@@ -39,35 +38,26 @@ final class RectifierFormatSchema implements DeserializationSchema<RowData> {
     private final FlinkRectifier<byte[]> rectifier;
     @Getter
     private final TypeInformation<RowData> producedType;
-    private final DataStructureConverter converter;
-    private final int[][] projections;
+    private final RowDataConverter converter;
+    private final DataStructureConverter dataStructureConverter;
 
     RectifierFormatSchema(
             FlinkRectifier<byte[]> rectifier,
             TypeInformation<RowData> producedType,
-            DataStructureConverter converter,
-            int[][] projections
+            DataStructureConverter dataStructureConverter,
+            RowDataConverter converter
     ) {
         this.rectifier = rectifier;
-        this.converter = converter;
         this.producedType = producedType;
-        this.projections = projections;
+        this.dataStructureConverter = dataStructureConverter;
+        this.converter = converter;
     }
 
     @Override
     public void open(InitializationContext context) {
-        converter.open(RuntimeConverter.Context.create(
+        dataStructureConverter.open(RuntimeConverter.Context.create(
                 context.getUserCodeClassLoader().asClassLoader()
         ));
-    }
-
-    @Nullable
-    private RowData project(@Nullable Row row) {
-        if (row == null) {
-            return null;
-        }
-        var projected = ProjectUtils.project(row, projections);
-        return (RowData) converter.toInternal(projected);
     }
 
     @Nullable
@@ -75,15 +65,15 @@ final class RectifierFormatSchema implements DeserializationSchema<RowData> {
     public RowData deserialize(byte[] message) {
         var cell = new SingleElementConsumer<Row>();
         this.rectifier.process(message, cell);
-        return project(cell.getValue());
+        return converter.convert(cell.getValue());
     }
 
     @Override
     public void deserialize(byte[] message, Collector<RowData> out) {
         this.rectifier.process(message, row -> {
-            var projected = project(row);
-            if (projected != null) {
-                out.collect(projected);
+            var converted = converter.convert(row);
+            if (converted != null) {
+                out.collect(converted);
             }
         });
     }

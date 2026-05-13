@@ -34,6 +34,7 @@ import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.SimpleUserCodeClassLoader;
 import org.apache.flink.util.UserCodeClassLoader;
 
 import java.util.ArrayList;
@@ -115,17 +116,8 @@ public class TableTestSupport {
 
         @Override
         public UserCodeClassLoader getUserCodeClassLoader() {
-            return new UserCodeClassLoader() {
-                @Override
-                public ClassLoader asClassLoader() {
-                    return getClass().getClassLoader();
-                }
-
-                @Override
-                public void registerReleaseHookIfAbsent(String releaseHookName, Runnable releaseHook) {
-                    // no-op for tests
-                }
-            };
+            var classLoader = getClass().getClassLoader();
+            return SimpleUserCodeClassLoader.create(classLoader);
         }
     }
 

@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink.table.factory;
+package org.febit.rectify.flink.table.factory.file;
 
-import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.configuration.ReadableConfig;
+import org.apache.flink.connector.file.src.FileSourceSplit;
+import org.apache.flink.connector.file.src.impl.StreamFormatAdapter;
+import org.apache.flink.connector.file.src.reader.BulkFormat;
+import org.apache.flink.connector.file.table.format.BulkDecodingFormat;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.Projection;
 import org.apache.flink.table.connector.format.ProjectableDecodingFormat;
@@ -24,24 +27,27 @@ import org.apache.flink.table.connector.source.DynamicTableSource;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.DataType;
 import org.febit.rectify.flink.table.TableTypeUtils;
+import org.febit.rectify.flink.table.factory.FactorySupport;
+import org.febit.rectify.flink.table.factory.RowDataProjectConverter;
 
-public record RectifierDecodingFormat(
+public record RectifierBulkDecodingFormat(
         ReadableConfig config
-) implements ProjectableDecodingFormat<DeserializationSchema<RowData>> {
+) implements BulkDecodingFormat<RowData>,
+        ProjectableDecodingFormat<BulkFormat<RowData, FileSourceSplit>> {
 
     @Override
-    public DeserializationSchema<RowData> createRuntimeDecoder(
-            DynamicTableSource.Context context,
-            DataType physicalDataType,
-            int[][] projections
-    ) {
+    public BulkFormat<RowData, FileSourceSplit> createRuntimeDecoder(
+            DynamicTableSource.Context context, DataType physicalDataType, int[][] projections) {
+
         var projectedDataType = Projection.of(projections).project(physicalDataType);
         var producedType = context.<RowData>createTypeInformation(projectedDataType);
         var dataStructureConverter = context.createDataStructureConverter(projectedDataType);
-        var rowType = TableTypeUtils.toRowType(physicalDataType);
-        var rectifier = FactorySupport.createBytesBasedRectifier(config, rowType);
         var converter = RowDataProjectConverter.of(dataStructureConverter, projections);
-        return new RectifierFormatSchema(rectifier, producedType, dataStructureConverter, converter);
+        var rowType = TableTypeUtils.toRowType(physicalDataType);
+        var rectifier = FactorySupport.createStringBasedRectifier(config, rowType);
+        return new StreamFormatAdapter<>(
+                RectifierStreamFormat.create(rectifier, producedType, converter)
+        );
     }
 
     @Override
@@ -53,5 +59,4 @@ public record RectifierDecodingFormat(
     public boolean supportsNestedProjection() {
         return true;
     }
-
 }

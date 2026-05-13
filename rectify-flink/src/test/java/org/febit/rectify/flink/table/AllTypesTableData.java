@@ -21,7 +21,7 @@ import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.types.Row;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.lang.util.Lists;
-import org.febit.rectify.flink.table.factory.RectifierFormatFactory;
+import org.febit.rectify.flink.table.factory.FactorySupport;
 import org.febit.rectify.format.JsonSourceFormat;
 
 import java.math.BigDecimal;
@@ -136,7 +136,7 @@ final class AllTypesTableData {
     static Map<String, String> tableOptions() {
         var options = new LinkedHashMap<String, String>();
         options.put("connector", TestingBytesTableSourceFactory.IDENTIFIER);
-        options.put("format", RectifierFormatFactory.IDENTIFIER);
+        options.put("format", FactorySupport.IDENTIFIER);
         options.put("febit-rectifier.source.format", JsonSourceFormat.NAME);
         options.put("febit-rectifier.name", "DemoAllTypeSupported");
         options.put("data", RAW_LINES);

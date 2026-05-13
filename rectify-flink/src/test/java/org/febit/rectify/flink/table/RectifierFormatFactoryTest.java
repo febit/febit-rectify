@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.febit.rectify.flink.table.factory.RectifierFormatFactory.OPTIONAL_OPTIONS;
-import static org.febit.rectify.flink.table.factory.RectifierFormatFactory.REQUIRED_OPTIONS;
+import static org.febit.rectify.flink.table.factory.FactorySupport.OPTIONAL_OPTIONS;
+import static org.febit.rectify.flink.table.factory.FactorySupport.REQUIRED_OPTIONS;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RectifierFormatFactoryTest {

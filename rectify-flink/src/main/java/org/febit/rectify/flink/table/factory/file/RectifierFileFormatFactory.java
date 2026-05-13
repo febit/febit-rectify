@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.febit.rectify.flink.table.factory;
+package org.febit.rectify.flink.table.factory.file;
 
-import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ReadableConfig;
-import org.apache.flink.table.connector.format.ProjectableDecodingFormat;
+import org.apache.flink.connector.file.table.factories.BulkReaderFormatFactory;
+import org.apache.flink.connector.file.table.format.BulkDecodingFormat;
 import org.apache.flink.table.data.RowData;
-import org.apache.flink.table.factories.DeserializationFormatFactory;
 import org.apache.flink.table.factories.DynamicTableFactory;
 import org.apache.flink.table.factories.FactoryUtil;
+import org.febit.rectify.flink.table.factory.FactorySupport;
 
 import java.util.Set;
 
-public class RectifierFormatFactory implements DeserializationFormatFactory {
+/**
+ * Factory for creating {@link RectifierBulkDecodingFormat}.
+ */
+public class RectifierFileFormatFactory implements BulkReaderFormatFactory {
 
     @Override
-    public ProjectableDecodingFormat<DeserializationSchema<RowData>> createDecodingFormat(
-            DynamicTableFactory.Context context,
-            ReadableConfig options
-    ) {
+    public BulkDecodingFormat<RowData> createDecodingFormat(
+            DynamicTableFactory.Context context, ReadableConfig options) {
         FactoryUtil.validateFactoryOptions(this, options);
-        return new RectifierDecodingFormat(options);
+        return new RectifierBulkDecodingFormat(options);
     }
 
     @Override

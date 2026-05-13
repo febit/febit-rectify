@@ -3,16 +3,18 @@ description = 'Rectify Flink'
 dependencies {
   api project(":febit-rectify-core")
 
-  compileOnly "org.apache.flink:flink-streaming-java"
+  compileOnly "org.apache.flink:flink-connector-files"
   compileOnly "org.apache.flink:flink-format-common"
-  compileOnly "org.apache.flink:flink-table-common"
+  compileOnly "org.apache.flink:flink-streaming-java"
   compileOnly "org.apache.flink:flink-table"
+  compileOnly "org.apache.flink:flink-table-common"
 
-  testImplementation "org.apache.flink:flink-streaming-java"
   testImplementation "org.apache.flink:flink-clients"
-  testImplementation "org.apache.flink:flink-table-common"
+  testImplementation "org.apache.flink:flink-connector-files"
+  testImplementation "org.apache.flink:flink-streaming-java"
   testImplementation "org.apache.flink:flink-table"
   testImplementation "org.apache.flink:flink-table-api-java"
-  testRuntimeOnly "org.apache.flink:flink-table-runtime"
+  testImplementation "org.apache.flink:flink-table-common"
   testRuntimeOnly "org.apache.flink:flink-table-planner-loader"
+  testRuntimeOnly "org.apache.flink:flink-table-runtime"
 }

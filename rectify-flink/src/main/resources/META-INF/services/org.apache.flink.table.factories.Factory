@@ -1,1 +1,2 @@
+org.febit.rectify.flink.table.factory.file.RectifierFileFormatFactory
 org.febit.rectify.flink.table.factory.RectifierFormatFactory
