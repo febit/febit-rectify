@@ -192,10 +192,15 @@ properties:
 }
 ```
 
-4. Start SQLLine
+4. build and run with SQLLine
 
 ```bash
-sqlline -u "jdbc:calcite:model=/absolute/path/to/demo/model.json"
+./gradlew :febit-rectify-sqlline:installDist
+cd rectify-sqlline/build/install/febit-rectify-sqlline/bin
+```
+
+```bash
+./febit-rectify-sqlline -u 'jdbc:calcite:model=/absolute/path/to/demo/model.json' -n demo -p ''
 ```
 
 5. Run a query

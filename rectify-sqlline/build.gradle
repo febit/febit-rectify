@@ -1,6 +1,14 @@
+plugins {
+  id 'application'
+}
+
 ext {
   moduleName = 'Rectify Sqlline'
   moduleDescription = 'Rectify support for Sqlline'
+}
+
+application {
+  mainClass = 'sqlline.SqlLine'
 }
 
 dependencies {
