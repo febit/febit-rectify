@@ -18,36 +18,39 @@ package org.febit.rectify.lib.extra;
 import org.febit.lang.func.Function0;
 import org.febit.lang.func.Function1;
 import org.febit.lang.func.Function2;
+import org.febit.rectify.lib.BindingAlias;
 import org.febit.rectify.lib.Library;
+import org.febit.rectify.lib.Namespace;
 import org.febit.wit.ir.support.ALU;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings({
         "unused",
         "java:S1118", // Utility classes should not have public constructors
 })
-public class CoreLibrary implements Library {
+public class ObjectLibrary implements Library {
 
-    private static final AtomicLong NEXT_ID = new AtomicLong(1);
+    /**
+     * Namespace: Object.
+     */
+    @BindingAlias(value = {"Object"}, keepDeclaredName = false)
+    public static final ObjectNamespace OBJECT = new ObjectNamespace();
 
-    public static final Function0<@Nullable Object> noop = () -> null;
+    public static class ObjectNamespace implements Namespace {
 
-    public static final Function0<Long> seq = NEXT_ID::getAndIncrement;
-    public static final Function0<UUID> uuid = UUID::randomUUID;
+        private final AtomicLong next = new AtomicLong(1);
 
-    public static final Function0<Object> newList = ArrayList::new;
-    public static final Function0<Object> newSet = HashSet::new;
-    public static final Function0<Object> newMap = LinkedHashMap::new;
-    public static final Function1<@Nullable Object, Integer> size = ALU::size;
+        public final Function0<@Nullable Object> noop = () -> null;
 
-    public static final Function1<@Nullable Object, Boolean> isNull = Objects::isNull;
-    public static final Function1<@Nullable Object, Boolean> nonNull = Objects::nonNull;
-    public static final Function2<@Nullable Object, @Nullable Object, Boolean> isEquals = Objects::equals;
+        public final Function0<Long> seq = next::getAndIncrement;
+
+        public final Function1<@Nullable Object, Integer> sizeOf = ALU::size;
+
+        public final Function1<@Nullable Object, Boolean> isNull = Objects::isNull;
+        public final Function1<@Nullable Object, Boolean> nonNull = Objects::nonNull;
+        public final Function2<@Nullable Object, @Nullable Object, Boolean> isEquals = Objects::equals;
+    }
 }

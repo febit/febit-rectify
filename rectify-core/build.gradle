@@ -3,4 +3,6 @@ description = 'Rectify Core'
 dependencies {
   api 'org.febit:febit-lang'
   api 'org.febit.wit:wit-core'
+  compileOnly 'com.fasterxml.uuid:java-uuid-generator'
+  testImplementation 'com.fasterxml.uuid:java-uuid-generator'
 }
