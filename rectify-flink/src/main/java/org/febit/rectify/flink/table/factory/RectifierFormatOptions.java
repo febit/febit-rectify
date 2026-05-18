@@ -45,11 +45,11 @@ public class RectifierFormatOptions {
                     + " used for debugging and schema inference,"
                     + " it does not affect the actual processing logic.");
 
-    public static final ConfigOption<List<String>> PREINSTALLS = ConfigOptions.key("preinstalls")
+    public static final ConfigOption<List<String>> SETUPS = ConfigOptions.key("setups")
             .stringType()
             .asList()
             .defaultValues()
-            .withDescription("Global pre-install scripts,"
+            .withDescription("Global setup scripts,"
                     + " executed before processing any record,"
                     + " can be used to define UDFs or perform global initialization.");
 

@@ -36,23 +36,27 @@ class SqllineExampleTest {
         Files.writeString(tablesDir.resolve("orders.log"), """
                 {"id": 1, "status": 10, "content": "hello"}
                 {"id": 2, "status": 20, "content": "world"}
+                {"id": 3, "status": 15, "content": "skip"}
                 """);
         Files.writeString(tablesDir.resolve("orders-log.rectify.yml"), """
                 name: orders
-                path: orders.log
-                source: json
-                preinstalls:
+                source:
+                  path: orders.log
+                  format: json
+                setups:
                   - var isEven = $.status % 2 == 0
-                properties:
+                filters:
+                  - isEven || "status is not even"
+                columns:
                   - name: id
                     type: long
-                    expression: $.id
+                    expr: $.id
                   - name: status
                     type: int
-                    expression: $.status
+                    expr: $.status
                   - name: content
                     type: string
-                    expression: '"prefix:" + $.content'
+                    expr: '"prefix:" + $.content'
                 """);
 
         var model = tempDir.resolve("model.json");

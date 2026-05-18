@@ -31,7 +31,7 @@ class RectifierFormatOptionsTest {
 
         assertEquals("{}", RectifierFormatOptions.SOURCE_OPTIONS.defaultValue());
         assertEquals("Unnamed", RectifierFormatOptions.NAME.defaultValue());
-        assertTrue(RectifierFormatOptions.PREINSTALLS.defaultValue().isEmpty());
+        assertTrue(RectifierFormatOptions.SETUPS.defaultValue().isEmpty());
         assertTrue(RectifierFormatOptions.FILTERS.defaultValue().isEmpty());
         assertTrue(RectifierFormatOptions.COLUMNS.defaultValue().isEmpty());
 

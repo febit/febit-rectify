@@ -30,9 +30,9 @@ class CoreExampleTest {
         var settings = RectifierSettings.builder()
                 .name("QuickDemo")
                 .filter("$.status > 0")
-                .property("long", "id", "$.id")
-                .property("int", "status", "$.status")
-                .property("string", "content", "\"prefix:\" + $.content")
+                .field("long", "id", "$.id")
+                .field("int", "status", "$.status")
+                .field("string", "content", "\"prefix:\" + $.content")
                 .build();
 
         var rectifier = settings.create()
@@ -61,7 +61,7 @@ class CoreExampleTest {
     void advanced() {
         var settings = RectifierSettings.builder()
                 .name("Demo")
-                .preinstall("""
+                .setup("""
                         var isTruly = obj -> {
                            return obj == true
                                       || obj == "on" || obj == "true"
@@ -70,28 +70,31 @@ class CoreExampleTest {
                         """)
                 .filter("$.status > 0")
                 .filter("$.status < 100 || \"status should <100\"")
-                .preinstall("var isEven = $.status % 2 == 0 ")
-                .preinstall("var statusCopy = $.status")
+                .setup("var isEven = $.status % 2 == 0 ")
+                .setup("var statusCopy = $.status")
                 .filter("isEven || \"status is not even\"")
-                .property()
+
+                .field()
                 .name("id")
                 .type("long")
-                .expression("$.id")
+                .expr("$.id")
                 .commit()
-                .property()
+
+                .field()
                 .name("enable")
                 .comment("The enable property, should be true or truthy")
                 .type("boolean")
                 .validation("$$ || \"enable is falsely\"")
                 .commit()
-                .property()
+
+                .field()
                 .type("string")
                 .name("content")
-                .expression("\"prefix:\" + $.content")
+                .expr("\"prefix:\" + $.content")
                 .commit()
-                .property("int", "status", null)
-                .property("boolean", "isEven", "isEven")
-                .property("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
+                .field("int", "status", null)
+                .field("boolean", "isEven", "isEven")
+                .field("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
                 .build();
 
         var rectifier = settings.create()

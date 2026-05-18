@@ -55,20 +55,20 @@ class RectifySchema extends AbstractSchema {
         }
         var map = new HashMap<String, Table>();
         for (var file : files) {
-            TableSettings config;
+            TableConfig conf;
             try {
-                config = TableSettings.fromYaml(Sources.of(file).reader());
+                conf = TableConfig.fromYaml(Sources.of(file).reader());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            var table = createTable(config);
-            map.put(config.name(), table);
+            var table = createTable(conf);
+            map.put(conf.name(), table);
         }
         return Collections.unmodifiableMap(map);
     }
 
-    private Table createTable(TableSettings settings) {
-        var source = Sources.of(new File(directoryFile, settings.path()));
-        return new RectifyTable(settings.toRectifierSettings(), source, settings.createSourceFormat());
+    private Table createTable(TableConfig conf) {
+        var source = Sources.of(new File(directoryFile, conf.source().path()));
+        return new RectifyTable(conf.toRectifierSettings(), source, SourceFormatFactory.create(conf.source().format()));
     }
 }

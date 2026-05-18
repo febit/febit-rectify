@@ -57,8 +57,8 @@ import java.util.function.Predicate;
 )
 public class RectifierSettings implements Serializable {
 
-    private final List<Setup> preinstalls;
-    private final List<Property> properties;
+    private final List<Snippet> setups;
+    private final List<Field> fields;
 
     @lombok.Builder.Default
     private final String name = "Unnamed";
@@ -91,9 +91,9 @@ public class RectifierSettings implements Serializable {
         return schema(col -> true);
     }
 
-    public Schema schema(Predicate<Property> filter) {
+    public Schema schema(Predicate<Field> filter) {
         var struct = Schemas.newStruct();
-        this.properties.stream()
+        this.fields.stream()
                 .filter(filter)
                 .forEach(col -> {
                     var colSchema = Schema.parse(name, col.name(), col.type());
@@ -177,29 +177,29 @@ public class RectifierSettings implements Serializable {
     public static class Builder {
 
         public Builder() {
-            this.properties = new ArrayList<>();
-            this.preinstalls = new ArrayList<>();
+            this.fields = new ArrayList<>();
+            this.setups = new ArrayList<>();
         }
 
         @Tolerate
-        public Builder preinstalls(Setup... setups) {
-            return preinstalls(Arrays.asList(setups));
+        public Builder setups(Snippet... setups) {
+            return setups(Arrays.asList(setups));
         }
 
         @Tolerate
-        public Builder preinstall(Setup setup) {
-            this.preinstalls.add(setup);
+        public Builder setup(Snippet setup) {
+            this.setups.add(setup);
             return this;
         }
 
         @Tolerate
-        public Builder preinstall(String code) {
-            return preinstall(context -> context.append(code));
+        public Builder setup(String code) {
+            return setup(context -> context.append(code));
         }
 
         @Tolerate
         public Builder filter(String expr) {
-            return preinstall(context -> ScriptBuilder.appendFilter(context, expr));
+            return setup(context -> ScriptBuilder.appendFilter(context, expr));
         }
 
         @Tolerate
@@ -209,48 +209,48 @@ public class RectifierSettings implements Serializable {
         }
 
         @Tolerate
-        public Builder properties(Property... properties) {
-            return properties(Arrays.asList(properties));
+        public Builder fields(Field... properties) {
+            return fields(Arrays.asList(properties));
         }
 
         @Tolerate
-        public Builder property(Property property) {
-            this.properties.add(property);
+        public Builder field(Field field) {
+            this.fields.add(field);
             return this;
         }
 
         @Tolerate
-        public Builder property(String type, String name, @Nullable String expression) {
-            return property(type, name, expression, null, null);
+        public Builder field(String type, String name, @Nullable String expr) {
+            return field(type, name, expr, null, null);
         }
 
         @Tolerate
-        public Builder property(
+        public Builder field(
                 String type,
                 String name,
-                @Nullable String expression,
+                @Nullable String expr,
                 @Nullable String validation
         ) {
-            return property(type, name, expression, validation, null);
+            return field(type, name, expr, validation, null);
         }
 
         @Tolerate
         @lombok.Builder(
-                builderClassName = "PropertyBuilder",
+                builderClassName = "FieldBuilder",
                 buildMethodName = "commit",
-                builderMethodName = "property"
+                builderMethodName = "field"
         )
-        public Builder property(
+        public Builder field(
                 @lombok.NonNull
                 String type,
                 @lombok.NonNull
                 String name,
-                @Nullable String expression,
+                @Nullable String expr,
                 @Nullable String validation,
                 @Nullable String comment
         ) {
-            return property(
-                    new Property(type, name, expression, validation, comment)
+            return field(
+                    new Field(type, name, expr, validation, comment)
             );
         }
     }
@@ -285,18 +285,18 @@ public class RectifierSettings implements Serializable {
     }
 
     @FunctionalInterface
-    public interface Setup extends Serializable {
-        void setup(ScriptBuilder.Context context);
+    public interface Snippet extends Serializable {
+        void apply(ScriptBuilder.Context context);
     }
 
     @lombok.Builder(builderClassName = "Builder")
-    public record Property(
+    public record Field(
             @lombok.NonNull
             String type,
             @lombok.NonNull
             String name,
 
-            @Nullable String expression,
+            @Nullable String expr,
             @Nullable String validation,
             @Nullable String comment
     ) implements Serializable {

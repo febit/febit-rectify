@@ -30,8 +30,8 @@ class SourceFormatFactoryTest {
 
     @Test
     void createJson() {
-        var source = TableSettings.Source.builder()
-                .format(JsonSourceFormat.NAME)
+        var source = TableConfig.SourceFormatConfig.builder()
+                .kind(JsonSourceFormat.NAME)
                 .build();
 
         var format = SourceFormatFactory.create(source);
@@ -50,8 +50,8 @@ class SourceFormatFactoryTest {
 
     @Test
     void createAccess() {
-        var source = TableSettings.Source.builder()
-                .format(AccessLogSourceFormat.NAME)
+        var source = TableConfig.SourceFormatConfig.builder()
+                .kind(AccessLogSourceFormat.NAME)
                 .option("columns", List.of("ip", "status", "path"))
                 .build();
 
@@ -70,8 +70,8 @@ class SourceFormatFactoryTest {
 
     @Test
     void createAccessInvalid() {
-        var source = TableSettings.Source.builder()
-                .format(AccessLogSourceFormat.NAME)
+        var source = TableConfig.SourceFormatConfig.builder()
+                .kind(AccessLogSourceFormat.NAME)
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> SourceFormatFactory.create(source));
@@ -79,8 +79,8 @@ class SourceFormatFactoryTest {
 
     @Test
     void createUnsupported() {
-        var source = TableSettings.Source.builder()
-                .format("csv")
+        var source = TableConfig.SourceFormatConfig.builder()
+                .kind("csv")
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> SourceFormatFactory.create(source));

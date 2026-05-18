@@ -100,14 +100,14 @@ public class ScriptBuilder {
                 // -- Global Segments:
                 """
         );
-        for (var setup : settings.preinstalls()) {
+        for (var setup : settings.setups()) {
             context.append("//-\n");
-            setup.setup(context);
+            setup.apply(context);
             context.append(";\n");
         }
 
         // Properties
-        var properties = settings.properties();
+        var properties = settings.fields();
         context.append("""
 
                 // -- Properties:
@@ -148,11 +148,11 @@ public class ScriptBuilder {
 
     public static void appendProperty(
             Context context,
-            RectifierSettings.Property property,
+            RectifierSettings.Field field,
             int index
     ) {
-        var escapedName = escapeStringLiteral(property.name());
-        var expr = property.expression();
+        var escapedName = escapeStringLiteral(field.name());
+        var expr = field.expr();
         if (StringUtils.isBlank(expr)) {
             expr = VAR_INPUT + '[' + escapedName + ']';
         }
@@ -165,9 +165,9 @@ public class ScriptBuilder {
                 .append(expr)
                 .append(";\n");
 
-        var validation = property.validation();
+        var validation = field.validation();
         if (StringUtils.isNotEmpty(validation)) {
-            appendFilter(context, validation, index, property.name());
+            appendFilter(context, validation, index, field.name());
         }
     }
 

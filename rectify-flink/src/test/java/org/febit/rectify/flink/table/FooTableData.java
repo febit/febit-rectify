@@ -92,7 +92,7 @@ final class FooTableData {
         var options = new Configuration();
         options.set(RectifierFormatOptions.SOURCE_FORMAT, JsonSourceFormat.NAME);
         options.set(RectifierFormatOptions.NAME, "Demo");
-        options.set(RectifierFormatOptions.PREINSTALLS, List.of("var statusCopy = $.status"));
+        options.set(RectifierFormatOptions.SETUPS, List.of("var statusCopy = $.status"));
         options.set(RectifierFormatOptions.FILTERS, List.of(
                 "$.status > 0",
                 "$.enable || \"enable is falsely\""

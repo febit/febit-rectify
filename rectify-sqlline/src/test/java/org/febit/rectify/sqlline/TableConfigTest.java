@@ -15,7 +15,6 @@
  */
 package org.febit.rectify.sqlline;
 
-import org.febit.rectify.RectifierSettings;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -23,31 +22,33 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TableSettingsTest {
+class TableConfigTest {
 
     @Test
-    void source() {
-        TableSettings.Source source;
-        source = TableSettings.fromYaml("""
+    void format() {
+        TableConfig.SourceFormatConfig format;
+        format = TableConfig.fromYaml("""
                 name: x
-                path: /path/to/file
-                source: json
-                """).source();
-
-        assertEquals("json", source.format());
-        assertTrue(source.options().isEmpty());
-
-        source = TableSettings.fromYaml("""
-                name: x
-                path: /path/to/file
                 source:
-                  format: access
-                  options:
-                    properties: [a, b, c]
-                """).source();
+                  path: /path/to/file
+                  format: json
+                """).source().format();
 
-        assertEquals("access", source.format());
-        assertThat(source.options())
+        assertEquals("json", format.kind());
+        assertTrue(format.options().isEmpty());
+
+        format = TableConfig.fromYaml("""
+                name: x
+                source:
+                  path: /path/to/file
+                  format:
+                    kind: access
+                    options:
+                      properties: [a, b, c]
+                """).source().format();
+
+        assertEquals("access", format.kind());
+        assertThat(format.options())
                 .containsEntry("properties", List.of("a", "b", "c"));
     }
 
@@ -55,31 +56,32 @@ class TableSettingsTest {
     void fromYaml() {
         String yaml = """
                 name: Demo
-                source: json
-                path: /path/to/file
-                preinstalls:
+                source:
+                  path: /path/to/file
+                  format: json
+                setups:
                   - var isEven = $.status % 2 == 0
                   - var statusCopy = $.status
-                properties:
+                columns:
                   - name: id
                     type: long
-                    expression: $.id
+                    expr: $.id
                   - name: enable
                     type: boolean
                     validation: $$ || "enable is falsely"
                 """;
 
-        var config = TableSettings.fromYaml(yaml);
+        var config = TableConfig.fromYaml(yaml);
         assertNotNull(config);
 
         assertEquals("Demo", config.name());
         assertEquals(
-                TableSettings.Source.builder().format("json").build(),
-                config.source()
+                TableConfig.SourceFormatConfig.builder().kind("json").build(),
+                config.source().format()
         );
 
-        var codes = config.preinstalls();
-        var properties = config.properties();
+        var codes = config.setups();
+        var properties = config.columns();
 
         assertNotNull(codes);
         assertEquals(2, codes.size());
@@ -87,12 +89,12 @@ class TableSettingsTest {
         assertEquals("var statusCopy = $.status", codes.get(1));
 
         assertEquals(List.of(
-                RectifierSettings.Property.builder()
+                TableConfig.Column.builder()
                         .name("id")
                         .type("long")
-                        .expression("$.id")
+                        .expr("$.id")
                         .build(),
-                RectifierSettings.Property.builder()
+                TableConfig.Column.builder()
                         .name("enable")
                         .type("boolean")
                         .validation("$$ || \"enable is falsely\"")

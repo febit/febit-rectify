@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.COLUMNS;
 import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.FILTERS;
 import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.NAME;
-import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.PREINSTALLS;
+import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.SETUPS;
 import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.SOURCE_FORMAT;
 import static org.febit.rectify.flink.table.factory.RectifierFormatOptions.SOURCE_OPTIONS;
 
@@ -53,7 +53,7 @@ public class FactorySupport {
     public static final Set<ConfigOption<?>> OPTIONAL_OPTIONS = Set.of(
             SOURCE_OPTIONS,
             NAME,
-            PREINSTALLS,
+            SETUPS,
             FILTERS,
             COLUMNS
     );
@@ -94,9 +94,9 @@ public class FactorySupport {
         var builder = RectifierSettings.builder()
                 .name(conf.get(RectifierFormatOptions.NAME));
 
-        conf.get(RectifierFormatOptions.PREINSTALLS).stream()
+        conf.get(RectifierFormatOptions.SETUPS).stream()
                 .filter(StringUtils::isNotBlank)
-                .forEach(builder::preinstall);
+                .forEach(builder::setup);
 
         conf.get(RectifierFormatOptions.FILTERS).stream()
                 .filter(StringUtils::isNotBlank)
@@ -114,10 +114,10 @@ public class FactorySupport {
         for (var field : producedType.getFields()) {
             var name = field.getName();
             var expr = bindings.get(name);
-            builder.property()
+            builder.field()
                     .name(name)
                     .type(TableTypeUtils.toSchema(field.getType()).toTypeString())
-                    .expression(isBlank(expr) ? null : expr)
+                    .expr(isBlank(expr) ? null : expr)
                     .commit();
         }
         return builder.build();

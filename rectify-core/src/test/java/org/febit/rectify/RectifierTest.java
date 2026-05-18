@@ -41,7 +41,7 @@ class RectifierTest {
             // Naming your schema
             .name("Demo")
             // Preinstall code or functions, which can be used in filters or property expressions.
-            .preinstall("""
+            .setup("""
                     var isTruly = obj -> {
                        return obj == true
                                   || obj == "on" || obj == "true"
@@ -52,18 +52,18 @@ class RectifierTest {
             .filter("$.status > 0")
             //    Recommend: give a reason if falsy, `||` is logic OR (just what it means to in JS, feel free!).
             .filter("$.status < 100 || \"status should <100\"")
-            .preinstall("var isEven = $.status % 2 == 0 ")
-            .preinstall("var statusCopy = $.status")
+            .setup("var isEven = $.status % 2 == 0 ")
+            .setup("var statusCopy = $.status")
             .filter("isEven || \"status is not even\"")
 
             // Properties:
-            .property()
+            .field()
             .name("id")
             .type("long")
-            .expression("$.id")
+            .expr("$.id")
             .commit()
 
-            .property()
+            .field()
             .name("enable")
             .comment("The enable property, should be true or truthy")
             .type("boolean")
@@ -72,15 +72,15 @@ class RectifierTest {
             .validation("$$ || \"enable is falsely\"")
             .commit()
 
-            .property()
+            .field()
             .type("string")
             .name("content")
-            .expression("\"prefix:\" + $.content")
+            .expr("\"prefix:\" + $.content")
             .commit()
 
-            .property("int", "status", null)
-            .property("boolean", "isEven", "isEven")
-            .property("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
+            .field("int", "status", null)
+            .field("boolean", "isEven", "isEven")
+            .field("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
             .build();
 
     private static String buildInput(

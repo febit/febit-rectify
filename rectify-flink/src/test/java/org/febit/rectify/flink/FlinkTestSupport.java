@@ -30,10 +30,10 @@ public class FlinkTestSupport {
             .name("Demo")
             .filter("$.status > 0")
             .filter("$.status < 100 || \"status should <100\"")
-            .property("long", "id", "$.id")
-            .property("boolean", "enable", "", "$$ || \"enable is falsely\"")
-            .property("int", "status", "$.status")
-            .property("string", "content", "\"prefix:\"+$.content")
+            .field("long", "id", "$.id")
+            .field("boolean", "enable", "", "$$ || \"enable is falsely\"")
+            .field("int", "status", "$.status")
+            .field("string", "content", "\"prefix:\"+$.content")
             .build();
 
     public static final List<String> SOURCE = Arrays.asList(

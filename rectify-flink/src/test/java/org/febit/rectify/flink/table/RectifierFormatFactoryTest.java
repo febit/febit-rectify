@@ -68,7 +68,7 @@ class RectifierFormatFactoryTest {
         assertEquals(5, OPTIONAL_OPTIONS.size());
         assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.SOURCE_OPTIONS));
         assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.NAME));
-        assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.PREINSTALLS));
+        assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.SETUPS));
         assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.FILTERS));
         assertTrue(OPTIONAL_OPTIONS.contains(RectifierFormatOptions.COLUMNS));
     }

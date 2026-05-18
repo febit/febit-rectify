@@ -34,10 +34,10 @@ class StreamingExampleTest {
         var settings = RectifierSettings.builder()
                 .name("Demo")
                 .filter("$.status > 0")
-                .property("long", "id", "$.id")
-                .property("boolean", "enable", "", "$$ || \"enable is falsely\"")
-                .property("int", "status", "$.status")
-                .property("string", "content", "\"prefix:\" + $.content")
+                .field("long", "id", "$.id")
+                .field("boolean", "enable", "", "$$ || \"enable is falsely\"")
+                .field("int", "status", "$.status")
+                .field("string", "content", "\"prefix:\" + $.content")
                 .build();
 
         var env = StreamExecutionEnvironment.getExecutionEnvironment();

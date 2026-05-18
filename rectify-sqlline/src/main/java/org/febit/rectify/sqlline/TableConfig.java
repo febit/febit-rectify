@@ -20,7 +20,6 @@ import lombok.Singular;
 import lombok.extern.jackson.Jacksonized;
 import org.febit.lang.util.JacksonUtils;
 import org.febit.rectify.RectifierSettings;
-import org.febit.rectify.SourceFormat;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Reader;
@@ -29,20 +28,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public record TableSettings(
+public record TableConfig(
         @lombok.NonNull
         String name,
-
-        @lombok.NonNull
-        String path,
-
         @lombok.NonNull
         Source source,
 
         @Nullable
-        List<String> preinstalls,
+        List<String> setups,
         @Nullable
-        List<RectifierSettings.Property> properties
+        List<String> filters,
+        @Nullable
+        List<Column> columns
 ) implements Serializable {
 
     @Jacksonized
@@ -51,7 +48,19 @@ public record TableSettings(
     )
     public record Source(
             @lombok.NonNull
-            String format,
+            String path,
+            @lombok.NonNull
+            SourceFormatConfig format
+    ) implements Serializable {
+    }
+
+    @Jacksonized
+    @lombok.Builder(
+            builderClassName = "Builder"
+    )
+    public record SourceFormatConfig(
+            @lombok.NonNull
+            String kind,
             @Singular
             Map<String, Object> options
     ) implements Serializable {
@@ -63,36 +72,61 @@ public record TableSettings(
             }
 
             @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-            public Builder(String format) {
-                format(format);
+            public Builder(String kind) {
+                kind(kind);
             }
         }
     }
 
-    public static TableSettings fromYaml(Reader reader) {
-        var conf = JacksonUtils.yaml().parse(reader, TableSettings.class);
+    @lombok.Builder(
+            builderClassName = "Builder"
+    )
+    public record Column(
+            @lombok.NonNull
+            String name,
+            @lombok.NonNull
+            String type,
+            @Nullable
+            String expr,
+            @Nullable
+            String validation
+    ) implements Serializable {
+
+        public RectifierSettings.Field toProperty() {
+            return RectifierSettings.Field.builder()
+                    .name(name)
+                    .type(type)
+                    .expr(expr)
+                    .validation(validation)
+                    .build();
+        }
+    }
+
+    public static TableConfig fromYaml(Reader reader) {
+        var conf = JacksonUtils.yaml().parse(reader, TableConfig.class);
         Objects.requireNonNull(conf);
         return conf;
     }
 
-    public static TableSettings fromYaml(String yaml) {
-        var conf = JacksonUtils.yaml().parse(yaml, TableSettings.class);
+    public static TableConfig fromYaml(String yaml) {
+        var conf = JacksonUtils.yaml().parse(yaml, TableConfig.class);
         Objects.requireNonNull(conf);
         return conf;
-    }
-
-    public SourceFormat<String, Object> createSourceFormat() {
-        return SourceFormatFactory.create(source);
     }
 
     public RectifierSettings toRectifierSettings() {
         var builder = RectifierSettings.builder()
                 .name(name);
-        if (preinstalls != null) {
-            preinstalls.forEach(builder::preinstall);
+        if (setups != null) {
+            setups.forEach(builder::setup);
         }
-        if (properties != null) {
-            builder.properties(properties);
+        if (filters != null) {
+            filters.forEach(builder::filter);
+        }
+        if (columns != null) {
+            for (var column : columns) {
+                builder.field(column.toProperty());
+            }
         }
         return builder.build();
     }

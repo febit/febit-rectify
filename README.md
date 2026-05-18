@@ -43,22 +43,18 @@ See also: [CoreExampleTest.java](rectify-core/src/test/java/org/febit/rectify/Co
 var settings = RectifierSettings.builder()
     .name("QuickDemo")
     .filter("$.status > 0")
-    .property("long", "id", "$.id")
-    .property("int", "status", "$.status")
-    .property("string", "content", "\"prefix:\" + $.content")
+    .field("long", "id", "$.id")
+    .field("int", "status", "$.status")
+    .field("string", "content", "\"prefix:\" + $.content")
     .build();
 
 var rectifier = settings.create()
     .with(new JsonSourceFormat());
 
-rectifier.
-
-process("""
-                {"id":1,"status":10,"content":"hello"}""",
-        System.out::println,
-        reason ->
-
-fail("Processing failed: "+reason)
+rectifier.process("""
+        {"id":1,"status":10,"content":"hello"}""",
+    System.out::println,
+    reason -> fail("Processing failed: "+reason)
 );
 ```
 
@@ -79,10 +75,10 @@ See also: [StreamingExampleTest.java](rectify-flink/src/test/java/org/febit/rect
 var settings = RectifierSettings.builder()
     .name("Demo")
     .filter("$.status > 0")
-    .property("long", "id", "$.id")
-    .property("boolean", "enable", "", "$$ || \"enable is falsely\"")
-    .property("int", "status", "$.status")
-    .property("string", "content", "\"prefix:\" + $.content")
+    .field("long", "id", "$.id")
+    .field("boolean", "enable", "", "$$ || \"enable is falsely\"")
+    .field("int", "status", "$.status")
+    .field("string", "content", "\"prefix:\" + $.content")
     .build();
 
 var env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -95,12 +91,8 @@ var source = env.fromData(
 );
 
 var rows = RectifierStreamingSupport.flatMap(source, settings, new JsonSourceFormat());
-rows.
-
-print();
-env.
-
-execute("rectify-streaming-demo");
+rows.print();
+env.execute("rectify-streaming-demo");
 ```
 
 ### Flink Table / SQL
@@ -110,8 +102,7 @@ Best when you want to define transformation rules in SQL DDL and query them with
 See also: [TableExampleTest.java](rectify-flink/src/test/java/org/febit/rectify/flink/TableExampleTest.java)
 
 ```sql
-CREATE
-TEMPORARY TABLE input_events (
+CREATE TEMPORARY TABLE input_events (
   id BIGINT,
   enable BOOLEAN,
   status INT,
@@ -157,20 +148,23 @@ demo/
 
 ```yaml
 name: orders
-path: orders.log
-source: json
-preinstalls:
+source:
+  path: orders.log
+  format: json
+setups:
   - var isEven = $.status % 2 == 0
-properties:
+filters:
+  - isEven || "status is not even"
+columns:
   - name: id
     type: long
-    expression: $.id
+    expr: $.id
   - name: status
     type: int
-    expression: $.status
+    expr: $.status
   - name: content
     type: string
-    expression: '"prefix:" + $.content'
+    expr: '"prefix:" + $.content'
 ```
 
 3. Create the Calcite model file `model.json`
@@ -214,16 +208,16 @@ FROM "orders";
 
 ### Core API: Advanced
 
-Use this when you need preinstalled functions, multiple filters, and more advanced property expressions.
+Use this when you need preinstalled functions, multiple filters, and more advanced field expressions.
 
 See also: [CoreExampleTest.java](rectify-core/src/test/java/org/febit/rectify/CoreExampleTest.java)
 
 ```java
-// `$` is input record, can be used in filters, preinstall scripts and property expressions.
-// `$$` is current property value, can be used in property check expression
+// `$` is input record, can be used in filters, setup scripts and field expressions.
+// `$$` is current field value, can be used in field check expression
 var settings = RectifierSettings.builder()
         .name("Demo")
-        .preinstall("""
+        .setup("""
             var isTruly = obj -> {
                return obj == true
                           || obj == "on" || obj == "true"
@@ -232,32 +226,31 @@ var settings = RectifierSettings.builder()
             """)
         .filter("$.status > 0")
         .filter("$.status < 100 || \"status should <100\"")
-        .preinstall("var isEven = $.status % 2 == 0 ")
-        .preinstall("var statusCopy = $.status")
+        .setup("var isEven = $.status % 2 == 0 ")
+        .setup("var statusCopy = $.status")
         .filter("isEven || \"status is not even\"")
 
-        .property()
+        .field()
         .name("id")
         .type("long")
-        .expression("$.id")
+        .expr("$.id")
         .commit()
 
-        .property()
+        .field()
         .name("enable")
         .comment("The enable property, should be true or truthy")
         .type("boolean")
         .validation("$$ || \"enable is falsely\"")
         .commit()
 
-        .property()
+        .field()
         .type("string")
         .name("content")
-        .expression("\"prefix:\" + $.content")
+        .expr("\"prefix:\" + $.content")
         .commit()
-
-        .property("int", "status", null)
-        .property("boolean", "isEven", "isEven")
-        .property("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
+        .field("int", "status", null)
+        .field("boolean", "isEven", "isEven")
+        .field("boolean", "call_isTruly", "isTruly($.isTrulyArg)")
         .build();
 ```
 
